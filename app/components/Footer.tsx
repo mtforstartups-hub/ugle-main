@@ -2,17 +2,24 @@ import Link from "next/link";
 import Image from "next/image";
 import FooterNewsletter from "./forms/FooterNewsletter";
 import RegionSwitcher from "./RegionSwitcher";
-import { cookies } from "next/headers";
+import { cookies, headers } from "next/headers";
 import {
   PRICE_CONFIG,
   REGION_COOKIE,
+  REGION_HEADER,
   DEFAULT_REGION,
   type Region,
 } from "../lib/priceConfig";
 
 export default async function Footer() {
+  const hdrs = await headers();
   const jar = await cookies();
-  const raw = jar.get(REGION_COOKIE)?.value ?? DEFAULT_REGION;
+  // Header is injected by proxy on /pricing (works on first visit).
+  // Cookie is the fallback for all other pages once the user has visited /pricing.
+  const raw =
+    hdrs.get(REGION_HEADER) ??
+    jar.get(REGION_COOKIE)?.value ??
+    DEFAULT_REGION;
   const currentRegion = (raw in PRICE_CONFIG ? raw : DEFAULT_REGION) as Region;
   return (
     <footer className="bg-[#1C1C1C] text-white pt-10 md:pt-16 overflow-hidden border-t border-ugle-slate/20 relative">
