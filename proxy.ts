@@ -101,8 +101,7 @@ export function proxy(request: NextRequest) {
 
 export const config = {
   matcher: [
-    // Only run on pricing page — zero overhead elsewhere
-    "/pricing",
-    "/pricing/:path*",
+    // Run on all paths except static files, API routes, and Next.js internals
+    "/((?!api|_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
   ],
 };
