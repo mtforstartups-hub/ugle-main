@@ -11,10 +11,18 @@ import PricingFaq from "../components/pricing/PricingFaq";
 
 export default async function Pricing() {
   const hdrs = await headers();
-  const raw = hdrs.get(REGION_HEADER) ?? DEFAULT_REGION;
-  const region = (raw in PRICE_CONFIG ? raw : DEFAULT_REGION) as Region;
+  const raw = hdrs.get(REGION_HEADER) ?? null;
+  const region = (raw && raw in PRICE_CONFIG ? raw : DEFAULT_REGION) as Region;
   const priceConfig = PRICE_CONFIG[region];
 
+  // ── Debug log — remove once currency switching is confirmed working ──────────
+  console.log("[ugle/pricing-page]", JSON.stringify({
+    headerReceived: raw,              // null = proxy header not present
+    regionResolved: region,
+    priceMonthly: priceConfig.monthly,
+    currency: priceConfig.currency,
+  }));
+  // ────────────────────────────────────────────────────────────────────────────
 
   return (
     <div className="bg-[#F8FAF9] min-h-screen py-10">

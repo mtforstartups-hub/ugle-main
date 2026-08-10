@@ -9,50 +9,95 @@ import {
   type Region,
 } from "./app/lib/priceConfig";
 
-function detectRegion(request: NextRequest): Region {
-  // 1. Already set by user (manual override via footer switcher) — honour it
-  const existing = request.cookies.get(REGION_COOKIE)?.value as
-    Region | undefined;
-  if (existing && (ALL_REGIONS as string[]).includes(existing)) return existing;
+type DetectionResult = {
+  region: Region;
+  reason: "cookie" | "vercel-geo" | "accept-language" | "default";
+  // raw signal values for debugging
+  cookieValue: string | null;
+  vercelCountry: string | null;
+  acceptLanguage: string | null;
+};
 
-  // 2. Cloudflare geo header (available on Vercel / CF-backed deployments)
-  const cfCountry = request.headers.get("CF-IPCountry") ?? "";
-  if (cfCountry && COUNTRY_TO_REGION[cfCountry])
-    return COUNTRY_TO_REGION[cfCountry];
+function detectRegion(request: NextRequest): DetectionResult {
+  const cookieValue = request.cookies.get(REGION_COOKIE)?.value ?? null;
+  const vercelCountry = request.headers.get("x-vercel-ip-country");
+  const acceptLanguage = request.headers.get("accept-language");
 
-  // 3. Accept-Language best-effort fallback
-  const lang = request.headers.get("accept-language") ?? "";
-  if (/\ben-GB\b/i.test(lang)) return "GB";
-  if (/\ben-IN\b/i.test(lang)) return "IN";
-  if (/\b(de|fr|nl|es|it|pl)\b/i.test(lang)) return "EU";
+  // 1. Honour an existing user-set cookie (manual footer override)
+  if (cookieValue && (ALL_REGIONS as string[]).includes(cookieValue)) {
+    return {
+      region: cookieValue as Region,
+      reason: "cookie",
+      cookieValue,
+      vercelCountry,
+      acceptLanguage,
+    };
+  }
 
-  return DEFAULT_REGION;
+  // 2. Vercel geo header (x-vercel-ip-country, injected on every Vercel request)
+  if (vercelCountry && COUNTRY_TO_REGION[vercelCountry]) {
+    return {
+      region: COUNTRY_TO_REGION[vercelCountry],
+      reason: "vercel-geo",
+      cookieValue,
+      vercelCountry,
+      acceptLanguage,
+    };
+  }
+
+  // 3. Accept-Language best-effort fallback (useful in local dev)
+  if (acceptLanguage) {
+    if (/\ben-GB\b/i.test(acceptLanguage))
+      return { region: "GB", reason: "accept-language", cookieValue, vercelCountry, acceptLanguage };
+    if (/\ben-IN\b/i.test(acceptLanguage))
+      return { region: "IN", reason: "accept-language", cookieValue, vercelCountry, acceptLanguage };
+    if (/\b(de|fr|nl|es|it|pl)\b/i.test(acceptLanguage))
+      return { region: "EU", reason: "accept-language", cookieValue, vercelCountry, acceptLanguage };
+  }
+
+  // 4. Nothing matched — fall back to default
+  return {
+    region: DEFAULT_REGION,
+    reason: "default",
+    cookieValue,
+    vercelCountry,
+    acceptLanguage,
+  };
 }
 
 export function proxy(request: NextRequest) {
-  const region = detectRegion(request);
+  const detection = detectRegion(request);
 
-  // Forward region to the server component via a request header.
-  // cookies() reads from the *request*, so a cookie set on the *response*
-  // isn't visible to the same render — the header solves the first-visit race.
+  // ── Structured log — visible in Vercel function logs ────────────────────────
+  console.log("[ugle/region]", JSON.stringify({
+    url: request.nextUrl.pathname,
+    selected: detection.region,
+    reason: detection.reason,
+    signals: {
+      cookie: detection.cookieValue,
+      "x-vercel-ip-country": detection.vercelCountry,
+      "accept-language": detection.acceptLanguage,
+    },
+  }));
+  // ────────────────────────────────────────────────────────────────────────────
+
   const requestHeaders = new Headers(request.headers);
-  requestHeaders.set(REGION_HEADER, region);
+  requestHeaders.set(REGION_HEADER, detection.region);
 
   const response = NextResponse.next({
     request: { headers: requestHeaders },
   });
 
-  // Also persist as cookie so the footer switcher can read/override it,
-  // and future requests carry the preference.
-  response.cookies.set(REGION_COOKIE, region, {
-    maxAge: 60 * 60 * 24, // 1 day
+  response.cookies.set(REGION_COOKIE, detection.region, {
+    maxAge: 60 * 60 * 24,
     path: "/",
     sameSite: "lax",
-    httpOnly: false, // readable by client JS for the footer switcher
+    httpOnly: false,
   });
 
   return response;
 }
+
 
 export const config = {
   matcher: [
