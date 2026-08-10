@@ -52,6 +52,7 @@ export const PRICE_CONFIG: Record<Region, PriceConfig> = {
 export const ALL_REGIONS: Region[] = ["US", "GB", "EU", "IN"];
 export const DEFAULT_REGION: Region = "US";
 export const REGION_COOKIE = "ugle_region";
+export const REGION_HEADER = "x-ugle-region";
 
 // Map Cloudflare CF-IPCountry codes → region
 export const COUNTRY_TO_REGION: Record<string, Region> = {
