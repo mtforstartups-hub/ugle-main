@@ -65,7 +65,9 @@ export default function RootLayout({
       lang="en"
       className={`${manrope.variable} ${sfMono.variable} h-full antialiased`}
     >
-      <GoogleConsentManager gtmId="GTM-53P7CN9X" />
+      <head>
+        <GoogleConsentManager gtmId="GTM-53P7CN9X" />
+      </head>
       <body className="min-h-full flex flex-col">
         <CookieConsentProvider>
           <Header />

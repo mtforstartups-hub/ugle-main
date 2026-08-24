@@ -89,7 +89,7 @@ export default function CookiePreferencesModal() {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={closePreferences}
-            className="fixed inset-0 bg-black/70 backdrop-blur-sm transition-opacity"
+            className="fixed inset-0 bg-black/50 backdrop-blur-xs transition-opacity"
             aria-hidden="true"
           />
 
@@ -103,10 +103,10 @@ export default function CookiePreferencesModal() {
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 16 }}
             transition={{ type: "spring", stiffness: 300, damping: 28 }}
-            className="relative w-full max-w-2xl max-h-[90vh] flex flex-col bg-[#1C1C1C] text-white rounded-2xl border border-white/10 shadow-2xl z-10 overflow-hidden"
+            className="relative w-full max-w-2xl max-h-[90vh] flex flex-col bg-white text-ugle-slate rounded-2xl border border-gray-200 shadow-2xl z-10 overflow-hidden"
           >
             {/* Modal Header */}
-            <div className="flex items-center justify-between px-6 py-5 border-b border-white/10 bg-[#161616]">
+            <div className="flex items-center justify-between px-6 py-5 border-b border-gray-200 bg-gray-50/80">
               <div className="flex items-center gap-3">
                 <div className="p-2 rounded-lg bg-[#75C043]/15 text-[#75C043]">
                   <Sliders className="size-5" />
@@ -114,11 +114,11 @@ export default function CookiePreferencesModal() {
                 <div>
                   <h2
                     id="cookie-preferences-title"
-                    className="text-lg font-bold tracking-tight text-white"
+                    className="text-lg font-bold tracking-tight text-gray-900"
                   >
                     Cookie & Privacy Preferences
                   </h2>
-                  <p className="text-xs text-gray-400 font-mono">
+                  <p className="text-xs text-gray-500 font-mono">
                     GDPR & UK PECR Compliant Consent Manager
                   </p>
                 </div>
@@ -126,20 +126,20 @@ export default function CookiePreferencesModal() {
               <button
                 onClick={closePreferences}
                 aria-label="Close preferences modal"
-                className="p-2 text-gray-400 hover:text-white rounded-lg hover:bg-white/5 transition-colors cursor-pointer"
+                className="p-2 text-gray-400 hover:text-gray-700 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer"
               >
                 <X className="size-5" />
               </button>
             </div>
 
             {/* Modal Content / Categories */}
-            <div className="flex-1 overflow-y-auto px-6 py-6 space-y-4">
-              <p className="text-sm text-gray-300 leading-relaxed">
+            <div className="flex-1 overflow-y-auto px-6 py-6 space-y-4 bg-white">
+              <p className="text-sm text-gray-600 leading-relaxed">
                 We use cookies and related technologies to ensure security, improve site performance, and analyze traffic. You can customize your consent preferences for each category below. Strictly necessary cookies cannot be disabled.
               </p>
 
               {/* Category 1: Strictly Necessary */}
-              <div className="p-4 rounded-xl bg-white/[0.03] border border-white/10 space-y-3">
+              <div className="p-4 rounded-xl bg-gray-50 border border-gray-200/80 space-y-3">
                 <div className="flex items-center justify-between gap-4">
                   <div className="flex items-center gap-3">
                     <div className="text-[#75C043] p-1.5 rounded-md bg-[#75C043]/10">
@@ -147,14 +147,14 @@ export default function CookiePreferencesModal() {
                     </div>
                     <div>
                       <div className="flex items-center gap-2">
-                        <span className="font-semibold text-sm text-white">
+                        <span className="font-semibold text-sm text-gray-900">
                           Strictly Necessary Cookies
                         </span>
-                        <span className="text-[10px] uppercase font-mono px-2 py-0.5 rounded bg-[#75C043]/20 text-[#75C043] font-bold">
+                        <span className="text-[10px] uppercase font-mono px-2 py-0.5 rounded bg-[#75C043]/20 text-[#609e37] font-bold">
                           Always Active
                         </span>
                       </div>
-                      <p className="text-xs text-gray-400 mt-0.5">
+                      <p className="text-xs text-gray-500 mt-0.5">
                         Essential for basic navigation, security, and storing your consent choices.
                       </p>
                     </div>
@@ -164,7 +164,7 @@ export default function CookiePreferencesModal() {
                     type="button"
                     onClick={() => toggleCategoryExpand("necessary")}
                     aria-label="Toggle details for Strictly Necessary cookies"
-                    className="text-gray-400 hover:text-white p-1 rounded transition-colors"
+                    className="text-gray-400 hover:text-gray-700 p-1 rounded transition-colors"
                   >
                     {expandedCategory === "necessary" ? (
                       <ChevronUp className="size-4" />
@@ -175,18 +175,18 @@ export default function CookiePreferencesModal() {
                 </div>
 
                 {expandedCategory === "necessary" && (
-                  <div className="pt-3 border-t border-white/5 text-xs text-gray-400 space-y-2 font-mono">
-                    <div className="bg-black/30 p-2.5 rounded-lg border border-white/5 space-y-1">
-                      <p className="text-gray-300 font-semibold">Purposes & Storage:</p>
-                      <ul className="list-disc pl-4 space-y-1 text-gray-400">
+                  <div className="pt-3 border-t border-gray-200 text-xs text-gray-600 space-y-2 font-mono">
+                    <div className="bg-white p-3 rounded-lg border border-gray-200 space-y-1">
+                      <p className="text-gray-800 font-semibold">Purposes & Storage:</p>
+                      <ul className="list-disc pl-4 space-y-1 text-gray-600">
                         <li>
-                          <code className="text-[#75C043]">ugle_cookie_consent</code>: Stores your cookie preferences (1 year).
+                          <code className="text-[#609e37] font-bold">ugle_cookie_consent</code>: Stores your cookie preferences (1 year).
                         </li>
                         <li>
-                          <code className="text-[#75C043]">ugle_region</code>: Remembers pricing currency/region selection.
+                          <code className="text-[#609e37] font-bold">ugle_region</code>: Remembers pricing currency/region selection.
                         </li>
                         <li>
-                          <code className="text-[#75C043]">cf_turnstile</code>: Cloudflare bot protection and security verification.
+                          <code className="text-[#609e37] font-bold">cf_turnstile</code>: Cloudflare bot protection and security verification.
                         </li>
                       </ul>
                     </div>
@@ -195,19 +195,19 @@ export default function CookiePreferencesModal() {
               </div>
 
               {/* Category 2: Analytics & Performance */}
-              <div className="p-4 rounded-xl bg-white/[0.03] border border-white/10 space-y-3">
+              <div className="p-4 rounded-xl bg-gray-50 border border-gray-200/80 space-y-3">
                 <div className="flex items-center justify-between gap-4">
                   <div className="flex items-center gap-3">
-                    <div className="text-blue-400 p-1.5 rounded-md bg-blue-500/10">
+                    <div className="text-blue-600 p-1.5 rounded-md bg-blue-50">
                       <BarChart3 className="size-4" />
                     </div>
                     <div>
                       <div className="flex items-center gap-2">
-                        <span className="font-semibold text-sm text-white">
+                        <span className="font-semibold text-sm text-gray-900">
                           Analytics & Performance
                         </span>
                       </div>
-                      <p className="text-xs text-gray-400 mt-0.5">
+                      <p className="text-xs text-gray-500 mt-0.5">
                         Helps us measure site traffic and aggregate usage patterns to improve user experience.
                       </p>
                     </div>
@@ -222,14 +222,14 @@ export default function CookiePreferencesModal() {
                         className="sr-only peer"
                         aria-label="Toggle Analytics cookies"
                       />
-                      <div className="w-11 h-6 bg-white/10 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#75C043]"></div>
+                      <div className="w-11 h-6 bg-gray-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#75C043]"></div>
                     </label>
 
                     <button
                       type="button"
                       onClick={() => toggleCategoryExpand("analytics")}
                       aria-label="Toggle details for Analytics cookies"
-                      className="text-gray-400 hover:text-white p-1 rounded transition-colors"
+                      className="text-gray-400 hover:text-gray-700 p-1 rounded transition-colors"
                     >
                       {expandedCategory === "analytics" ? (
                         <ChevronUp className="size-4" />
@@ -241,12 +241,12 @@ export default function CookiePreferencesModal() {
                 </div>
 
                 {expandedCategory === "analytics" && (
-                  <div className="pt-3 border-t border-white/5 text-xs text-gray-400 space-y-2 font-mono">
-                    <div className="bg-black/30 p-2.5 rounded-lg border border-white/5 space-y-1">
-                      <p className="text-gray-300 font-semibold">Purposes & Storage:</p>
-                      <ul className="list-disc pl-4 space-y-1 text-gray-400">
+                  <div className="pt-3 border-t border-gray-200 text-xs text-gray-600 space-y-2 font-mono">
+                    <div className="bg-white p-3 rounded-lg border border-gray-200 space-y-1">
+                      <p className="text-gray-800 font-semibold">Purposes & Storage:</p>
+                      <ul className="list-disc pl-4 space-y-1 text-gray-600">
                         <li>
-                          <code className="text-blue-400">_ga, _gid</code>: Anonymous visitor telemetry via Google Analytics & Google Tag Manager.
+                          <code className="text-blue-600 font-bold">_ga, _gid</code>: Anonymous visitor telemetry via Google Analytics & Google Tag Manager.
                         </li>
                         <li>Consent Mode v2: Analytics tags remain blocked until explicit opt-in.</li>
                         <li>Retention: Up to 13 months.</li>
@@ -257,19 +257,19 @@ export default function CookiePreferencesModal() {
               </div>
 
               {/* Category 3: Marketing & Advertising */}
-              <div className="p-4 rounded-xl bg-white/[0.03] border border-white/10 space-y-3">
+              <div className="p-4 rounded-xl bg-gray-50 border border-gray-200/80 space-y-3">
                 <div className="flex items-center justify-between gap-4">
                   <div className="flex items-center gap-3">
-                    <div className="text-amber-400 p-1.5 rounded-md bg-amber-500/10">
+                    <div className="text-amber-600 p-1.5 rounded-md bg-amber-50">
                       <Sparkles className="size-4" />
                     </div>
                     <div>
                       <div className="flex items-center gap-2">
-                        <span className="font-semibold text-sm text-white">
+                        <span className="font-semibold text-sm text-gray-900">
                           Marketing & Advertising
                         </span>
                       </div>
-                      <p className="text-xs text-gray-400 mt-0.5">
+                      <p className="text-xs text-gray-500 mt-0.5">
                         Used to measure campaign conversions and relevant announcements. Never sells personal data.
                       </p>
                     </div>
@@ -284,14 +284,14 @@ export default function CookiePreferencesModal() {
                         className="sr-only peer"
                         aria-label="Toggle Marketing cookies"
                       />
-                      <div className="w-11 h-6 bg-white/10 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#75C043]"></div>
+                      <div className="w-11 h-6 bg-gray-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#75C043]"></div>
                     </label>
 
                     <button
                       type="button"
                       onClick={() => toggleCategoryExpand("marketing")}
                       aria-label="Toggle details for Marketing cookies"
-                      className="text-gray-400 hover:text-white p-1 rounded transition-colors"
+                      className="text-gray-400 hover:text-gray-700 p-1 rounded transition-colors"
                     >
                       {expandedCategory === "marketing" ? (
                         <ChevronUp className="size-4" />
@@ -303,10 +303,10 @@ export default function CookiePreferencesModal() {
                 </div>
 
                 {expandedCategory === "marketing" && (
-                  <div className="pt-3 border-t border-white/5 text-xs text-gray-400 space-y-2 font-mono">
-                    <div className="bg-black/30 p-2.5 rounded-lg border border-white/5 space-y-1">
-                      <p className="text-gray-300 font-semibold">Purposes & Storage:</p>
-                      <ul className="list-disc pl-4 space-y-1 text-gray-400">
+                  <div className="pt-3 border-t border-gray-200 text-xs text-gray-600 space-y-2 font-mono">
+                    <div className="bg-white p-3 rounded-lg border border-gray-200 space-y-1">
+                      <p className="text-gray-800 font-semibold">Purposes & Storage:</p>
+                      <ul className="list-disc pl-4 space-y-1 text-gray-600">
                         <li>Ad conversion attribution and campaign performance measurement.</li>
                         <li>Retention: Up to 12 months.</li>
                       </ul>
@@ -316,19 +316,19 @@ export default function CookiePreferencesModal() {
               </div>
 
               {/* Category 4: Functional / Preferences */}
-              <div className="p-4 rounded-xl bg-white/[0.03] border border-white/10 space-y-3">
+              <div className="p-4 rounded-xl bg-gray-50 border border-gray-200/80 space-y-3">
                 <div className="flex items-center justify-between gap-4">
                   <div className="flex items-center gap-3">
-                    <div className="text-purple-400 p-1.5 rounded-md bg-purple-500/10">
+                    <div className="text-purple-600 p-1.5 rounded-md bg-purple-50">
                       <ShieldCheck className="size-4" />
                     </div>
                     <div>
                       <div className="flex items-center gap-2">
-                        <span className="font-semibold text-sm text-white">
+                        <span className="font-semibold text-sm text-gray-900">
                           Preferences & Functionality
                         </span>
                       </div>
-                      <p className="text-xs text-gray-400 mt-0.5">
+                      <p className="text-xs text-gray-500 mt-0.5">
                         Enables custom preferences and enhanced interactive site features.
                       </p>
                     </div>
@@ -343,14 +343,14 @@ export default function CookiePreferencesModal() {
                         className="sr-only peer"
                         aria-label="Toggle Preferences cookies"
                       />
-                      <div className="w-11 h-6 bg-white/10 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#75C043]"></div>
+                      <div className="w-11 h-6 bg-gray-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#75C043]"></div>
                     </label>
 
                     <button
                       type="button"
                       onClick={() => toggleCategoryExpand("preferences")}
                       aria-label="Toggle details for Preferences cookies"
-                      className="text-gray-400 hover:text-white p-1 rounded transition-colors"
+                      className="text-gray-400 hover:text-gray-700 p-1 rounded transition-colors"
                     >
                       {expandedCategory === "preferences" ? (
                         <ChevronUp className="size-4" />
@@ -362,10 +362,10 @@ export default function CookiePreferencesModal() {
                 </div>
 
                 {expandedCategory === "preferences" && (
-                  <div className="pt-3 border-t border-white/5 text-xs text-gray-400 space-y-2 font-mono">
-                    <div className="bg-black/30 p-2.5 rounded-lg border border-white/5 space-y-1">
-                      <p className="text-gray-300 font-semibold">Purposes & Storage:</p>
-                      <ul className="list-disc pl-4 space-y-1 text-gray-400">
+                  <div className="pt-3 border-t border-gray-200 text-xs text-gray-600 space-y-2 font-mono">
+                    <div className="bg-white p-3 rounded-lg border border-gray-200 space-y-1">
+                      <p className="text-gray-800 font-semibold">Purposes & Storage:</p>
+                      <ul className="list-disc pl-4 space-y-1 text-gray-600">
                         <li>Remembers localized UI state and user preferences between sessions.</li>
                         <li>Retention: Up to 1 year.</li>
                       </ul>
@@ -376,13 +376,13 @@ export default function CookiePreferencesModal() {
             </div>
 
             {/* Modal Footer with Actions (Equal Prominence & Transparency) */}
-            <div className="px-6 py-4 border-t border-white/10 bg-[#161616] flex flex-col sm:flex-row items-center justify-between gap-3">
-              <div className="text-xs text-gray-400">
+            <div className="px-6 py-4 border-t border-gray-200 bg-gray-50 flex flex-col sm:flex-row items-center justify-between gap-3">
+              <div className="text-xs text-gray-500">
                 Read our{" "}
                 <Link
                   href="/privacy-policy"
                   onClick={closePreferences}
-                  className="underline hover:text-white transition-colors"
+                  className="text-gray-700 underline font-medium hover:text-[#75C043] transition-colors"
                 >
                   Privacy Policy
                 </Link>
@@ -393,7 +393,7 @@ export default function CookiePreferencesModal() {
                 <button
                   type="button"
                   onClick={rejectAll}
-                  className="flex-1 sm:flex-none px-4 py-2.5 rounded-lg text-xs font-semibold font-mono uppercase tracking-wider text-gray-300 bg-white/5 border border-white/20 hover:bg-white/10 hover:text-white hover:border-white/40 transition-all cursor-pointer text-center"
+                  className="flex-1 sm:flex-none px-4 py-2.5 rounded-lg text-xs font-semibold font-mono uppercase tracking-wider text-gray-700 bg-white border border-gray-300 hover:bg-gray-100 hover:text-gray-900 transition-all cursor-pointer text-center shadow-xs"
                 >
                   Reject All
                 </button>
@@ -401,7 +401,7 @@ export default function CookiePreferencesModal() {
                 <button
                   type="button"
                   onClick={handleSaveCustom}
-                  className="flex-1 sm:flex-none px-4 py-2.5 rounded-lg text-xs font-semibold font-mono uppercase tracking-wider text-white bg-white/10 border border-white/30 hover:bg-white/20 hover:border-white/50 transition-all cursor-pointer text-center"
+                  className="flex-1 sm:flex-none px-4 py-2.5 rounded-lg text-xs font-semibold font-mono uppercase tracking-wider text-gray-700 bg-gray-100 border border-gray-200 hover:bg-gray-200 hover:text-gray-900 transition-all cursor-pointer text-center"
                 >
                   Save Choices
                 </button>
