@@ -1,7 +1,7 @@
-import { ChevronDown, Globe } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 import FooterNewsletter from "./forms/FooterNewsletter";
+import RegionSwitcher from "./RegionSwitcher";
 
 export default function Footer() {
   return (
@@ -117,27 +117,7 @@ export default function Footer() {
             © 2026 Ugle. All rights reserved.
           </div>
 
-          <div className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors relative group justify-center sm:justify-end">
-            <Globe className="w-4 h-4 text-[#75C043]" />
-            <select className="bg-transparent border-none outline-none cursor-pointer appearance-none font-mono text-xs focus:outline-none uppercase tracking-wider pr-6 z-10 relative">
-              <option value="en" className="text-ugle-slate">
-                EN - English
-              </option>
-              <option value="es" className="text-ugle-slate">
-                ES - Español
-              </option>
-              <option value="fr" className="text-ugle-slate">
-                FR - Français
-              </option>
-              <option value="de" className="text-ugle-slate">
-                DE - Deutsch
-              </option>
-              <option value="ja" className="text-ugle-slate">
-                JA - 日本語
-              </option>
-            </select>
-            <ChevronDown className="w-3 h-3 absolute right-0 top-1/2 -translate-y-1/2 opacity-50 pointer-events-none group-hover:opacity-100 transition-opacity" />
-          </div>
+          <RegionSwitcher />
         </div>
       </div>
     </footer>

@@ -4,6 +4,15 @@ import { useState } from "react";
 import { motion } from "motion/react";
 import { Check, Mail } from "lucide-react";
 import Link from "next/link";
+import type { PriceConfig } from "../../lib/priceConfig";
+
+function fmt(amount: number, cfg: PriceConfig): string {
+  return new Intl.NumberFormat(cfg.locale, {
+    style: "currency",
+    currency: cfg.currency,
+    maximumFractionDigits: 0,
+  }).format(amount);
+}
 
 // ── Shared check-list row ─────────────────────────────────────────────────────
 
@@ -22,13 +31,22 @@ function Feature({ text, dark = false }: { text: string; dark?: boolean }) {
 }
 
 // ── Individual pricing panel ──────────────────────────────────────────────────
-function IndividualsPanel({ isAnnual }: { isAnnual: boolean }) {
-  const price = isAnnual ? "$169" : "$20";
-  const origPrice = isAnnual ? "$199" : "$25";
+function IndividualsPanel({
+  isAnnual,
+  priceConfig,
+}: {
+  isAnnual: boolean;
+  priceConfig: PriceConfig;
+}) {
+  const price = fmt(
+    isAnnual ? priceConfig.annual : priceConfig.monthly,
+    priceConfig,
+  );
+  const origPrice = fmt(
+    isAnnual ? priceConfig.origAnnual : priceConfig.origMonthly,
+    priceConfig,
+  );
   const period = isAnnual ? "per user, per year" : "per user, per month";
-  const loyaltyNote = isAnnual
-    ? "loyalty renewal rate · save ~15%"
-    : "loyalty renewal rate · save ~20%";
   const updatesNote = isAnnual
     ? "Updates included for 12 months"
     : "Updates included while subscribed";
@@ -103,7 +121,10 @@ function IndividualsPanel({ isAnnual }: { isAnnual: boolean }) {
             </p>
             <p className="text-[13px] text-ugle-gray mt-0.5">
               Prices shown reflect the loyalty rate for returning subscribers.
-              First-time price: <span className="font-semibold">$199/year</span>
+              First-time price:{" "}
+              <span className="font-semibold">
+                {fmt(priceConfig.origAnnual, priceConfig)}/year
+              </span>
               .
             </p>
           </div>
@@ -328,7 +349,11 @@ function EducationPanel() {
 }
 
 // ── Main export ───────────────────────────────────────────────────────────────
-export default function PricingMain() {
+export default function PricingMain({
+  priceConfig,
+}: {
+  priceConfig: PriceConfig;
+}) {
   const [category, setCategory] = useState<
     "individuals" | "organisation" | "non-commercial" | "education"
   >("individuals");
@@ -448,7 +473,7 @@ export default function PricingMain() {
         ) : category === "organisation" ? (
           <OrganisationPanel />
         ) : (
-          <IndividualsPanel isAnnual={isAnnual} />
+          <IndividualsPanel isAnnual={isAnnual} priceConfig={priceConfig} />
         )}
       </motion.div>
     </>
