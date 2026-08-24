@@ -60,14 +60,16 @@ export default function Hero() {
           <motion.h1
             variants={itemVariants}
             className="text-[2.3rem] sm:text-[2.6rem] md:text-7xl lg:text-[5.8rem] font-bold tracking-tight leading-[1.2] text-ugle-slate max-w-7xl"
+            aria-label="Find Your Moment. From Your Videos. On Your Machine."
           >
-            <span className="inline-block">
+            <span className="inline-block" aria-hidden="true">
               Find Your{" "}
               <span className="whitespace-nowrap">
                 M
                 <Image
                   src="/ugle-icon.png"
-                  alt="ugle moment o"
+                  alt=""
+                  aria-hidden="true"
                   width={50}
                   height={50}
                   className="inline-block align-baseline h-[0.68em] w-auto"
@@ -77,7 +79,7 @@ export default function Hero() {
               </span>
             </span>
             <br />
-            <span className="text-[2.3rem] sm:text-[2.6rem] lg:text-[4rem]">
+            <span className="text-[2.3rem] sm:text-[2.6rem] lg:text-[4rem]" aria-hidden="true">
               From Your Videos. On Your Machine.
             </span>
           </motion.h1>
