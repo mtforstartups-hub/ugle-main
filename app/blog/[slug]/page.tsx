@@ -1,4 +1,5 @@
 import React from "react";
+import type { Metadata } from "next";
 import BlogPost from "@/app/components/blog/BlogPost";
 import SocialShare from "@/app/components/blog/SocialShare";
 import { ArrowRight } from "lucide-react";
@@ -11,6 +12,7 @@ const BLOG_POST_DATA: Record<
   string,
   {
     title: string;
+    description: string;
     meta: string;
     tag: string;
     image: string;
@@ -19,6 +21,8 @@ const BLOG_POST_DATA: Record<
 > = {
   "why-local-first": {
     title: "Why we built Ugle local-first",
+    description:
+      "Why on-device transcription and zero cloud uploads is the only architecture that respects journalistic integrity and source privacy.",
     meta: "4 min read",
     tag: "Product philosophy",
     image: "/images/blogs/why-local-first.jpg",
@@ -73,6 +77,8 @@ const BLOG_POST_DATA: Record<
   },
   "cost-of-scrubbing-timelines": {
     title: "The real cost of scrubbing timelines",
+    description:
+      "A documentary editor spends 6-10 hours a week scrubbing timelines. Here is how local-first search changes media archiving.",
     meta: "3 min read",
     tag: "Workflow",
     image: "/images/blogs/cost-of-scrubbing.jpg",
@@ -119,6 +125,8 @@ const BLOG_POST_DATA: Record<
   },
   "what-transcription-accuracy-means": {
     title: "What 95% transcription accuracy actually means",
+    description:
+      "A breakdown of transcription word error rates across accents, recording conditions, and noise levels — and what it means for search.",
     meta: "5 min read",
     tag: "Product",
     image: "/images/blogs/transcription-accuracy.jpg",
@@ -220,6 +228,8 @@ const BLOG_POST_DATA: Record<
   },
   "languages-supported": {
     title: "The 90+ Languages Supported by Ugle",
+    description:
+      "Explore the 90+ languages supported locally by Ugle for fast, on-device audio and video transcription with no cloud required.",
     meta: "4 min read",
     tag: "Product",
     image: "/images/blogs/languages-supported.png",
@@ -394,6 +404,45 @@ export function generateStaticParams() {
   return Object.keys(BLOG_POST_DATA).map((slug) => ({
     slug,
   }));
+}
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}): Promise<Metadata> {
+  const { slug } = await params;
+  const blogPost = BLOG_POST_DATA[slug];
+
+  if (!blogPost) {
+    return {
+      title: "Article Not Found",
+      description: "The requested blog article could not be found.",
+    };
+  }
+
+  return {
+    title: blogPost.title,
+    description: blogPost.description,
+    openGraph: {
+      type: "article",
+      url: `/blog/${slug}`,
+      title: blogPost.title,
+      description: blogPost.description,
+      images: [
+        {
+          url: blogPost.image,
+          alt: blogPost.title,
+        },
+      ],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: blogPost.title,
+      description: blogPost.description,
+      images: [blogPost.image],
+    },
+  };
 }
 
 export default async function page({

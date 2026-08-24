@@ -1,5 +1,16 @@
+import type { Metadata } from "next";
 import PageHeader from "../components/sharedpages/PageHeader";
 import ChangelogMain from "../components/changelog/ChangelogMain";
+
+export const metadata: Metadata = {
+  title: "Changelog",
+  description: "Release notes, performance improvements, and updates to Ugle.",
+  openGraph: {
+    title: "Changelog",
+    description: "Release notes, performance improvements, and updates to Ugle.",
+    url: "/changelog",
+  },
+};
 
 export default function page() {
   return (

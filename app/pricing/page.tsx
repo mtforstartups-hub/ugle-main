@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { headers } from "next/headers";
 import {
   PRICE_CONFIG,
@@ -8,6 +9,18 @@ import {
 import PricingHeader from "../components/pricing/PricingHeader";
 import PricingMain from "../components/pricing/PricingMain";
 import PricingFaq from "../components/pricing/PricingFaq";
+
+export const metadata: Metadata = {
+  title: "Pricing",
+  description:
+    "Simple, transparent pricing for Ugle. Buy a lifetime or subscription license for 100% private, on-device audio search.",
+  openGraph: {
+    title: "Pricing",
+    description:
+      "Simple, transparent pricing for Ugle. Buy a lifetime or subscription license for 100% private, on-device audio search.",
+    url: "/pricing",
+  },
+};
 
 export default async function Pricing() {
   const hdrs = await headers();

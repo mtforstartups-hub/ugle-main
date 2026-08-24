@@ -1,8 +1,21 @@
 import React from "react";
+import type { Metadata } from "next";
 import PageHeader from "../components/sharedpages/PageHeader";
 import { FileText, Mic2, Newspaper } from "lucide-react";
 import Link from "next/link";
 import GlobalCTA from "../components/GlobalCTA";
+
+export const metadata: Metadata = {
+  title: "Use Cases",
+  description:
+    "Explore how newsrooms, podcast producers, and investigative journalists use Ugle's local-first search to find soundbites and protect sources.",
+  openGraph: {
+    title: "Use Cases",
+    description:
+      "Explore how newsrooms, podcast producers, and investigative journalists use Ugle's local-first search to find soundbites and protect sources.",
+    url: "/use-cases",
+  },
+};
 
 const useCaseList = [
   {
