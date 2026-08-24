@@ -457,8 +457,43 @@ export default async function page({
     notFound();
   }
 
+  const articleJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "BlogPosting",
+    headline: blogPost.title,
+    description: blogPost.description,
+    image: [`https://ugle.ai${blogPost.image}`],
+    url: `https://ugle.ai/blog/${slug}`,
+    mainEntityOfPage: {
+      "@type": "WebPage",
+      "@id": `https://ugle.ai/blog/${slug}`,
+    },
+    articleSection: blogPost.tag,
+    inLanguage: "en-US",
+    author: {
+      "@type": "Organization",
+      name: "Ugle",
+      url: "https://ugle.ai",
+    },
+    publisher: {
+      "@type": "Organization",
+      name: "Ugle",
+      url: "https://ugle.ai",
+      logo: {
+        "@type": "ImageObject",
+        url: "https://ugle.ai/Ugle%20Logo.png",
+      },
+    },
+  };
+
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(articleJsonLd).replace(/</g, "\\u003c"),
+        }}
+      />
       <div className="max-w-3xl mx-auto px-6 py-20 pb-32">
         <Link
           href="/blog"
