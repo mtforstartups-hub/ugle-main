@@ -44,9 +44,37 @@ const sfMono = localFont({
 });
 
 export const metadata: Metadata = {
-  title: "Ugle | Local-First Media Search",
+  metadataBase: new URL("https://ugle.ai"),
+  title: {
+    default: "Ugle | Local-First Media Search",
+    template: "%s | Ugle",
+  },
   description:
     "Find the exact moment inside any recording, locally on your machine, with no uploads and no cloud.",
+  openGraph: {
+    type: "website",
+    locale: "en_US",
+    url: "https://ugle.ai",
+    siteName: "Ugle",
+    title: "Ugle | Local-First Media Search",
+    description:
+      "Find the exact moment inside any recording, locally on your machine, with no uploads and no cloud.",
+    images: [
+      {
+        url: "/ugle-icon.png",
+        width: 1200,
+        height: 630,
+        alt: "Ugle - Local-First Media Search",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Ugle | Local-First Media Search",
+    description:
+      "Find the exact moment inside any recording, locally on your machine, with no uploads and no cloud.",
+    images: ["/ugle-icon.png"],
+  },
   other: {
     rel: "preconnect",
     url: "https://challenges.cloudflare.com",
