@@ -5,7 +5,9 @@ import "./globals.css";
 import Header from "./components/Header";
 import Footer from "./components/Footer";
 import ScrollToTop from "./components/ScrollToTop";
-import { GoogleTagManager } from "@next/third-parties/google";
+import GoogleConsentManager from "./components/cookie/GoogleConsentManager";
+import { CookieConsentProvider } from "./context/CookieConsentContext";
+import CookieManager from "./components/cookie/CookieManager";
 
 const manrope = Manrope({
   variable: "--font-sans",
@@ -146,18 +148,23 @@ export default function RootLayout({
       lang="en"
       className={`${manrope.variable} ${sfMono.variable} h-full antialiased`}
     >
-      <GoogleTagManager gtmId="GTM-53P7CN9X" />
+      <head>
+        <GoogleConsentManager gtmId="GTM-53P7CN9X" />
+      </head>
       <body className="min-h-full flex flex-col">
+        <CookieConsentProvider>
+          <Header />
+          {children}
+          <Footer />
+          <ScrollToTop />
+          <CookieManager />
+        </CookieConsentProvider>
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
             __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c"),
           }}
         />
-        <Header />
-        {children}
-        <Footer />
-        <ScrollToTop />
       </body>
     </html>
   );

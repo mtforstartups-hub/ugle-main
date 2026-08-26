@@ -2,6 +2,7 @@ import Link from "next/link";
 import Image from "next/image";
 import FooterNewsletter from "./forms/FooterNewsletter";
 import RegionSwitcher from "./RegionSwitcher";
+import FooterCookieButton from "./cookie/FooterCookieButton";
 
 export default function Footer() {
   return (
@@ -99,7 +100,7 @@ export default function Footer() {
         </div>
 
         <div className="py-3 md:py-6 border-t border-white/10 flex flex-col sm:flex-row justify-between items-center gap-6">
-          <div className="flex gap-4">
+          <div className="flex flex-wrap gap-4 items-center">
             <Link
               href="/privacy-policy"
               className="text-gray-400 hover:text-white transition-colors font-mono text-xs"
@@ -112,6 +113,7 @@ export default function Footer() {
             >
               Terms of Service
             </Link>
+            <FooterCookieButton />
           </div>
           <div className="text-gray-400 font-mono text-xs text-center sm:text-left">
             © 2026 Ugle. All rights reserved.
