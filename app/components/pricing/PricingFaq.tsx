@@ -2,6 +2,33 @@
 
 import { motion } from "motion/react";
 
+const PRICING_FAQS = [
+  {
+    q: "Is there a free trial?",
+    a: "Yes. 14 days, no file limit, no credit card. At day 14, choose a licence or the app continues in read-only mode — your existing index stays searchable, with no new imports.",
+  },
+  {
+    q: "What counts as a seat?",
+    a: "One seat = one machine. Solo licences activate on up to two machines owned by the same person. Team licences are per-machine.",
+  },
+  {
+    q: "What if I reinstall my OS?",
+    a: "Deactivate from Settings > Licence, then reactivate after reinstalling. Deactivate and reactivate as many times as needed.",
+  },
+  {
+    q: "Does Ugle work offline?",
+    a: "Yes. After activation, Ugle runs entirely without internet. Transcription, indexing, and search are all local. Internet is required for initial activation and updates only.",
+  },
+  {
+    q: "Is there a loyalty discount?",
+    a: "Yes. Individual subscribers receive a 15% loyalty discount on every subsequent renewal — annual drops from $199 to $169/year, monthly from $25 to $20/month.",
+  },
+  {
+    q: "Educational or non-commercial pricing?",
+    a: "Both are completely free. Education licences require verification of enrollment or employment at an accredited institution (processed within 2 business days). Non-commercial use requires no approval — just confirm you're not earning commercial benefits.",
+  },
+];
+
 export default function PricingFaq() {
   return (
     <motion.div
@@ -17,32 +44,7 @@ export default function PricingFaq() {
         </h2>
       </div>
       <div className="flex flex-col border-t border-ugle-light/60">
-        {[
-          {
-            q: "Is there a free trial?",
-            a: "Yes. 14 days, no file limit, no credit card. At day 14, choose a licence or the app continues in read-only mode — your existing index stays searchable, with no new imports.",
-          },
-          {
-            q: "What counts as a seat?",
-            a: "One seat = one machine. Solo licences activate on up to two machines owned by the same person. Team licences are per-machine.",
-          },
-          {
-            q: "What if I reinstall my OS?",
-            a: "Deactivate from Settings > Licence, then reactivate after reinstalling. Deactivate and reactivate as many times as needed.",
-          },
-          {
-            q: "Does Ugle work offline?",
-            a: "Yes. After activation, Ugle runs entirely without internet. Transcription, indexing, and search are all local. Internet is required for initial activation and updates only.",
-          },
-          {
-            q: "Is there a loyalty discount?",
-            a: "Yes. Individual subscribers receive a 15% loyalty discount on every subsequent renewal — annual drops from $199 to $169/year, monthly from $25 to $20/month.",
-          },
-          {
-            q: "Educational or non-commercial pricing?",
-            a: "Both are completely free. Education licences require verification of enrollment or employment at an accredited institution (processed within 2 business days). Non-commercial use requires no approval — just confirm you're not earning commercial benefits.",
-          },
-        ].map((item, i) => (
+        {PRICING_FAQS.map((item, i) => (
           <div
             key={i}
             className="py-5 border-b border-ugle-light/60 flex flex-col md:flex-row md:gap-8 md:items-start"
@@ -56,6 +58,24 @@ export default function PricingFaq() {
           </div>
         ))}
       </div>
+
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "FAQPage",
+            mainEntity: PRICING_FAQS.map((item) => ({
+              "@type": "Question",
+              name: item.q,
+              acceptedAnswer: {
+                "@type": "Answer",
+                text: item.a,
+              },
+            })),
+          }),
+        }}
+      />
 
       <div className="bg-white border border-ugle-light/60 rounded-[14px] p-8.5 mt-10 shadow-sm">
         <h3 className="text-[22px] font-bold text-ugle-slate mb-2">

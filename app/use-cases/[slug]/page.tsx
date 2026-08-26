@@ -4,6 +4,7 @@ import UseCaseHeroImage from "@/app/components/usecase/UseCaseHeroImage";
 import { ArrowRight } from "lucide-react";
 import Link from "next/link";
 import React from "react";
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import GlobalCTA from "@/app/components/GlobalCTA";
 import { FAQSection } from "@/app/components/sharedpages/FAQSection";
@@ -20,6 +21,7 @@ const USE_CASE_DATA: Record<
     title: string;
     badge: string;
     subtitle: string;
+    description: string;
     image: { src: string; alt: string };
     content: React.ReactNode;
     ctatitle: string;
@@ -31,6 +33,8 @@ const USE_CASE_DATA: Record<
     title: "Find the soundbite. Cut the segment. Hit the deadline.",
     badge: "Newsroom editors",
     subtitle: "Find the soundbite. Cut the segment. Hit the deadline.",
+    description:
+      "Search hours of raw broadcast footage and multi-track audio in milliseconds to pull the exact soundbite and hit breaking news deadlines.",
     image: {
       src: "/images/usecases/NewsroomEditor2.png",
       alt: "Ugle in a newsroom — search, clip, export workflow",
@@ -150,6 +154,8 @@ const USE_CASE_DATA: Record<
     title: "Pull clips from 300 episodes without listening to any of them.",
     badge: "Podcast Producers",
     subtitle: "Pull clips from 300 episodes without listening to any of them.",
+    description:
+      "Instantly search across multi-track recordings, backlog archives, and unedited takes to find quotes, callbacks, and soundbites in 30ms.",
     image: {
       src: "/images/usecases/Podcasters.jpg",
       alt: "Ugle for podcast producers — search across hundreds of episodes",
@@ -223,6 +229,8 @@ const USE_CASE_DATA: Record<
     title: "A private, searchable archive of every source conversation.",
     badge: "Journalists",
     subtitle: "A private, searchable archive of every source conversation.",
+    description:
+      "100% on-device indexing and air-gapped search for investigative journalists. Protect confidential sources with zero cloud uploads.",
     image: {
       src: "/images/usecases/Journalist.jpg",
       alt: "Ugle for journalists — private, local, searchable source archive",
@@ -334,6 +342,49 @@ const USE_CASE_DATA: Record<
     ctaText: "Get Early Access",
   },
 };
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}): Promise<Metadata> {
+  const { slug } = await params;
+  const useCase = USE_CASE_DATA[slug];
+
+  if (!useCase) {
+    return {
+      title: "Use Case Not Found",
+      description: "The requested use case could not be found.",
+    };
+  }
+
+  const pageTitle = `${useCase.badge} — ${useCase.title}`;
+
+  return {
+    title: pageTitle,
+    description: useCase.description,
+    openGraph: {
+      type: "website",
+      url: `/use-cases/${slug}`,
+      title: pageTitle,
+      description: useCase.description,
+      images: [
+        {
+          url: useCase.image.src,
+          width: 1200,
+          height: 630,
+          alt: useCase.image.alt,
+        },
+      ],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: pageTitle,
+      description: useCase.description,
+      images: [useCase.image.src],
+    },
+  };
+}
 
 export default async function UseCasePage({
   params,
