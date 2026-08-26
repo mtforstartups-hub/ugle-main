@@ -1,6 +1,19 @@
+import type { Metadata } from "next";
 import { Building2 } from "lucide-react";
 import ContactForm from "../components/ContactForm";
 import GlobalCTA from "../components/GlobalCTA";
+
+export const metadata: Metadata = {
+  title: "Contact Sales",
+  description:
+    "Get in touch with the Ugle team for enterprise licensing, volume deployments, and commercial support.",
+  openGraph: {
+    title: "Contact Sales",
+    description:
+      "Get in touch with the Ugle team for enterprise licensing, volume deployments, and commercial support.",
+    url: "/contact",
+  },
+};
 
 export default function ContactPage() {
   return (

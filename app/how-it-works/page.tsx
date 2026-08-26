@@ -1,4 +1,5 @@
 import Link from "next/link";
+import type { Metadata } from "next";
 import GlobalCTA from "../components/GlobalCTA";
 import { FAQSection } from "../components/sharedpages/FAQSection";
 import PageHeader from "../components/sharedpages/PageHeader";
@@ -10,6 +11,18 @@ import {
   PlayCircle,
   Search,
 } from "lucide-react";
+
+export const metadata: Metadata = {
+  title: "How It Works",
+  description:
+    "See how Ugle indexes your audio and video locally, builds a fast search index, and finds moments in 30ms without uploading files.",
+  openGraph: {
+    title: "How It Works",
+    description:
+      "See how Ugle indexes your audio and video locally, builds a fast search index, and finds moments in 30ms without uploading files.",
+    url: "/how-it-works",
+  },
+};
 
 export default function page() {
   return (

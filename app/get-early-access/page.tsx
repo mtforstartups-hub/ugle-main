@@ -1,6 +1,18 @@
-import React from "react";
+import type { Metadata } from "next";
 import GetAccessHero from "../components/getaccess/GetAccessHero";
 import GetAccessForm from "../components/getaccess/GetAccessForm";
+
+export const metadata: Metadata = {
+  title: "Get Early Access",
+  description:
+    "Apply for early access to Ugle. Experience local-first, lightning-fast audio and video search on your own machine.",
+  openGraph: {
+    title: "Get Early Access",
+    description:
+      "Apply for early access to Ugle. Experience local-first, lightning-fast audio and video search on your own machine.",
+    url: "/get-early-access",
+  },
+};
 
 export default function GetEarlyAccess() {
   return (

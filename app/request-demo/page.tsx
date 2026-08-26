@@ -1,6 +1,19 @@
 import React from "react";
+import type { Metadata } from "next";
 import DemoHero from "../components/demo/DemoHero";
 import DemoForm from "../components/demo/DemoForm";
+
+export const metadata: Metadata = {
+  title: "Request a Demo",
+  description:
+    "See Ugle in action. Schedule a walkthrough of our local-first search engine for newsrooms, podcast networks, and media teams.",
+  openGraph: {
+    title: "Request a Demo",
+    description:
+      "See Ugle in action. Schedule a walkthrough of our local-first search engine for newsrooms, podcast networks, and media teams.",
+    url: "/request-demo",
+  },
+};
 
 export default function RequestDemo() {
   return (

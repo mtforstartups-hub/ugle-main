@@ -1,8 +1,21 @@
+import type { Metadata } from "next";
 import { ShieldCheck, EyeOff, FolderOpen, Users } from "lucide-react";
 import GlobalCTA from "../components/GlobalCTA";
 import PageHeader from "../components/sharedpages/PageHeader";
 import Section from "../components/sharedpages/Section";
 import BottomHighlightedSection from "../components/sharedpages/BottomHighlightedSection";
+
+export const metadata: Metadata = {
+  title: "About Us",
+  description:
+    "Learn about Ugle's mission to build 100% private, local-first search tools for journalists, creators, and media professionals.",
+  openGraph: {
+    title: "About Us",
+    description:
+      "Learn about Ugle's mission to build 100% private, local-first search tools for journalists, creators, and media professionals.",
+    url: "/about",
+  },
+};
 
 const philosophyCards = [
   {

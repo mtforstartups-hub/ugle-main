@@ -2,7 +2,7 @@ import PrivacyPolicy from "@/app/markdown/Privacy Policy.md";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Privacy Policy | Ugle",
+  title: "Privacy Policy",
   description:
     "Read the Ugle Privacy Policy. We are committed to protecting your personal information.",
 };

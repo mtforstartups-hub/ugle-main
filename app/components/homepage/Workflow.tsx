@@ -109,9 +109,9 @@ export default function Workflow() {
                 <c.icon className="size-6 text-ugle-slate" />
               </div>
 
-              <h2 className="text-2xl font-bold mb-3 text-ugle-slate">
+              <h3 className="text-2xl font-bold mb-3 text-ugle-slate">
                 {c.title}
-              </h2>
+              </h3>
 
               <p className="text-ugle-gray mb-8 leading-relaxed">{c.desc}</p>
 
