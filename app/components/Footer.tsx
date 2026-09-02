@@ -114,10 +114,10 @@ export default function Footer() {
               Terms of Service
             </Link>
             <Link
-              href="/notice"
+              href="/eula"
               className="text-gray-400 hover:text-white transition-colors font-mono text-xs"
             >
-              Notices
+              EULA
             </Link>
             <FooterCookieButton />
           </div>

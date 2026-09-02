@@ -1,6 +1,6 @@
 # Third-Party Notices
 
-Ugle (`ai.ugle.app`) is proprietary software (see LICENSE and EULA.md). It
+Ugle (`ai.ugle.app`) is proprietary software (see LICENSE and [EULA](/eula)). It
 bundles or downloads the third-party components below. Versions are pinned in
 `scripts/prepare-sidecars.sh` / `scripts/prepare-sidecars.ps1`; this file must
 be updated whenever those pins change.
