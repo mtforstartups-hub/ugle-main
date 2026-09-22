@@ -94,6 +94,9 @@ function IndividualsPanel({
                 <div className="text-[32px] font-extrabold text-ugle-slate tracking-tight leading-none">
                   {price}
                 </div>
+                <span className="text-sm font-medium text-ugle-gray/80">
+                  + tax
+                </span>
               </div>
               {isAnnual && (
                 <div className="text-[12px] text-ugle-gray/55 mt-0.5">
@@ -124,8 +127,8 @@ function IndividualsPanel({
               First-time price:{" "}
               <span className="font-semibold">
                 {fmt(priceConfig.origAnnual, priceConfig)}/year
-              </span>
-              .
+              </span>{" "}
+              + tax.
             </p>
           </div>
         </div>
