@@ -116,20 +116,20 @@ function IndividualsPanel({
 
       {/* Loyalty note — below the card */}
       {isAnnual && (
-        <div className="mt-4 flex items-start gap-3 bg-[#F0F9EA] border border-[#75C043]/30 rounded-xl px-5 py-4">
+        <div className="mt-4 flex items-center gap-3 bg-[#F0F9EA] border border-[#75C043]/30 rounded-xl px-5 py-4">
           <span className="text-[#5DA233] text-lg mt-0.5">&#10022;</span>
           <div>
             <p className="text-sm font-semibold text-ugle-slate">
-              15% Loyalty Discount on every renewal
+              15% Loyalty discount on every renewal
             </p>
-            <p className="text-[13px] text-ugle-gray mt-0.5">
+            {/* <p className="text-[13px] text-ugle-gray mt-0.5">
               Prices shown reflect the loyalty rate for returning subscribers.
               First-time price:{" "}
               <span className="font-semibold">
                 {fmt(priceConfig.origAnnual, priceConfig)}/year
               </span>{" "}
               + tax.
-            </p>
+            </p> */}
           </div>
         </div>
       )}

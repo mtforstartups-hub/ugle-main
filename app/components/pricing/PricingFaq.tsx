@@ -5,7 +5,7 @@ import { motion } from "motion/react";
 const PRICING_FAQS = [
   {
     q: "Is there a free trial?",
-    a: "Yes. 14 days, no file limit, no credit card. At day 14, choose a licence or the app continues in read-only mode — your existing index stays searchable, with no new imports.",
+    a: "Yes. 15 days, no file limit, no credit card. At day 15, choose a licence or the app continues in read-only mode — your existing index stays searchable, with no new imports.",
   },
   {
     q: "What counts as a seat?",
