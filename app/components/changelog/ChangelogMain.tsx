@@ -6,7 +6,7 @@ import { changelogData, ChangelogItem } from "@/app/data/changelog";
 const tagColorMap: Record<string, string> = {
   feature: "text-blue-600",
   improvement: "text-[#75C043]",
-  performance: "text-ugle-gray",
+  performance: "text-purple-400",
   fix: "text-red-500",
   licence: "text-amber-600",
   license: "text-amber-600",
@@ -51,7 +51,7 @@ export default function ChangelogMain() {
                 <span
                   className={`font-mono text-xs w-28 uppercase tracking-wider font-bold shrink-0 pt-1.5 ${getTagClass(
                     item.t,
-                    item.c
+                    item.c,
                   )}`}
                 >
                   {formatTag(item.t)}
