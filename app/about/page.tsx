@@ -4,18 +4,14 @@ import GlobalCTA from "../components/GlobalCTA";
 import PageHeader from "../components/sharedpages/PageHeader";
 import Section from "../components/sharedpages/Section";
 import BottomHighlightedSection from "../components/sharedpages/BottomHighlightedSection";
+import { pageMetadata } from "@/app/lib/seo";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata({
   title: "About Us",
   description:
     "Learn about Ugle's mission to build 100% private, local-first search tools for journalists, creators, and media professionals.",
-  openGraph: {
-    title: "About Us",
-    description:
-      "Learn about Ugle's mission to build 100% private, local-first search tools for journalists, creators, and media professionals.",
-    url: "/about",
-  },
-};
+  path: "/about",
+});
 
 const philosophyCards = [
   {

@@ -11,18 +11,13 @@ import {
   PlayCircle,
   Search,
 } from "lucide-react";
+import { pageMetadata } from "@/app/lib/seo";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata({
   title: "How It Works",
-  description:
-    "See how Ugle indexes your audio and video locally, builds a fast search index, and finds moments in 30ms without uploading files.",
-  openGraph: {
-    title: "How It Works",
-    description:
-      "See how Ugle indexes your audio and video locally, builds a fast search index, and finds moments in 30ms without uploading files.",
-    url: "/how-it-works",
-  },
-};
+  description: "See how Ugle indexes your audio and video locally, builds a fast search index, and finds moments in 30ms without uploading files.",
+  path: "/how-it-works",
+});
 
 export default function page() {
   return (
@@ -287,6 +282,7 @@ export default function page() {
         </div>
 
         <FAQSection
+          pagePath="/how-it-works"
           items={[
             {
               question: "What formats are supported?",

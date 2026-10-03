@@ -2,18 +2,13 @@ import React from "react";
 import type { Metadata } from "next";
 import DemoHero from "../components/demo/DemoHero";
 import DemoForm from "../components/demo/DemoForm";
+import { pageMetadata } from "@/app/lib/seo";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata({
   title: "Request a Demo",
-  description:
-    "See Ugle in action. Schedule a walkthrough of our local-first search engine for newsrooms, podcast networks, and media teams.",
-  openGraph: {
-    title: "Request a Demo",
-    description:
-      "See Ugle in action. Schedule a walkthrough of our local-first search engine for newsrooms, podcast networks, and media teams.",
-    url: "/request-demo",
-  },
-};
+  description: "See Ugle in action. Schedule a walkthrough of our local-first search engine for newsrooms, podcast networks, and media teams.",
+  path: "/request-demo",
+});
 
 export default function RequestDemo() {
   return (

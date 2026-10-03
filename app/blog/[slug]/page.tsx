@@ -7,6 +7,13 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import Image from "next/image";
 import GlobalCTA from "@/app/components/GlobalCTA";
+import BreadcrumbJsonLd from "@/app/components/Seo/BreadcrumbJsonLd";
+import {
+  SITE_URL,
+  absoluteUrl,
+  pageMetadata,
+  serializeJsonLd,
+} from "@/app/lib/seo";
 
 const BLOG_POST_DATA: Record<
   string,
@@ -16,6 +23,8 @@ const BLOG_POST_DATA: Record<
     meta: string;
     tag: string;
     image: string;
+    publishedAt: string;
+    updatedAt: string;
     content: React.ReactNode;
   }
 > = {
@@ -26,6 +35,8 @@ const BLOG_POST_DATA: Record<
     meta: "4 min read",
     tag: "Product philosophy",
     image: "/images/blogs/why-local-first.jpg",
+    publishedAt: "2026-06-25",
+    updatedAt: "2026-07-16",
     content: (
       <>
         <p className="text-[20px] text-ugle-gray leading-[1.55] mb-8">
@@ -82,6 +93,8 @@ const BLOG_POST_DATA: Record<
     meta: "3 min read",
     tag: "Workflow",
     image: "/images/blogs/cost-of-scrubbing.jpg",
+    publishedAt: "2026-06-25",
+    updatedAt: "2026-06-25",
     content: (
       <>
         <p className="text-[20px] text-ugle-gray leading-[1.55] mb-8">
@@ -130,6 +143,8 @@ const BLOG_POST_DATA: Record<
     meta: "5 min read",
     tag: "Product",
     image: "/images/blogs/transcription-accuracy.jpg",
+    publishedAt: "2026-06-25",
+    updatedAt: "2026-06-25",
     content: (
       <>
         <p className="text-[20px] text-ugle-gray leading-[1.55] mb-8">
@@ -233,6 +248,8 @@ const BLOG_POST_DATA: Record<
     meta: "4 min read",
     tag: "Product",
     image: "/images/blogs/languages-supported.png",
+    publishedAt: "2026-06-27",
+    updatedAt: "2026-07-16",
     content: (
       <>
         <p className="text-[20px] text-ugle-gray leading-[1.55] mb-8">
@@ -418,31 +435,22 @@ export async function generateMetadata({
     return {
       title: "Article Not Found",
       description: "The requested blog article could not be found.",
+      robots: { index: false, follow: false },
     };
   }
 
-  return {
+  return pageMetadata({
     title: blogPost.title,
     description: blogPost.description,
-    openGraph: {
-      type: "article",
-      url: `/blog/${slug}`,
-      title: blogPost.title,
-      description: blogPost.description,
-      images: [
-        {
-          url: blogPost.image,
-          alt: blogPost.title,
-        },
-      ],
+    path: `/blog/${slug}`,
+    ogType: "article",
+    socialImage: {
+      url: blogPost.image,
+      alt: blogPost.title,
+      width: 1200,
+      height: 630,
     },
-    twitter: {
-      card: "summary_large_image",
-      title: blogPost.title,
-      description: blogPost.description,
-      images: [blogPost.image],
-    },
-  };
+  });
 }
 
 export default async function page({
@@ -460,29 +468,27 @@ export default async function page({
   const articleJsonLd = {
     "@context": "https://schema.org",
     "@type": "BlogPosting",
-    headline: blogPost.title,
-    description: blogPost.description,
-    image: [`https://ugle.ai${blogPost.image}`],
-    url: `https://ugle.ai/blog/${slug}`,
+    "@id": `${absoluteUrl(`/blog/${slug}`)}#article`,
     mainEntityOfPage: {
       "@type": "WebPage",
-      "@id": `https://ugle.ai/blog/${slug}`,
+      "@id": absoluteUrl(`/blog/${slug}`),
     },
-    articleSection: blogPost.tag,
+    headline: blogPost.title,
+    description: blogPost.description,
+    image: [`${absoluteUrl(blogPost.image)}`],
+    url: absoluteUrl(`/blog/${slug}`),
+    datePublished: blogPost.publishedAt,
+    dateModified: blogPost.updatedAt,
     inLanguage: "en-US",
+    articleSection: blogPost.tag,
+    isAccessibleForFree: true,
     author: {
       "@type": "Organization",
       name: "Ugle",
-      url: "https://ugle.ai",
+      url: SITE_URL,
     },
     publisher: {
-      "@type": "Organization",
-      name: "Ugle",
-      url: "https://ugle.ai",
-      logo: {
-        "@type": "ImageObject",
-        url: "https://ugle.ai/Ugle%20Logo.png",
-      },
+      "@id": `${SITE_URL}/#organization`,
     },
   };
 
@@ -490,9 +496,14 @@ export default async function page({
     <>
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{
-          __html: JSON.stringify(articleJsonLd).replace(/</g, "\\u003c"),
-        }}
+        dangerouslySetInnerHTML={{ __html: serializeJsonLd(articleJsonLd) }}
+      />
+      <BreadcrumbJsonLd
+        items={[
+          { name: "Home", href: "/" },
+          { name: "Blog", href: "/blog" },
+          { name: blogPost.title, href: `/blog/${slug}` },
+        ]}
       />
       <div className="max-w-3xl mx-auto px-6 py-20 pb-32">
         <Link

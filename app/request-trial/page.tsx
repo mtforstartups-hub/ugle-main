@@ -1,18 +1,13 @@
 import type { Metadata } from "next";
 import GetAccessHero from "../components/getaccess/GetAccessHero";
 import GetAccessForm from "../components/getaccess/GetAccessForm";
+import { pageMetadata } from "@/app/lib/seo";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata({
   title: "Request Trial",
-  description:
-    "Apply for early access to Ugle. Experience local-first, lightning-fast audio and video search on your own machine.",
-  openGraph: {
-    title: "Request Trial",
-    description:
-      "Apply for early access to Ugle. Experience local-first, lightning-fast audio and video search on your own machine.",
-    url: "/request-trial",
-  },
-};
+  description: "Apply for early access to Ugle. Experience local-first, lightning-fast audio and video search on your own machine.",
+  path: "/request-trial",
+});
 
 export default function GetEarlyAccess() {
   return (

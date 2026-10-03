@@ -1,11 +1,13 @@
 import PrivacyPolicy from "@/app/markdown/Privacy Policy.md";
 import type { Metadata } from "next";
+import { pageMetadata } from "@/app/lib/seo";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata({
   title: "Privacy Policy",
   description:
     "Read the Ugle Privacy Policy. We are committed to protecting your personal information.",
-};
+  path: "/privacy-policy",
+});
 
 export default function PrivacyPolicyPage() {
   return <PrivacyPolicy />;

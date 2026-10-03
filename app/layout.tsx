@@ -8,6 +8,13 @@ import ScrollToTop from "./components/ScrollToTop";
 import GoogleConsentManager from "./components/cookie/GoogleConsentManager";
 import { CookieConsentProvider } from "./context/CookieConsentContext";
 import CookieManager from "./components/cookie/CookieManager";
+import {
+  OG_DEFAULTS,
+  OG_IMAGES,
+  SITE_URL,
+  TWITTER_DEFAULTS,
+  serializeJsonLd,
+} from "@/app/lib/seo";
 
 const manrope = Manrope({
   variable: "--font-sans",
@@ -45,47 +52,28 @@ const sfMono = localFont({
   variable: "--font-mono",
 });
 
+const HOME_TITLE = "Ugle | Local-First Media Search";
+const HOME_DESCRIPTION =
+  "Find the exact moment inside any recording, locally on your machine, with no uploads and no cloud.";
+
 export const metadata: Metadata = {
-  metadataBase: new URL("https://ugle.ai"),
+  metadataBase: new URL(SITE_URL),
   title: {
-    default: "Ugle | Local-First Media Search",
+    default: HOME_TITLE,
     template: "%s | Ugle",
   },
-  description:
-    "Find the exact moment inside any recording, locally on your machine, with no uploads and no cloud.",
+  description: HOME_DESCRIPTION,
   openGraph: {
-    type: "website",
-    locale: "en_US",
-    url: "https://ugle.ai",
-    siteName: "Ugle",
-    title: "Ugle | Local-First Media Search",
-    description:
-      "Find the exact moment inside any recording, locally on your machine, with no uploads and no cloud.",
-    images: [
-      {
-        url: "/ugle-icon.png",
-        width: 800,
-        height: 800,
-        alt: "Ugle - Local-First Media Search",
-      },
-      {
-        url: "/UgleOGImage.png",
-        width: 1200,
-        height: 630,
-        alt: "Ugle - Local-First Media Search",
-      },
-    ],
+    ...OG_DEFAULTS,
+    url: "/",
+    title: HOME_TITLE,
+    description: HOME_DESCRIPTION,
+    images: OG_IMAGES,
   },
   twitter: {
-    card: "summary_large_image",
-    title: "Ugle | Local-First Media Search",
-    description:
-      "Find the exact moment inside any recording, locally on your machine, with no uploads and no cloud.",
-    images: ["/UgleOGImage.png"],
-  },
-  other: {
-    rel: "preconnect",
-    url: "https://challenges.cloudflare.com",
+    ...TWITTER_DEFAULTS,
+    title: HOME_TITLE,
+    description: HOME_DESCRIPTION,
   },
 };
 
@@ -94,10 +82,10 @@ const jsonLd = {
   "@graph": [
     {
       "@type": "Organization",
-      "@id": "https://ugle.ai/#organization",
+      "@id": `${SITE_URL}/#organization`,
       name: "Ugle",
-      url: "https://ugle.ai",
-      logo: "https://ugle.ai/Ugle%20Logo.png",
+      url: SITE_URL,
+      logo: `${SITE_URL}/Ugle%20Logo.png`,
       description:
         "The local-first search application for media professionals.",
       contactPoint: {
@@ -108,31 +96,23 @@ const jsonLd = {
     },
     {
       "@type": "WebSite",
-      "@id": "https://ugle.ai/#website",
-      url: "https://ugle.ai",
+      "@id": `${SITE_URL}/#website`,
+      url: SITE_URL,
       name: "Ugle",
-      description:
-        "Find the exact moment inside any recording, locally on your machine, with no uploads and no cloud.",
+      description: HOME_DESCRIPTION,
       publisher: {
-        "@id": "https://ugle.ai/#organization",
+        "@id": `${SITE_URL}/#organization`,
       },
     },
     {
       "@type": "SoftwareApplication",
-      "@id": "https://ugle.ai/#software",
+      "@id": `${SITE_URL}/#software`,
       name: "Ugle",
       operatingSystem: "macOS 12+, Windows 10+ 64-bit",
       applicationCategory: "MultimediaApplication",
-      description:
-        "Find the exact moment inside any recording, locally on your machine, with no uploads and no cloud.",
-      url: "https://ugle.ai",
-      image: "https://ugle.ai/ugle-icon.png",
-      offers: {
-        "@type": "Offer",
-        price: "20.00",
-        priceCurrency: "USD",
-        url: "https://ugle.ai/pricing",
-      },
+      description: HOME_DESCRIPTION,
+      url: SITE_URL,
+      image: `${SITE_URL}/ugle-icon.png`,
       featureList: [
         "On-device local transcription",
         "Sub-30ms search across media archives",
@@ -155,6 +135,7 @@ export default function RootLayout({
       className={`${manrope.variable} ${sfMono.variable} h-full antialiased`}
     >
       <head>
+        <link rel="preconnect" href="https://challenges.cloudflare.com" />
         <GoogleConsentManager gtmId="GTM-53P7CN9X" />
       </head>
       <body className="min-h-full flex flex-col">
@@ -167,9 +148,7 @@ export default function RootLayout({
         </CookieConsentProvider>
         <script
           type="application/ld+json"
-          dangerouslySetInnerHTML={{
-            __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c"),
-          }}
+          dangerouslySetInnerHTML={{ __html: serializeJsonLd(jsonLd) }}
         />
       </body>
     </html>

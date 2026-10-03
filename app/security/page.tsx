@@ -2,18 +2,13 @@ import React from "react";
 import type { Metadata } from "next";
 import PageHeader from "../components/sharedpages/PageHeader";
 import SecurityMain from "../components/security/SecurityMain";
+import { pageMetadata } from "@/app/lib/seo";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata({
   title: "Security & Privacy",
-  description:
-    "Learn about Ugle's local-first security architecture. 100% on-device processing, zero telemetry, and no cloud uploads.",
-  openGraph: {
-    title: "Security & Privacy",
-    description:
-      "Learn about Ugle's local-first security architecture. 100% on-device processing, zero telemetry, and no cloud uploads.",
-    url: "/security",
-  },
-};
+  description: "Learn about Ugle's local-first security architecture. 100% on-device processing, zero telemetry, and no cloud uploads.",
+  path: "/security",
+});
 
 export default function Security() {
   return (

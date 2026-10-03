@@ -1,136 +1,68 @@
 import type { MetadataRoute } from "next";
+import { SITE_URL } from "@/app/lib/seo";
 
-const BASE_URL = "https://ugle.ai";
+type RouteEntry = {
+  lastModified: string;
+  changeFrequency: MetadataRoute.Sitemap[number]["changeFrequency"];
+  priority: number;
+};
+
+const STATIC_ROUTES: Record<string, RouteEntry> = {
+  "": { lastModified: "2026-09-16", changeFrequency: "monthly", priority: 1.0 },
+  "/about": { lastModified: "2026-08-24", changeFrequency: "monthly", priority: 0.8 },
+  "/how-it-works": { lastModified: "2026-08-24", changeFrequency: "monthly", priority: 0.8 },
+  "/pricing": { lastModified: "2026-09-16", changeFrequency: "monthly", priority: 0.8 },
+  "/use-cases": { lastModified: "2026-07-16", changeFrequency: "monthly", priority: 0.7 },
+  "/education": { lastModified: "2026-08-24", changeFrequency: "monthly", priority: 0.7 },
+  "/blog": { lastModified: "2026-09-16", changeFrequency: "weekly", priority: 0.7 },
+  "/changelog": { lastModified: "2026-09-16", changeFrequency: "weekly", priority: 0.6 },
+  "/download": { lastModified: "2026-08-24", changeFrequency: "monthly", priority: 0.6 },
+  "/request-trial": { lastModified: "2026-09-16", changeFrequency: "monthly", priority: 0.6 },
+  "/request-demo": { lastModified: "2026-08-24", changeFrequency: "monthly", priority: 0.6 },
+  "/contact": { lastModified: "2026-08-24", changeFrequency: "yearly", priority: 0.5 },
+  "/security": { lastModified: "2026-08-24", changeFrequency: "yearly", priority: 0.4 },
+  "/privacy-policy": { lastModified: "2026-08-24", changeFrequency: "yearly", priority: 0.3 },
+  "/terms": { lastModified: "2026-08-24", changeFrequency: "yearly", priority: 0.3 },
+  "/eula": { lastModified: "2026-08-24", changeFrequency: "yearly", priority: 0.3 },
+  "/notice": { lastModified: "2026-08-24", changeFrequency: "yearly", priority: 0.3 },
+};
 
 // Blog post slugs — keep in sync with BLOG_POST_DATA in app/blog/[slug]/page.tsx
-const BLOG_SLUGS = [
-  "why-local-first",
-  "cost-of-scrubbing-timelines",
-  "what-transcription-accuracy-means",
-  "languages-supported",
-] as const;
+const BLOG_ROUTES: Record<string, RouteEntry> = {
+  "why-local-first": { lastModified: "2026-07-16", changeFrequency: "monthly", priority: 0.6 },
+  "cost-of-scrubbing-timelines": { lastModified: "2026-06-25", changeFrequency: "monthly", priority: 0.6 },
+  "what-transcription-accuracy-means": { lastModified: "2026-06-25", changeFrequency: "monthly", priority: 0.6 },
+  "languages-supported": { lastModified: "2026-07-16", changeFrequency: "monthly", priority: 0.6 },
+};
 
 // Use-case slugs — keep in sync with generateStaticParams in app/use-cases/[slug]/page.tsx
-const USE_CASE_SLUGS = ["newsrooms", "podcasts", "journalists"] as const;
+const USE_CASE_ROUTES: Record<string, RouteEntry> = {
+  newsrooms: { lastModified: "2026-07-16", changeFrequency: "monthly", priority: 0.7 },
+  podcasts: { lastModified: "2026-07-16", changeFrequency: "monthly", priority: 0.7 },
+  journalists: { lastModified: "2026-07-16", changeFrequency: "monthly", priority: 0.7 },
+};
+
+function toEntry(path: string, route: RouteEntry): MetadataRoute.Sitemap[number] {
+  return {
+    url: `${SITE_URL}${path}`,
+    lastModified: new Date(route.lastModified),
+    changeFrequency: route.changeFrequency,
+    priority: route.priority,
+  };
+}
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const now = new Date();
+  const staticRoutes = Object.entries(STATIC_ROUTES).map(([path, route]) =>
+    toEntry(path, route)
+  );
 
-  // ── Static routes ──────────────────────────────────────────────────────────
-  const staticRoutes: MetadataRoute.Sitemap = [
-    {
-      url: BASE_URL,
-      lastModified: now,
-      changeFrequency: "monthly",
-      priority: 1.0,
-    },
-    {
-      url: `${BASE_URL}/about`,
-      lastModified: now,
-      changeFrequency: "monthly",
-      priority: 0.8,
-    },
-    {
-      url: `${BASE_URL}/how-it-works`,
-      lastModified: now,
-      changeFrequency: "monthly",
-      priority: 0.8,
-    },
-    {
-      url: `${BASE_URL}/pricing`,
-      lastModified: now,
-      changeFrequency: "monthly",
-      priority: 0.8,
-    },
-    {
-      url: `${BASE_URL}/use-cases`,
-      lastModified: now,
-      changeFrequency: "monthly",
-      priority: 0.7,
-    },
-    {
-      url: `${BASE_URL}/education`,
-      lastModified: now,
-      changeFrequency: "monthly",
-      priority: 0.7,
-    },
-    {
-      url: `${BASE_URL}/blog`,
-      lastModified: now,
-      changeFrequency: "weekly",
-      priority: 0.7,
-    },
-    {
-      url: `${BASE_URL}/changelog`,
-      lastModified: now,
-      changeFrequency: "weekly",
-      priority: 0.6,
-    },
-    {
-      url: `${BASE_URL}/download`,
-      lastModified: now,
-      changeFrequency: "monthly",
-      priority: 0.6,
-    },
-    {
-      url: `${BASE_URL}/request-trial`,
-      lastModified: now,
-      changeFrequency: "monthly",
-      priority: 0.6,
-    },
-    {
-      url: `${BASE_URL}/request-demo`,
-      lastModified: now,
-      changeFrequency: "monthly",
-      priority: 0.6,
-    },
-    {
-      url: `${BASE_URL}/contact`,
-      lastModified: now,
-      changeFrequency: "yearly",
-      priority: 0.5,
-    },
-    {
-      url: `${BASE_URL}/security`,
-      lastModified: now,
-      changeFrequency: "yearly",
-      priority: 0.4,
-    },
-    {
-      url: `${BASE_URL}/privacy-policy`,
-      lastModified: now,
-      changeFrequency: "yearly",
-      priority: 0.3,
-    },
-    {
-      url: `${BASE_URL}/terms`,
-      lastModified: now,
-      changeFrequency: "yearly",
-      priority: 0.3,
-    },
-    {
-      url: `${BASE_URL}/notice`,
-      lastModified: now,
-      changeFrequency: "monthly",
-      priority: 0.3,
-    },
-  ];
+  const blogRoutes = Object.entries(BLOG_ROUTES).map(([slug, route]) =>
+    toEntry(`/blog/${slug}`, route)
+  );
 
-  // ── Blog posts ─────────────────────────────────────────────────────────────
-  const blogRoutes: MetadataRoute.Sitemap = BLOG_SLUGS.map((slug) => ({
-    url: `${BASE_URL}/blog/${slug}`,
-    lastModified: now,
-    changeFrequency: "monthly",
-    priority: 0.6,
-  }));
-
-  // ── Use-case pages ─────────────────────────────────────────────────────────
-  const useCaseRoutes: MetadataRoute.Sitemap = USE_CASE_SLUGS.map((slug) => ({
-    url: `${BASE_URL}/use-cases/${slug}`,
-    lastModified: now,
-    changeFrequency: "monthly",
-    priority: 0.7,
-  }));
+  const useCaseRoutes = Object.entries(USE_CASE_ROUTES).map(([slug, route]) =>
+    toEntry(`/use-cases/${slug}`, route)
+  );
 
   return [...staticRoutes, ...blogRoutes, ...useCaseRoutes];
 }

@@ -1,6 +1,7 @@
 "use client";
 
 import { motion } from "motion/react";
+import { absoluteUrl, serializeJsonLd } from "@/app/lib/seo";
 
 const PRICING_FAQS = [
   {
@@ -62,9 +63,11 @@ export default function PricingFaq() {
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
-          __html: JSON.stringify({
+          __html: serializeJsonLd({
             "@context": "https://schema.org",
             "@type": "FAQPage",
+            "@id": `${absoluteUrl("/pricing")}#faq`,
+            url: absoluteUrl("/pricing"),
             mainEntity: PRICING_FAQS.map((item) => ({
               "@type": "Question",
               name: item.q,

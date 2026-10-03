@@ -2,18 +2,13 @@ import type { Metadata } from "next";
 import { GraduationCap } from "lucide-react";
 import EducationForm from "../components/EducationForm";
 import GlobalCTA from "../components/GlobalCTA";
+import { pageMetadata } from "@/app/lib/seo";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata({
   title: "Educational Access",
-  description:
-    "Apply for free educational access to Ugle. Available for students, researchers, and journalism instructors.",
-  openGraph: {
-    title: "Educational Access",
-    description:
-      "Apply for free educational access to Ugle. Available for students, researchers, and journalism instructors.",
-    url: "/education",
-  },
-};
+  description: "Apply for free educational access to Ugle. Available for students, researchers, and journalism instructors.",
+  path: "/education",
+});
 
 export default function page() {
   return (

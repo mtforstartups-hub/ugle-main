@@ -2,11 +2,14 @@
 import { ChevronDown } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import React from "react";
+import { absoluteUrl, serializeJsonLd } from "@/app/lib/seo";
 
 export const FAQSection = ({
   items,
+  pagePath,
 }: {
   items: { question: string; answer: string }[];
+  pagePath: string;
 }) => {
   const [openIndex, setOpenIndex] = React.useState<number | null>(null);
 
@@ -53,9 +56,11 @@ export const FAQSection = ({
         type="application/ld+json"
         suppressHydrationWarning
         dangerouslySetInnerHTML={{
-          __html: JSON.stringify({
+          __html: serializeJsonLd({
             "@context": "https://schema.org",
             "@type": "FAQPage",
+            "@id": `${absoluteUrl(pagePath)}#faq`,
+            url: absoluteUrl(pagePath),
             mainEntity: items.map((item) => ({
               "@type": "Question",
               name: item.question,
