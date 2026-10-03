@@ -10,6 +10,8 @@ import GlobalCTA from "@/app/components/GlobalCTA";
 import { FAQSection } from "@/app/components/sharedpages/FAQSection";
 import AnimatedWorkflowList from "@/app/components/usecase/AnimatedWorkflowList";
 import AnimatedPairedWorkflow from "@/app/components/usecase/AnimatedPairedWorkflow";
+import BreadcrumbJsonLd from "@/app/components/Seo/BreadcrumbJsonLd";
+import { pageMetadata } from "@/app/lib/seo";
 
 export function generateStaticParams() {
   return [{ slug: "newsrooms" }, { slug: "podcasts" }, { slug: "journalists" }];
@@ -121,6 +123,7 @@ const USE_CASE_DATA: Record<
         </div>
 
         <FAQSection
+          pagePath="/use-cases/newsrooms"
           items={[
             {
               question: "Is it secure for unreleased news footage?",
@@ -196,6 +199,7 @@ const USE_CASE_DATA: Record<
         />
 
         <FAQSection
+          pagePath="/use-cases/podcasts"
           items={[
             {
               question: "Can Ugle handle hundreds of episodes?",
@@ -311,6 +315,7 @@ const USE_CASE_DATA: Record<
         </div>
 
         <FAQSection
+          pagePath="/use-cases/journalists"
           items={[
             {
               question: "Are my recordings safe from subpoenas against Ugle?",
@@ -355,35 +360,23 @@ export async function generateMetadata({
     return {
       title: "Use Case Not Found",
       description: "The requested use case could not be found.",
+      robots: { index: false, follow: false },
     };
   }
 
   const pageTitle = `${useCase.badge} — ${useCase.title}`;
 
-  return {
+  return pageMetadata({
     title: pageTitle,
     description: useCase.description,
-    openGraph: {
-      type: "website",
-      url: `/use-cases/${slug}`,
-      title: pageTitle,
-      description: useCase.description,
-      images: [
-        {
-          url: useCase.image.src,
-          width: 1200,
-          height: 630,
-          alt: useCase.image.alt,
-        },
-      ],
+    path: `/use-cases/${slug}`,
+    socialImage: {
+      url: useCase.image.src,
+      alt: useCase.image.alt,
+      width: 1200,
+      height: 630,
     },
-    twitter: {
-      card: "summary_large_image",
-      title: pageTitle,
-      description: useCase.description,
-      images: [useCase.image.src],
-    },
-  };
+  });
 }
 
 export default async function UseCasePage({
@@ -400,6 +393,13 @@ export default async function UseCasePage({
 
   return (
     <>
+      <BreadcrumbJsonLd
+        items={[
+          { name: "Home", href: "/" },
+          { name: "Use Cases", href: "/use-cases" },
+          { name: useCase.title, href: `/use-cases/${slug}` },
+        ]}
+      />
       <div className="max-w-4xl mx-auto px-6 pt-12">
         <Link
           href="/use-cases"

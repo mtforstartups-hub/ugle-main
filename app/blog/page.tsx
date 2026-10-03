@@ -2,18 +2,13 @@ import type { Metadata } from "next";
 import BlogHero from "../components/blog/BlogHero";
 import BlogList from "../components/blog/BlogList";
 import GlobalCTA from "../components/GlobalCTA";
+import { pageMetadata } from "@/app/lib/seo";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata({
   title: "Blog",
-  description:
-    "Insights, philosophy, and technical deep-dives into local-first audio search, on-device AI transcription, and privacy-first media workflows.",
-  openGraph: {
-    title: "Blog",
-    description:
-      "Insights, philosophy, and technical deep-dives into local-first audio search, on-device AI transcription, and privacy-first media workflows.",
-    url: "/blog",
-  },
-};
+  description: "Insights, philosophy, and technical deep-dives into local-first audio search, on-device AI transcription, and privacy-first media workflows.",
+  path: "/blog",
+});
 
 export default function page() {
   return (
