@@ -422,8 +422,8 @@ const BLOG_POST_DATA: Record<
     meta: "4 min read",
     tag: "Workflow",
     image: "/images/blogs/find-quote-in-video.png",
-    publishedAt: "2026-10-05",
-    updatedAt: "2026-10-05",
+    publishedAt: "2026-09-28",
+    updatedAt: "2026-09-28",
     content: (
       <>
         <p className="text-[20px] text-ugle-gray leading-[1.55] mb-6">
@@ -584,8 +584,8 @@ const BLOG_POST_DATA: Record<
     meta: "4 min read",
     tag: "Workflow",
     image: "/images/blogs/search-across-multiple-audio-recordings.png",
-    publishedAt: "2026-10-05",
-    updatedAt: "2026-10-05",
+    publishedAt: "2026-09-23",
+    updatedAt: "2026-09-23",
     content: (
       <>
         <p className="text-[20px] text-ugle-gray leading-[1.55] mb-6">
@@ -713,8 +713,8 @@ const BLOG_POST_DATA: Record<
     meta: "4 min read",
     tag: "Workflow",
     image: "/images/blogs/search-podcast-back-catalogue.png",
-    publishedAt: "2026-10-05",
-    updatedAt: "2026-10-05",
+    publishedAt: "2026-09-18",
+    updatedAt: "2026-09-18",
     content: (
       <>
         <p className="text-[20px] text-ugle-gray leading-[1.55] mb-6">
@@ -839,8 +839,8 @@ const BLOG_POST_DATA: Record<
     meta: "5 min read",
     tag: "Journalism",
     image: "/images/blogs/search-journalist-interview-recordings-locally.png",
-    publishedAt: "2026-10-05",
-    updatedAt: "2026-10-05",
+    publishedAt: "2026-09-13",
+    updatedAt: "2026-09-13",
     content: (
       <>
         <p className="text-[20px] text-ugle-gray leading-[1.55] mb-6">
@@ -976,8 +976,8 @@ const BLOG_POST_DATA: Record<
     meta: "4 min read",
     tag: "Product",
     image: "/images/blogs/keyword-search-vs-semantic-search.png",
-    publishedAt: "2026-10-05",
-    updatedAt: "2026-10-05",
+    publishedAt: "2026-09-08",
+    updatedAt: "2026-09-08",
     content: (
       <>
         <p className="text-[20px] text-ugle-gray leading-[1.55] mb-4">
@@ -1104,8 +1104,8 @@ const BLOG_POST_DATA: Record<
     meta: "4 min read",
     tag: "Newsrooms",
     image: "/images/blogs/find-archive-soundbite-news-segment.jpg",
-    publishedAt: "2026-10-05",
-    updatedAt: "2026-10-05",
+    publishedAt: "2026-09-03",
+    updatedAt: "2026-09-03",
     content: (
       <>
         <p className="text-[20px] text-ugle-gray leading-[1.55] mb-6">
@@ -1217,8 +1217,8 @@ const BLOG_POST_DATA: Record<
     meta: "5 min read",
     tag: "Product philosophy",
     image: "/images/blogs/local-vs-cloud-media-search.png",
-    publishedAt: "2026-10-05",
-    updatedAt: "2026-10-05",
+    publishedAt: "2026-08-29",
+    updatedAt: "2026-08-29",
     content: (
       <>
         <p className="text-[20px] text-ugle-gray leading-[1.55] mb-6">
@@ -1335,8 +1335,8 @@ const BLOG_POST_DATA: Record<
     meta: "5 min read",
     tag: "Workflow",
     image: "/images/blogs/build-searchable-interview-archive.png",
-    publishedAt: "2026-10-05",
-    updatedAt: "2026-10-05",
+    publishedAt: "2026-08-24",
+    updatedAt: "2026-08-24",
     content: (
       <>
         <p className="text-[20px] text-ugle-gray leading-[1.55] mb-6">
@@ -1451,8 +1451,8 @@ const BLOG_POST_DATA: Record<
     meta: "4 min read",
     tag: "Workflow",
     image: "/images/blogs/verify-quote-against-original-recording.png",
-    publishedAt: "2026-10-05",
-    updatedAt: "2026-10-05",
+    publishedAt: "2026-08-19",
+    updatedAt: "2026-08-19",
     content: (
       <>
         <p className="text-[20px] text-ugle-gray leading-[1.55] mb-6">
@@ -1553,8 +1553,8 @@ const BLOG_POST_DATA: Record<
     meta: "5 min read",
     tag: "Product",
     image: "/images/blogs/transcription-search-quality-recorded-media.jpg",
-    publishedAt: "2026-10-05",
-    updatedAt: "2026-10-05",
+    publishedAt: "2026-08-14",
+    updatedAt: "2026-08-14",
     content: (
       <>
         <p className="text-[20px] text-ugle-gray leading-[1.55] mb-6">
@@ -1672,8 +1672,8 @@ const BLOG_POST_DATA: Record<
     meta: "6 min read",
     tag: "Comparison",
     image: "/images/blogs/evaluate-media-search-software.jpg",
-    publishedAt: "2026-10-05",
-    updatedAt: "2026-10-05",
+    publishedAt: "2026-08-09",
+    updatedAt: "2026-08-09",
     content: (
       <>
         <p className="text-[20px] text-ugle-gray leading-[1.55] mb-6">
@@ -1803,8 +1803,8 @@ const BLOG_POST_DATA: Record<
     meta: "4 min read",
     tag: "Workflow",
     image: "/images/blogs/retrieved-interview-passage-to-clip.jpg",
-    publishedAt: "2026-10-05",
-    updatedAt: "2026-10-05",
+    publishedAt: "2026-08-04",
+    updatedAt: "2026-08-04",
     content: (
       <>
         <p className="text-[20px] text-ugle-gray leading-[1.55] mb-6">
@@ -1936,6 +1936,17 @@ export async function generateMetadata({
   });
 }
 
+function formatDate(dateStr: string) {
+  const [year, month, day] = dateStr.split("-").map(Number);
+  const date = new Date(Date.UTC(year, month - 1, day));
+  return date.toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+    timeZone: "UTC",
+  });
+}
+
 export default async function page({
   params,
 }: {
@@ -1996,11 +2007,24 @@ export default async function page({
           <ArrowRight className="w-4 h-4 mr-2 rotate-180" strokeWidth={2.5} />{" "}
           Back to Blog
         </Link>
-        <div className="text-[13px] font-mono text-ugle-gray mb-3 flex items-center gap-2">
+        <div className="text-[13px] font-mono text-ugle-gray mb-3 flex flex-wrap items-center gap-2.5">
           <span className="inline-block bg-[#75C043]/10 text-[#5DA233] text-[11px] font-mono font-bold uppercase tracking-wider px-2.5 py-1 rounded-full">
             {blogPost.tag}
           </span>
+          <span className="text-ugle-gray/40">•</span>
           <span>{blogPost.meta}</span>
+          <span className="text-ugle-gray/40">•</span>
+          <time dateTime={blogPost.publishedAt}>
+            {formatDate(blogPost.publishedAt)}
+          </time>
+          {blogPost.updatedAt && blogPost.updatedAt !== blogPost.publishedAt && (
+            <>
+              <span className="text-ugle-gray/40">•</span>
+              <span className="text-ugle-gray/70">
+                Updated <time dateTime={blogPost.updatedAt}>{formatDate(blogPost.updatedAt)}</time>
+              </span>
+            </>
+          )}
         </div>
         <h1 className="text-[36px] md:text-[46px] font-extrabold tracking-[-0.02em] mb-10 text-ugle-slate leading-[1.1]">
           {blogPost.title}
