@@ -115,7 +115,7 @@ const blogItems = [
     desc: "Turn a growing folder of interview recordings into a searchable archive that lets you retrieve topics, quotes and source Moments later.",
     meta: "5 min read",
     tag: "Workflow",
-    image: "/images/blogs/build-searchable-interview-archive.png",
+    image: "/images/blogs/build-searchable-interview-archive.jpg",
   },
   {
     path: "/blog/verify-quote-against-original-recording",

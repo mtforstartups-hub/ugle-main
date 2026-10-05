@@ -1334,7 +1334,7 @@ const BLOG_POST_DATA: Record<
       "Turn a growing folder of interview recordings into a searchable archive that lets you retrieve topics, quotes and source Moments later.",
     meta: "5 min read",
     tag: "Workflow",
-    image: "/images/blogs/build-searchable-interview-archive.png",
+    image: "/images/blogs/build-searchable-interview-archive.jpg",
     publishedAt: "2026-08-24",
     updatedAt: "2026-08-24",
     content: (
@@ -2017,14 +2017,18 @@ export default async function page({
           <time dateTime={blogPost.publishedAt}>
             {formatDate(blogPost.publishedAt)}
           </time>
-          {blogPost.updatedAt && blogPost.updatedAt !== blogPost.publishedAt && (
-            <>
-              <span className="text-ugle-gray/40">•</span>
-              <span className="text-ugle-gray/70">
-                Updated <time dateTime={blogPost.updatedAt}>{formatDate(blogPost.updatedAt)}</time>
-              </span>
-            </>
-          )}
+          {blogPost.updatedAt &&
+            blogPost.updatedAt !== blogPost.publishedAt && (
+              <>
+                <span className="text-ugle-gray/40">•</span>
+                <span className="text-ugle-gray/70">
+                  Updated{" "}
+                  <time dateTime={blogPost.updatedAt}>
+                    {formatDate(blogPost.updatedAt)}
+                  </time>
+                </span>
+              </>
+            )}
         </div>
         <h1 className="text-[36px] md:text-[46px] font-extrabold tracking-[-0.02em] mb-10 text-ugle-slate leading-[1.1]">
           {blogPost.title}
