@@ -21,6 +21,88 @@ export interface ChangelogRelease {
 
 export const changelogData: ChangelogRelease[] = [
   {
+    v: "v0.6.0",
+    date: "October 6, 2026",
+    items: [
+      {
+        t: "Improvement",
+        text: "Installer is now ~192 MB (was ~1.1 GB): the transcription and search models download on first launch, with the exact size shown first, pause/resume, and automatic fallback to Hugging Face if our server is unreachable. Existing installs download nothing. If a model goes missing, Ugle still opens your library and offers to re-download it.",
+      },
+      {
+        t: "Licence",
+        text: "Activating a licence now asks you to agree to the EULA, with links to the EULA and third-party notices (both open offline). The EULA is now version 1.0: a one-year licence with no auto-renewal.",
+      },
+      {
+        t: "Fix",
+        text: "Changing your media folder no longer deletes your library. Ugle now asks whether to keep the files already indexed (the default) or delete them, and files on disk are never touched. If you moved your media, Keep carries your transcripts, edits and speaker names over to the new location.",
+      },
+      {
+        t: "Fix",
+        text: "Renaming or moving a file no longer re-transcribes it — it keeps its transcript, edits, speaker names and multitrack session. Moving a file while keeping an identical copy reuses the transcript for both.",
+      },
+      {
+        t: "Fix",
+        text: "An unplugged drive inside another library folder no longer loses its transcripts; they are kept until the drive comes back.",
+      },
+      {
+        t: "Fix",
+        text: "Refresh Transcript works again (broken since 0.5.5), and Identify Speakers no longer leaves a copy of the audio on disk.",
+      },
+      {
+        t: "Fix",
+        text: "Ugle refuses a system folder or your whole home folder as the media folder.",
+      },
+      {
+        t: "Fix",
+        text: "Stop indexing now also stops the file scan.",
+      },
+      {
+        t: "Fix",
+        text: "In a multitrack session, a result previews the track the words came from, not the session's first file.",
+      },
+      {
+        t: "Fix",
+        text: "Premiere and Final Cut exports relink files with `#` or `?` in their name.",
+      },
+      {
+        t: "Fix",
+        text: "Hindi, Chinese and other non-Latin transcripts no longer lose real speech to the repetition filter.",
+      },
+      {
+        t: "Fix",
+        text: "Warnings are readable in both light and dark mode.",
+      },
+      {
+        t: "Fix",
+        text: "No more suggestion chips that find nothing while your first index is running.",
+      },
+      {
+        t: "Fix",
+        text: "Notifications (\"Transcript refreshed\", save confirmations, error messages) are visible again.",
+      },
+      {
+        t: "Fix",
+        text: "A moved or deleted original now says so in preview and clip export, and \"Open in player\" is greyed out for it.",
+      },
+      {
+        t: "Fix",
+        text: "Library and licence problems show an error with a Retry button instead of an empty screen.",
+      },
+      {
+        t: "Fix",
+        text: "Your search and results survive a visit to the Library; a failed search no longer also shows \"No matches found\"; an open preview recovers if its cached clip was cleared.",
+      },
+      {
+        t: "Improvement",
+        text: "\"Open in player\" opens the whole file in your default media player instead of preferring VLC.",
+      },
+      {
+        t: "Improvement",
+        text: "Support bundles, logs and the feedback email no longer show your username, media folder names or drive names.",
+      },
+    ],
+  },
+  {
     v: "v0.5.9",
     date: "September 14, 2026",
     items: [
