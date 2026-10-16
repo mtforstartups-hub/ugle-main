@@ -2,6 +2,7 @@ import { CheckCircle2, XCircle, Info } from "lucide-react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
+import { canonicalFor } from "@/app/lib/seo";
 
 export function generateStaticParams() {
   return [{ status: "success" }, { status: "failed" }, { status: "cancelled" }];
@@ -46,6 +47,7 @@ export async function generateMetadata({
   return {
     title: data.title,
     description: data.description,
+    alternates: canonicalFor(`/payment/${status}`),
     robots: { index: false, follow: false },
   };
 }

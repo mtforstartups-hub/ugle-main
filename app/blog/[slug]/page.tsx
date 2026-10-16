@@ -596,8 +596,14 @@ const BLOG_POST_DATA: Record<
         </p>
         <p>
           You may know that someone discussed a subject somewhere in your
-          interviews, meetings or podcast recordings without remembering which
-          file contains it.
+          interviews, meetings or{" "}
+          <Link
+            href="/use-cases"
+            className="text-[#5DA233] font-semibold hover:underline"
+          >
+            podcast recordings
+          </Link>{" "}
+          without remembering which file contains it.
         </p>
         <p>Opening files one by one does not scale.</p>
 
@@ -613,8 +619,15 @@ const BLOG_POST_DATA: Record<
           inside the recordings.
         </p>
         <p>
-          With Ugle, audio is indexed locally so a search can run across the
-          indexed Library rather than one file at a time.
+          With Ugle,{" "}
+          <Link
+            href="/how-it-works"
+            className="text-[#5DA233] font-semibold hover:underline"
+          >
+            audio is indexed locally
+          </Link>{" "}
+          so a search can run across the indexed Library rather than one file at
+          a time.
         </p>
         <p>
           You can search for a word, phrase or concept and review matching
@@ -718,7 +731,14 @@ const BLOG_POST_DATA: Record<
     content: (
       <>
         <p className="text-[20px] text-ugle-gray leading-[1.55] mb-6">
-          A podcast archive gets more valuable every time you publish.
+          A{" "}
+          <Link
+            href="/use-cases/podcasts"
+            className="text-[#5DA233] font-semibold hover:underline"
+          >
+            podcast archive
+          </Link>{" "}
+          gets more valuable every time you publish.
         </p>
         <p className="text-[20px] text-ugle-gray leading-[1.55] mb-6">
           It also gets harder to remember.
@@ -739,7 +759,13 @@ const BLOG_POST_DATA: Record<
         </p>
         <p>Six months later, that may be exactly the passage you need.</p>
         <p>
-          Searching the spoken content gives you another way into the catalogue.
+          <Link
+            href="/how-it-works"
+            className="text-[#5DA233] font-semibold hover:underline"
+          >
+            Searching the spoken content
+          </Link>{" "}
+          gives you another way into the catalogue.
         </p>
 
         <h2>Search by what the guest discussed</h2>
@@ -889,7 +915,15 @@ const BLOG_POST_DATA: Record<
         </p>
 
         <h2>Search what you remember</h2>
-        <p>Journalists often remember meaning better than filenames.</p>
+        <p>
+          <Link
+            href="/use-cases/journalists"
+            className="text-[#5DA233] font-semibold hover:underline"
+          >
+            Journalists
+          </Link>{" "}
+          often remember meaning better than filenames.
+        </p>
         <p>You may remember:</p>
 
         <div className="my-6 p-5 rounded-xl bg-[#F0F4EE] border border-[#75C043]/30 not-prose">
@@ -1123,7 +1157,15 @@ const BLOG_POST_DATA: Record<
         <p>That is a retrieval problem.</p>
 
         <h2>The normal archive workflow is backwards</h2>
-        <p>Editorial teams often start with the file.</p>
+        <p>
+          <Link
+            href="/use-cases/newsrooms"
+            className="text-[#5DA233] font-semibold hover:underline"
+          >
+            Editorial teams
+          </Link>{" "}
+          often start with the file.
+        </p>
         <ul className="space-y-1">
           <li>Which interview was it?</li>
           <li>Which day?</li>
@@ -1176,8 +1218,14 @@ const BLOG_POST_DATA: Record<
 
         <h2>Build retrieval before deadline day</h2>
         <p>
-          The best time to make footage searchable is not fifteen minutes before
-          transmission.
+          The best time to{" "}
+          <Link
+            href="/how-it-works"
+            className="text-[#5DA233] font-semibold hover:underline"
+          >
+            make footage searchable
+          </Link>{" "}
+          is not fifteen minutes before transmission.
         </p>
         <p>
           Indexing the archive as material arrives means future searches can
@@ -1211,7 +1259,7 @@ const BLOG_POST_DATA: Record<
     ),
   },
   "local-vs-cloud-media-search": {
-    title: "Local vs Cloud Media Search: What to Compare Before Choosing",
+    title: "Local vs Cloud Media Search: What to Compare",
     description:
       "Compare local and cloud media search across privacy, hardware, access, collaboration, indexing and ongoing connectivity before choosing a workflow.",
     meta: "5 min read",
@@ -1239,14 +1287,27 @@ const BLOG_POST_DATA: Record<
           processing.
         </p>
         <p>
-          A local-first tool performs the core media processing on your machine.
+          A{" "}
+          <Link
+            href="/how-it-works"
+            className="text-[#5DA233] font-semibold hover:underline"
+          >
+            local-first tool
+          </Link>{" "}
+          performs the core media processing on your machine.
         </p>
         <p>
           That distinction matters when recordings are sensitive, large or
           controlled by internal data-handling policies.
         </p>
         <p>
-          With Ugle, media transcription, indexing and search happen locally
+          With Ugle, media transcription, indexing and search{" "}
+          <Link
+            href="/security"
+            className="text-[#5DA233] font-semibold hover:underline"
+          >
+            happen locally
+          </Link>{" "}
           during normal operation.
         </p>
         <p>
@@ -1346,8 +1407,14 @@ const BLOG_POST_DATA: Record<
           A searchable archive is something you can retrieve knowledge from.
         </p>
         <p className="text-[20px] text-ugle-slate font-bold leading-[1.55] mb-8">
-          The difference matters once you stop remembering every interview you
-          have recorded.
+          The difference matters once you stop remembering every{" "}
+          <Link
+            href="/use-cases/journalists"
+            className="text-[#5DA233] font-semibold hover:underline"
+          >
+            interview
+          </Link>{" "}
+          you have recorded.
         </p>
 
         <h2>Keep the source files organised</h2>
@@ -1362,7 +1429,15 @@ const BLOG_POST_DATA: Record<
 
         <h2>Index the spoken content</h2>
         <p>The next layer is the material inside the files.</p>
-        <p>Transcription turns speech into searchable text.</p>
+        <p>
+          <Link
+            href="/how-it-works"
+            className="text-[#5DA233] font-semibold hover:underline"
+          >
+            Transcription
+          </Link>{" "}
+          turns speech into searchable text.
+        </p>
         <p>
           Semantic indexing adds another capability: retrieving passages based
           on meaning as well as exact wording.
@@ -1513,15 +1588,30 @@ const BLOG_POST_DATA: Record<
 
         <h2>Retrieval is stronger when it is auditable</h2>
         <p>
-          This is one reason Ugle is designed around timestamped Moments and
-          source playback rather than generated answers.
+          This is one reason Ugle is designed around{" "}
+          <Link
+            href="/how-it-works"
+            className="text-[#5DA233] font-semibold hover:underline"
+          >
+            timestamped Moments and source playback
+          </Link>{" "}
+          rather than generated answers.
         </p>
         <p>A result should be inspectable.</p>
         <p>
           You should be able to ask, &ldquo;Where did this come from?&rdquo; and
           immediately return to the recording.
         </p>
-        <p>That matters for journalism.</p>
+        <p>
+          That matters for{" "}
+          <Link
+            href="/use-cases/journalists"
+            className="text-[#5DA233] font-semibold hover:underline"
+          >
+            journalism
+          </Link>
+          .
+        </p>
         <p>
           It also matters for documentary work, research, podcast production and
           any workflow where the source itself matters.
@@ -1569,14 +1659,26 @@ const BLOG_POST_DATA: Record<
           The same is true for search.
         </p>
         <p>
-          Understanding those differences is more useful than chasing a
-          universal percentage.
+          Understanding those differences is more useful than chasing a{" "}
+          <Link
+            href="/blog/what-transcription-accuracy-means"
+            className="text-[#5DA233] font-semibold hover:underline"
+          >
+            universal percentage
+          </Link>
+          .
         </p>
 
         <h2>Recording quality matters</h2>
         <p>
-          Clear speech gives a transcription system more information to work
-          with.
+          Clear speech gives a{" "}
+          <Link
+            href="/how-it-works"
+            className="text-[#5DA233] font-semibold hover:underline"
+          >
+            transcription system
+          </Link>{" "}
+          more information to work with.
         </p>
         <p>
           Noise, clipping, distance from the microphone and low recording levels
@@ -1677,7 +1779,14 @@ const BLOG_POST_DATA: Record<
     content: (
       <>
         <p className="text-[20px] text-ugle-gray leading-[1.55] mb-6">
-          The best media-search benchmark is not a polished vendor demo.
+          The best{" "}
+          <Link
+            href="/how-it-works"
+            className="text-[#5DA233] font-semibold hover:underline"
+          >
+            media-search benchmark
+          </Link>{" "}
+          is not a polished vendor demo.
         </p>
         <p className="text-[20px] text-ugle-slate font-bold leading-[1.55] mb-6">
           It is your archive.
@@ -1752,15 +1861,33 @@ const BLOG_POST_DATA: Record<
         <p>Retrieval should remain auditable.</p>
 
         <h2>Test the architecture</h2>
+        <p>Ask where processing occurs.</p>
         <p>
-          Ask where processing occurs. Ask where transcripts are stored. Ask
-          where indexes live. Ask what network communication occurs. Ask what
-          happens to data after the licence ends.
+          Ask where{" "}
+          <Link
+            href="/security"
+            className="text-[#5DA233] font-semibold hover:underline"
+          >
+            transcripts are stored
+          </Link>
+          .
+        </p>
+        <p>Ask where indexes live.</p>
+        <p>Ask what network communication occurs.</p>
+        <p>
+          Ask what happens to data after the{" "}
+          <Link
+            href="/pricing"
+            className="text-[#5DA233] font-semibold hover:underline"
+          >
+            licence ends
+          </Link>
+          .
         </p>
         <p>
           Do not settle for a one-word answer such as &ldquo;private.&rdquo;
-          Understand the mechanism.
         </p>
+        <p>Understand the mechanism.</p>
 
         <h2>Test the workflow, not only the model</h2>
         <p>
@@ -1858,8 +1985,14 @@ const BLOG_POST_DATA: Record<
           clip to make sense on its own.
         </p>
         <p>
-          The current Ugle workflow supports previewing retrieved media and
-          working with selected passages as clips for downstream use.
+          The current Ugle workflow supports previewing retrieved media and{" "}
+          <Link
+            href="/how-it-works"
+            className="text-[#5DA233] font-semibold hover:underline"
+          >
+            working with selected passages as clips
+          </Link>{" "}
+          for downstream use.
         </p>
         <p>The editor still makes the editorial decision.</p>
         <p>Ugle shortens the search.</p>
