@@ -102,7 +102,7 @@ const blogItems = [
   {
     path: "/blog/local-vs-cloud-media-search",
     slug: "local-vs-cloud-media-search",
-    title: "Local vs Cloud Media Search: What to Compare Before Choosing",
+    title: "Local vs Cloud Media Search: What to Compare",
     desc: "Compare local and cloud media search across privacy, hardware, access, collaboration, indexing and ongoing connectivity before choosing a workflow.",
     meta: "5 min read",
     tag: "Product philosophy",
