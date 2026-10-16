@@ -7,6 +7,21 @@ const nextConfig: NextConfig = {
   async redirects() {
     return [
       {
+        source: "/get-early-access",
+        destination: "/request-trial",
+        permanent: true,
+      },
+      {
+        source: "/get-early-access/:path*",
+        destination: "/request-trial",
+        permanent: true,
+      },
+      {
+        source: "/non-commercial",
+        destination: "/pricing",
+        permanent: true,
+      },
+      {
         source: "/:path*",
         has: [{ type: "host", value: "www.ugle.ai" }],
         destination: "https://ugle.ai/:path*",

@@ -1,0 +1,35 @@
+# Ugle
+
+> Find the exact moment inside any recording, locally on your machine, with no uploads and no cloud.
+
+Ugle is a local-first search application for media professionals, newsrooms, journalists, and podcast producers. It indexes video and audio archives directly on-device with sub-30ms search, 90+ supported languages, and zero cloud uploads.
+
+## Core Pages
+
+- [Overview](https://ugle.ai/): Product overview, key differentiators, and features.
+- [How It Works](https://ugle.ai/how-it-works): On-device transcription, local search index, and precision timestamp clip extraction.
+- [Pricing](https://ugle.ai/pricing): Solo and Team annual/monthly licences, zero cloud fees, and educational access.
+- [Download](https://ugle.ai/download): Desktop installers for macOS (Apple Silicon / Intel) and Windows (64-bit).
+- [Security & Privacy](https://ugle.ai/security): 100% private architecture, zero cloud telemetry, and local storage details.
+- [About Us](https://ugle.ai/about): Company mission, team, and local-first software philosophy.
+- [Changelog](https://ugle.ai/changelog): Product updates, engine enhancements, and release notes.
+
+## Use Cases
+
+- [Newsrooms](https://ugle.ai/use-cases/newsrooms): Fast soundbite search and segment clipping before broadcast deadlines.
+- [Podcast Producers](https://ugle.ai/use-cases/podcasts): Search across full back-catalogues of episodes without re-listening.
+- [Journalists](https://ugle.ai/use-cases/journalists): Confidential, searchable archives of source interviews and recordings.
+
+## Key Articles
+
+- [Why We Built Ugle Local-First](https://ugle.ai/blog/why-local-first): The rationale for on-device processing and journalistic source protection.
+- [The Real Cost of Scrubbing Timelines](https://ugle.ai/blog/cost-of-scrubbing-timelines): Time wasted manually scrubbing video timelines vs semantic search.
+- [What 95% Transcription Accuracy Means](https://ugle.ai/blog/what-transcription-accuracy-means): Explanation of word error rate and benchmarks.
+- [90+ Supported Languages](https://ugle.ai/blog/languages-supported): Overview of multilingual transcription capabilities.
+- [How to Find a Quote in a Video Without the Exact Words](https://ugle.ai/blog/find-quote-in-video-without-exact-words): Semantic search across video recordings.
+- [How to Search Across Multiple Audio Recordings](https://ugle.ai/blog/search-across-multiple-audio-recordings): Multi-file audio search workflow.
+- [How to Search a Podcast Back Catalogue](https://ugle.ai/blog/search-podcast-back-catalogue): Retrieving past guest answers across years of content.
+- [How Journalists Can Search Interview Recordings Locally](https://ugle.ai/blog/search-journalist-interview-recordings-locally): Local interview archive setup.
+- [Keyword Search vs Semantic Search for Recorded Interviews](https://ugle.ai/blog/keyword-search-vs-semantic-search-recorded-interviews): Differences when retrieving interview moments.
+- [Local vs Cloud Media Search](https://ugle.ai/blog/local-vs-cloud-media-search): Privacy, hardware, indexing, and cost comparisons.
+- [How to Build a Searchable Interview Archive](https://ugle.ai/blog/build-searchable-interview-archive): Structuring growing recording folders for instant retrieval.

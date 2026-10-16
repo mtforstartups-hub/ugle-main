@@ -282,6 +282,18 @@ export default function BlogList() {
           </button>
         </div>
       )}
+
+      {/* Crawler-accessible static links for all articles so search engines discover every post */}
+      <nav aria-label="All Articles" className="sr-only">
+        <h2>All Articles</h2>
+        <ul>
+          {blogItems.map((item) => (
+            <li key={item.slug}>
+              <Link href={item.path}>{item.title}</Link>
+            </li>
+          ))}
+        </ul>
+      </nav>
     </div>
   );
 }
