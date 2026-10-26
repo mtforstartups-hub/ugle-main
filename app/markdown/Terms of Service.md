@@ -1,6 +1,6 @@
 # **Ugle.ai — Terms of Service**
 
-*Effective date: 1 July 2026   ·   Last updated: 14 July 2026*
+*Effective date: 1 July 2026   ·   Last updated: 26 October 2026*
 
 These Terms of Service (“Terms”) govern your use of the Ugle.ai software (the “Software”) provided by DEEPSHIELD AI TECHNOLOGY LLP (LLPIN: ACB-4971), a limited liability partnership registered with the Registrar of Companies, Ahmedabad, having its registered office at 40 Oriyant Colony, Bhuj, Kachchh, Gujarat 370001, India (“we”, “us”, “our”). By downloading, activating or using the Software, or by clicking to accept these Terms, you agree to them. Your use of the Software is also subject to our [Privacy Policy](/privacy-policy). If you do not agree, do not use the Software.
 
@@ -28,7 +28,7 @@ These Terms of Service (“Terms”) govern your use of the Ugle.ai software (th
 
 **4.2 Renewal.** Your Licence renews automatically for successive annual terms unless cancelled. You may cancel at any time before the end of your then-current Licence Term, including during its final thirty (30) days, to prevent the next automatic renewal; cancellation takes effect at the end of the then-current Licence Term and you retain access until then. We will notify you by email before each renewal.
 
-**4.3 Refunds.** Except as expressly stated in these Terms (including Clause 14\) or as required under applicable law, licence fees are non-refundable once the Licence Term has begun.
+**4.3 Refunds.** You may request a refund within fourteen (14) days of purchase. Requesting a refund ends your Licence, and we will revoke the licence key. Purchases outside India are sold by Dodo Payments, which acts as our reseller and merchant of record. To request a refund or ask any question about your purchase, reply to your licence email or write to [support@ugle.ai](mailto:support@ugle.ai). Except as stated in this Clause, in Clause 14, or as required under applicable law, licence fees are non-refundable after the fourteen (14) day period.
 
 ## **5\.  Your data and Local Files**
 

@@ -67,6 +67,18 @@ function detectRegion(request: NextRequest): DetectionResult {
 }
 
 export function proxy(request: NextRequest) {
+  // Dodo appends the buyer's email to the redirect URL. Strip the query string
+  // before the success page renders so the address is not retained in the
+  // address bar or exposed to the page.
+  if (
+    request.nextUrl.pathname === "/payment/success" &&
+    request.nextUrl.search !== ""
+  ) {
+    const url = request.nextUrl.clone();
+    url.search = "";
+    return NextResponse.redirect(url);
+  }
+
   const detection = detectRegion(request);
 
   // ── Structured log — visible in Vercel function logs ────────────────────────

@@ -1,6 +1,6 @@
 # Ugle — End User Licence Agreement
 
-_Last updated: 2026-08-20 · Licensor: DEEPSHIELD AI TECHNOLOGY LLP (India)_
+_Last updated: 2026-10-26 · Licensor: DEEPSHIELD AI TECHNOLOGY LLP (India)_
 
 ## 1. What this agreement covers, and what it does not
 
@@ -57,9 +57,11 @@ refreshed.
 
 ### 2.2 Refunds
 
-Unless a different period is stated at purchase, a paid licence may be refunded within **15 days**
-of purchase. Requesting a refund ends your licence: on refund, the Licensor revokes the key, and
-section 2.1 governs when that takes effect on your machine.
+You may request a refund within **14 days** of purchase. Requesting a refund ends your licence:
+on refund, the Licensor revokes the key, and section 2.1 governs when that takes effect on your
+machine. Purchases outside India are sold by Dodo Payments, which acts as the Licensor's
+reseller and merchant of record. To request a refund or ask any question about your purchase,
+reply to your licence email or write to [support@ugle.ai](mailto:support@ugle.ai).
 
 ## 3. No warranty of accuracy — transcription, search, and diarization
 

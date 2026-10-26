@@ -82,7 +82,11 @@ export default async function Pricing() {
         {/* ── Header ── */}
         <PricingHeader />
 
-        <PricingMain priceConfig={priceConfig} checkoutUrl={checkoutUrl} />
+        <PricingMain
+          priceConfig={priceConfig}
+          region={region}
+          checkoutUrl={checkoutUrl}
+        />
 
         {/* ── FAQ — always visible ── */}
         <PricingFaq />

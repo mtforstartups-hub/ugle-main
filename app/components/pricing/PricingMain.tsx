@@ -4,7 +4,7 @@ import { useState } from "react";
 import { motion } from "motion/react";
 import { Check, Mail } from "lucide-react";
 import Link from "next/link";
-import type { PriceConfig } from "../../lib/priceConfig";
+import type { PriceConfig, Region } from "../../lib/priceConfig";
 
 function fmt(amount: number, cfg: PriceConfig): string {
   return new Intl.NumberFormat(cfg.locale, {
@@ -34,10 +34,12 @@ function Feature({ text, dark = false }: { text: string; dark?: boolean }) {
 function IndividualsPanel({
   isAnnual,
   priceConfig,
+  region,
   checkoutUrl,
 }: {
   isAnnual: boolean;
   priceConfig: PriceConfig;
+  region: Region;
   checkoutUrl: string | null;
 }) {
   const price = fmt(
@@ -97,31 +99,44 @@ function IndividualsPanel({
                   {price}
                 </div>
                 <span className="text-sm font-medium text-ugle-gray/80">
-                  + tax
+                  {region === "IN" ? "+ GST" : "+ local tax"}
                 </span>
               </div>
+              {region !== "IN" && (
+                <p className="text-[12px] text-ugle-gray/60 leading-relaxed mt-1.5">
+                  Your final price, including tax, is shown at checkout.
+                </p>
+              )}
               {isAnnual && (
                 <div className="text-[12px] text-ugle-gray/55 mt-0.5">
                   loyalty renewal rate · save ~15%
                 </div>
               )}
             </div>
-            {checkoutUrl ? (
-              <a
-                href={checkoutUrl}
-                rel="noopener"
-                className="inline-flex items-center justify-center px-7 py-3 bg-ugle-slate text-white font-bold text-[14px] rounded-[10px] hover:bg-[#222] transition-colors whitespace-nowrap"
-              >
-                {isAnnual ? "Buy Annual Licence" : "Buy Monthly Licence"}
-              </a>
-            ) : (
-              <Link
-                href="/request-trial"
-                className="inline-flex items-center justify-center px-7 py-3 bg-ugle-slate text-white font-bold text-[14px] rounded-[10px] hover:bg-[#222] transition-colors whitespace-nowrap"
-              >
-                {isAnnual ? "Buy Annual Licence" : "Buy Monthly Licence"}
-              </Link>
-            )}
+            <div className="flex flex-col items-start sm:items-end gap-2">
+              {checkoutUrl ? (
+                <a
+                  href={checkoutUrl}
+                  rel="noopener"
+                  className="inline-flex items-center justify-center px-7 py-3 bg-ugle-slate text-white font-bold text-[14px] rounded-[10px] hover:bg-[#222] transition-colors whitespace-nowrap"
+                >
+                  {isAnnual ? "Buy Annual Licence" : "Buy Monthly Licence"}
+                </a>
+              ) : (
+                <Link
+                  href="/request-trial"
+                  className="inline-flex items-center justify-center px-7 py-3 bg-ugle-slate text-white font-bold text-[14px] rounded-[10px] hover:bg-[#222] transition-colors whitespace-nowrap"
+                >
+                  {isAnnual ? "Buy Annual Licence" : "Buy Monthly Licence"}
+                </Link>
+              )}
+              {region !== "IN" && checkoutUrl && (
+                <p className="text-[11.5px] text-ugle-gray/60 leading-relaxed max-w-70 sm:text-right">
+                  International purchases are sold by Dodo Payments, our
+                  reseller and merchant of record.
+                </p>
+              )}
+            </div>
           </div>
         </div>
       </div>
@@ -366,9 +381,11 @@ function EducationPanel() {
 // ── Main export ───────────────────────────────────────────────────────────────
 export default function PricingMain({
   priceConfig,
+  region,
   checkoutUrl,
 }: {
   priceConfig: PriceConfig;
+  region: Region;
   checkoutUrl: string | null;
 }) {
   const [category, setCategory] = useState<
@@ -493,6 +510,7 @@ export default function PricingMain({
           <IndividualsPanel
             isAnnual={isAnnual}
             priceConfig={priceConfig}
+            region={region}
             checkoutUrl={checkoutUrl}
           />
         )}
