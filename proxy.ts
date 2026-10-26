@@ -3,6 +3,7 @@ import type { NextRequest } from "next/server";
 import {
   REGION_COOKIE,
   REGION_HEADER,
+  COUNTRY_HEADER,
   COUNTRY_TO_REGION,
   DEFAULT_REGION,
   ALL_REGIONS,
@@ -83,6 +84,14 @@ export function proxy(request: NextRequest) {
 
   const requestHeaders = new Headers(request.headers);
   requestHeaders.set(REGION_HEADER, detection.region);
+
+  // Pass the visitor's country through for hosted-checkout localisation.
+  // Always overwrite/remove it so it cannot be spoofed by the client.
+  if (detection.vercelCountry) {
+    requestHeaders.set(COUNTRY_HEADER, detection.vercelCountry.toUpperCase());
+  } else {
+    requestHeaders.delete(COUNTRY_HEADER);
+  }
 
   const response = NextResponse.next({
     request: { headers: requestHeaders },

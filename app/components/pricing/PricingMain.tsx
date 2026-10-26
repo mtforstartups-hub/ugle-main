@@ -34,9 +34,11 @@ function Feature({ text, dark = false }: { text: string; dark?: boolean }) {
 function IndividualsPanel({
   isAnnual,
   priceConfig,
+  checkoutUrl,
 }: {
   isAnnual: boolean;
   priceConfig: PriceConfig;
+  checkoutUrl: string | null;
 }) {
   const price = fmt(
     isAnnual ? priceConfig.annual : priceConfig.monthly,
@@ -104,12 +106,22 @@ function IndividualsPanel({
                 </div>
               )}
             </div>
-            <Link
-              href="/request-trial"
-              className="inline-flex items-center justify-center px-7 py-3 bg-ugle-slate text-white font-bold text-[14px] rounded-[10px] hover:bg-[#222] transition-colors whitespace-nowrap"
-            >
-              {isAnnual ? "Buy Annual Licence" : "Buy Monthly Licence"}
-            </Link>
+            {checkoutUrl ? (
+              <a
+                href={checkoutUrl}
+                rel="noopener"
+                className="inline-flex items-center justify-center px-7 py-3 bg-ugle-slate text-white font-bold text-[14px] rounded-[10px] hover:bg-[#222] transition-colors whitespace-nowrap"
+              >
+                {isAnnual ? "Buy Annual Licence" : "Buy Monthly Licence"}
+              </a>
+            ) : (
+              <Link
+                href="/request-trial"
+                className="inline-flex items-center justify-center px-7 py-3 bg-ugle-slate text-white font-bold text-[14px] rounded-[10px] hover:bg-[#222] transition-colors whitespace-nowrap"
+              >
+                {isAnnual ? "Buy Annual Licence" : "Buy Monthly Licence"}
+              </Link>
+            )}
           </div>
         </div>
       </div>
@@ -354,8 +366,10 @@ function EducationPanel() {
 // ── Main export ───────────────────────────────────────────────────────────────
 export default function PricingMain({
   priceConfig,
+  checkoutUrl,
 }: {
   priceConfig: PriceConfig;
+  checkoutUrl: string | null;
 }) {
   const [category, setCategory] = useState<
     "individuals" | "organisation" | "non-commercial" | "education"
@@ -476,7 +490,11 @@ export default function PricingMain({
         ) : category === "organisation" ? (
           <OrganisationPanel />
         ) : (
-          <IndividualsPanel isAnnual={isAnnual} priceConfig={priceConfig} />
+          <IndividualsPanel
+            isAnnual={isAnnual}
+            priceConfig={priceConfig}
+            checkoutUrl={checkoutUrl}
+          />
         )}
       </motion.div>
     </>

@@ -4,8 +4,10 @@ import {
   PRICE_CONFIG,
   DEFAULT_REGION,
   REGION_HEADER,
+  COUNTRY_HEADER,
   type Region,
 } from "../lib/priceConfig";
+import { checkoutUrlFor, paymentsAreLive } from "../lib/payments";
 import PricingHeader from "../components/pricing/PricingHeader";
 import PricingMain from "../components/pricing/PricingMain";
 import PricingFaq from "../components/pricing/PricingFaq";
@@ -23,12 +25,18 @@ export default async function Pricing() {
   const region = (raw && raw in PRICE_CONFIG ? raw : DEFAULT_REGION) as Region;
   const priceConfig = PRICE_CONFIG[region];
 
+  const paymentsLive = paymentsAreLive();
+  const checkoutUrl = paymentsLive
+    ? checkoutUrlFor(region, hdrs.get(COUNTRY_HEADER))
+    : null;
+
   // ── Debug log — remove once currency switching is confirmed working ──────────
   console.log("[ugle/pricing-page]", JSON.stringify({
     headerReceived: raw,              // null = proxy header not present
     regionResolved: region,
     priceMonthly: priceConfig.monthly,
     currency: priceConfig.currency,
+    paymentsLive,
   }));
   // ────────────────────────────────────────────────────────────────────────────
 
@@ -74,7 +82,7 @@ export default async function Pricing() {
         {/* ── Header ── */}
         <PricingHeader />
 
-        <PricingMain priceConfig={priceConfig} />
+        <PricingMain priceConfig={priceConfig} checkoutUrl={checkoutUrl} />
 
         {/* ── FAQ — always visible ── */}
         <PricingFaq />
