@@ -1,8 +1,9 @@
 "use client";
 
-import { useActionState, Suspense } from "react";
+import { useActionState, Suspense, useRef, useEffect } from "react";
 import { Check } from "lucide-react";
 import { motion } from "motion/react";
+import { Turnstile, type TurnstileInstance } from "@marsidev/react-turnstile";
 import {
   requestEarlyAccess,
   type ActionState,
@@ -13,6 +14,8 @@ const initialState: ActionState = { success: false, message: "" };
 
 const inputClass =
   "w-full bg-[#F8FAF9] border border-ugle-light/60 rounded-[10px] px-4 py-3 text-[15px] text-ugle-slate focus:outline-none focus:border-[#75C043] focus:ring-1 focus:ring-[#75C043] transition-all";
+
+const TURNSTILE_SITE_KEY = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
 
 // Only this tiny piece reads the search param.
 function PlatformRadios() {
@@ -51,6 +54,13 @@ export default function GetAccessForm() {
     requestEarlyAccess,
     initialState,
   );
+  const turnstileRef = useRef<TurnstileInstance>(null);
+
+  useEffect(() => {
+    if (!isPending && state.error) {
+      turnstileRef.current?.reset();
+    }
+  }, [isPending, state]);
 
   return (
     <motion.div
@@ -118,6 +128,25 @@ export default function GetAccessForm() {
 
           {state.error && (
             <p className="text-red-500 text-sm font-medium">{state.error}</p>
+          )}
+
+          {/* Turnstile widget */}
+          {TURNSTILE_SITE_KEY && (
+            <div className="mt-4">
+              <Turnstile
+                ref={turnstileRef}
+                siteKey={TURNSTILE_SITE_KEY}
+                options={{
+                  size: "invisible",
+                  appearance: "interaction-only",
+                }}
+                onError={() => {
+                  console.warn(
+                    "[Turnstile] Widget failed to load — submission will proceed without a token.",
+                  );
+                }}
+              />
+            </div>
           )}
 
           <button

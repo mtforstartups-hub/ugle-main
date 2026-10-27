@@ -1,12 +1,13 @@
 "use server";
 import * as z from "zod";
-import { Resend } from "resend";
+import { getResendClient } from "@/app/lib/resend";
 import { resendConfig } from "@/app/lib/env";
 import {
   EducationConfirmationEmail,
   EducationAdminNotificationEmail,
 } from "../components/email-templates/EducationTemplates";
 import { EducationSheetService } from "@/app/lib/sheets";
+import { verifyTurnstile } from "@/app/lib/turnstile";
 
 const educationSchema = z.object({
   firstName: z.string().min(1, "First name is required"),
@@ -29,6 +30,18 @@ export async function applyForEducationAccess(
   formData: FormData,
 ): Promise<ActionState> {
   try {
+    const turnstileToken = formData.get("cf-turnstile-response") as
+      string | null;
+    const isHuman = await verifyTurnstile(turnstileToken);
+
+    if (!isHuman) {
+      return {
+        success: false,
+        message: "Verification failed. Please try again.",
+        error: "Verification failed. Please try again.",
+      };
+    }
+
     const raw = Object.fromEntries(formData);
 
     const result = educationSchema.safeParse(raw);
@@ -51,7 +64,7 @@ export async function applyForEducationAccess(
     const [emailResult, sheetsResult] = await Promise.allSettled([
       // Operation 1: Send confirmation + admin notification emails via Resend
       resendConfig.success
-        ? new Resend(resendConfig.data.RESEND_API_KEY).batch.send([
+        ? getResendClient()!.batch.send([
             {
               from: `Ugle <${resendConfig.data.RESEND_FROM_EMAIL}>`,
               to: [email],

@@ -130,6 +130,7 @@ export function updateGoogleConsentMode(prefs: CookieConsentPreferences): void {
 
   if (typeof win.gtag !== "function") {
     win.gtag = function () {
+      // eslint-disable-next-line prefer-rest-params
       win.dataLayer?.push(arguments);
     };
   }

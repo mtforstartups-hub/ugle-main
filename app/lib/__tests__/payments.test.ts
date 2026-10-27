@@ -22,6 +22,7 @@ describe("checkoutUrlFor", () => {
 
   it("uses the exact Dodo link when the visitor country is unknown", () => {
     expect(checkoutUrlFor("US", null)).toBe(DODO_CHECKOUT_URL);
+    expect(checkoutUrlFor("US", undefined)).toBe(DODO_CHECKOUT_URL);
     expect(checkoutUrlFor("GB", "")).toBe(DODO_CHECKOUT_URL);
   });
 
@@ -32,12 +33,17 @@ describe("checkoutUrlFor", () => {
     expect(checkoutUrlFor("EU", "de")).toBe(
       `${DODO_CHECKOUT_URL}&country=DE&disableCountry=true`,
     );
+    expect(checkoutUrlFor("US", "  gb  ")).toBe(
+      `${DODO_CHECKOUT_URL}&country=GB&disableCountry=true`,
+    );
   });
 
   it("never sends India or malformed countries to Dodo", () => {
     expect(checkoutUrlFor("US", "IN")).toBe(DODO_CHECKOUT_URL);
     expect(checkoutUrlFor("US", "GB&country=IN")).toBe(DODO_CHECKOUT_URL);
     expect(checkoutUrlFor("US", "global")).toBe(DODO_CHECKOUT_URL);
+    expect(checkoutUrlFor("US", "123")).toBe(DODO_CHECKOUT_URL);
+    expect(checkoutUrlFor("US", "G B")).toBe(DODO_CHECKOUT_URL);
   });
 
   it("keeps the supplied Dodo parameters untouched", () => {

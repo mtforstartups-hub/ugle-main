@@ -1,17 +1,27 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useRef, useEffect } from "react";
 import { Check } from "lucide-react";
 import { motion } from "motion/react";
+import { Turnstile, type TurnstileInstance } from "@marsidev/react-turnstile";
 import { requestDemo, type ActionState } from "@/app/actions/demo";
 
 const initialState: ActionState = { success: false, message: "" };
+
+const TURNSTILE_SITE_KEY = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
 
 export default function DemoForm() {
   const [state, formAction, isPending] = useActionState(
     requestDemo,
     initialState,
   );
+  const turnstileRef = useRef<TurnstileInstance>(null);
+
+  useEffect(() => {
+    if (!isPending && state.error) {
+      turnstileRef.current?.reset();
+    }
+  }, [isPending, state]);
 
   return (
     <motion.div
@@ -103,6 +113,25 @@ export default function DemoForm() {
           {/* Validation error */}
           {state.error && (
             <p className="text-red-400 text-sm font-medium">{state.error}</p>
+          )}
+
+          {/* Turnstile widget */}
+          {TURNSTILE_SITE_KEY && (
+            <div className="mt-4">
+              <Turnstile
+                ref={turnstileRef}
+                siteKey={TURNSTILE_SITE_KEY}
+                options={{
+                  size: "invisible",
+                  appearance: "interaction-only",
+                }}
+                onError={() => {
+                  console.warn(
+                    "[Turnstile] Widget failed to load — submission will proceed without a token.",
+                  );
+                }}
+              />
+            </div>
           )}
 
           <button

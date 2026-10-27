@@ -1,12 +1,13 @@
 "use server";
 import * as z from "zod";
-import { Resend } from "resend";
+import { getResendClient } from "@/app/lib/resend";
 import { resendConfig } from "@/app/lib/env";
 import {
   ContactConfirmationEmail,
   ContactAdminNotificationEmail,
 } from "../components/email-templates/ContactTemplates";
 import { ContactFormSheetService } from "@/app/lib/sheets";
+import { verifyTurnstile } from "@/app/lib/turnstile";
 
 const contactSchema = z.object({
   firstName: z.string().min(1, "First name is required"),
@@ -28,6 +29,18 @@ export async function submitContactInquiry(
   formData: FormData,
 ): Promise<ActionState> {
   try {
+    const turnstileToken = formData.get("cf-turnstile-response") as
+      string | null;
+    const isHuman = await verifyTurnstile(turnstileToken);
+
+    if (!isHuman) {
+      return {
+        success: false,
+        message: "Verification failed. Please try again.",
+        error: "Verification failed. Please try again.",
+      };
+    }
+
     const raw = Object.fromEntries(formData);
 
     const result = contactSchema.safeParse(raw);
@@ -46,7 +59,7 @@ export async function submitContactInquiry(
 
     const [emailResult, sheetsResult] = await Promise.allSettled([
       resendConfig.success
-        ? new Resend(resendConfig.data.RESEND_API_KEY).batch.send([
+        ? getResendClient()!.batch.send([
             // Confirmation email → submitter
             {
               from: `Ugle <${resendConfig.data.RESEND_FROM_EMAIL}>`,

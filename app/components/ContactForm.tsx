@@ -1,9 +1,10 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useRef, useEffect } from "react";
 import { ArrowRight, CheckCircle2 } from "lucide-react";
 import { motion } from "motion/react";
 import Link from "next/link";
+import { Turnstile, type TurnstileInstance } from "@marsidev/react-turnstile";
 import {
   submitContactInquiry,
   type ActionState,
@@ -113,11 +114,20 @@ export const FormSelect = ({
 
 const initialState: ActionState = { success: false, message: "" };
 
+const TURNSTILE_SITE_KEY = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
+
 export default function ContactForm() {
   const [state, formAction, isPending] = useActionState(
     submitContactInquiry,
     initialState,
   );
+  const turnstileRef = useRef<TurnstileInstance>(null);
+
+  useEffect(() => {
+    if (!isPending && state.error) {
+      turnstileRef.current?.reset();
+    }
+  }, [isPending, state]);
 
   return (
     <>
@@ -176,6 +186,25 @@ export default function ContactForm() {
             <p className="text-red-500 text-sm font-medium mt-1">
               {state.error}
             </p>
+          )}
+
+          {/* Turnstile widget */}
+          {TURNSTILE_SITE_KEY && (
+            <div className="mt-4">
+              <Turnstile
+                ref={turnstileRef}
+                siteKey={TURNSTILE_SITE_KEY}
+                options={{
+                  size: "invisible",
+                  appearance: "interaction-only",
+                }}
+                onError={() => {
+                  console.warn(
+                    "[Turnstile] Widget failed to load — submission will proceed without a token.",
+                  );
+                }}
+              />
+            </div>
           )}
 
           <button
