@@ -1,16 +1,22 @@
-import { describe, it, expect, vi } from "vitest";
+import { describe, it, expect, vi, beforeEach } from "vitest";
 import { newsletterJoin } from "../newsletter";
+import { verifyTurnstile } from "@/app/lib/turnstile";
+
+const mockBatchSend = vi.fn().mockResolvedValue({ data: [{}, {}], error: null });
+const mockSheetAppend = vi.fn().mockResolvedValue(undefined);
 
 vi.mock("resend", () => ({
-  Resend: vi.fn().mockImplementation(() => ({
-    batch: { send: vi.fn().mockResolvedValue({ data: [{}, {}], error: null }) },
-  })),
+  Resend: class {
+    batch = {
+      send: mockBatchSend,
+    };
+  },
 }));
 
 vi.mock("@/app/lib/sheets", () => ({
-  NewsletterSheetService: vi.fn().mockImplementation(() => ({
-    append: vi.fn().mockResolvedValue(undefined),
-  })),
+  NewsletterSheetService: class {
+    append = mockSheetAppend;
+  },
 }));
 
 vi.mock("@/app/lib/turnstile", () => ({
@@ -18,6 +24,12 @@ vi.mock("@/app/lib/turnstile", () => ({
 }));
 
 describe("newsletterJoin", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockBatchSend.mockResolvedValue({ data: [{}, {}], error: null });
+    mockSheetAppend.mockResolvedValue(undefined);
+  });
+
   it("succeeds when both email and sheets succeed", async () => {
     const formData = new FormData();
     formData.set("email", "test@example.com");
@@ -28,6 +40,12 @@ describe("newsletterJoin", () => {
     );
 
     expect(result.success).toBe(true);
+    expect(mockBatchSend).toHaveBeenCalledTimes(1);
+    expect(mockSheetAppend).toHaveBeenCalledTimes(1);
+
+    const emailPayload = mockBatchSend.mock.calls[0][0];
+    expect(emailPayload[0].to).toEqual(["test@example.com"]);
+    expect(emailPayload[1].to).toEqual(["admin@ugle.ai"]);
   });
 
   it("rejects invalid email without calling Turnstile", async () => {
@@ -41,16 +59,12 @@ describe("newsletterJoin", () => {
 
     expect(result.success).toBe(false);
     expect(result.message).toMatch(/invalid/i);
+    expect(mockBatchSend).not.toHaveBeenCalled();
+    expect(mockSheetAppend).not.toHaveBeenCalled();
   });
 
   it("still succeeds if only sheets succeeds (email down)", async () => {
-    const { Resend } = await import("resend");
-    vi.mocked(Resend).mockImplementationOnce(
-      () =>
-        ({
-          batch: { send: vi.fn().mockRejectedValue(new Error("Resend down")) },
-        }) as any,
-    );
+    mockBatchSend.mockRejectedValueOnce(new Error("Resend down"));
 
     const formData = new FormData();
     formData.set("email", "test2@example.com");
@@ -60,25 +74,13 @@ describe("newsletterJoin", () => {
       formData,
     );
 
-    expect(result.success).toBe(true); // sheets alone is enough
+    expect(result.success).toBe(true);
+    expect(mockSheetAppend).toHaveBeenCalledTimes(1);
   });
 
   it("fails cleanly when both integrations fail", async () => {
-    const { Resend } = await import("resend");
-    const { NewsletterSheetService } = await import("@/app/lib/sheets");
-
-    vi.mocked(Resend).mockImplementationOnce(
-      () =>
-        ({
-          batch: { send: vi.fn().mockRejectedValue(new Error("down")) },
-        }) as any,
-    );
-    vi.mocked(NewsletterSheetService).mockImplementationOnce(
-      () =>
-        ({
-          append: vi.fn().mockRejectedValue(new Error("down")),
-        }) as any,
-    );
+    mockBatchSend.mockRejectedValueOnce(new Error("Resend down"));
+    mockSheetAppend.mockRejectedValueOnce(new Error("Sheets down"));
 
     const formData = new FormData();
     formData.set("email", "test3@example.com");
@@ -89,6 +91,23 @@ describe("newsletterJoin", () => {
     );
 
     expect(result.success).toBe(false);
-    expect(result.error).toMatch(/failed/i);
+    expect(result.error).toMatch(/wrong/i);
+  });
+
+  it("rejects submission when Turnstile verification fails (bot detected)", async () => {
+    vi.mocked(verifyTurnstile).mockResolvedValueOnce(false);
+
+    const formData = new FormData();
+    formData.set("email", "bot@example.com");
+
+    const result = await newsletterJoin(
+      { success: false, message: "" },
+      formData,
+    );
+
+    expect(result.success).toBe(false);
+    expect(result.error).toMatch(/verification failed/i);
+    expect(mockBatchSend).not.toHaveBeenCalled();
+    expect(mockSheetAppend).not.toHaveBeenCalled();
   });
 });

@@ -7,6 +7,7 @@ import {
   EducationAdminNotificationEmail,
 } from "../components/email-templates/EducationTemplates";
 import { EducationSheetService } from "@/app/lib/sheets";
+import { verifyTurnstile } from "@/app/lib/turnstile";
 
 const educationSchema = z.object({
   firstName: z.string().min(1, "First name is required"),
@@ -29,6 +30,18 @@ export async function applyForEducationAccess(
   formData: FormData,
 ): Promise<ActionState> {
   try {
+    const turnstileToken = formData.get("cf-turnstile-response") as
+      string | null;
+    const isHuman = await verifyTurnstile(turnstileToken);
+
+    if (!isHuman) {
+      return {
+        success: false,
+        message: "Verification failed. Please try again.",
+        error: "Verification failed. Please try again.",
+      };
+    }
+
     const raw = Object.fromEntries(formData);
 
     const result = educationSchema.safeParse(raw);

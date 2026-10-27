@@ -1,0 +1,87 @@
+name: Staging Smoke Test
+
+# Manual trigger via GitHub Actions UI (workflow_dispatch)
+# OR auto-run on main when email, sheets, or Turnstile form code changes
+on:
+  workflow_dispatch:
+    inputs:
+      form:
+        description: "Form to test"
+        type: choice
+        required: true
+        options:
+          - newsletter
+          - contact
+          - demo
+          - early_access
+          - education
+          - all
+        default: "newsletter"
+  push:
+    branches: [main]
+    paths:
+      - "app/actions/newsletter.ts"
+      - "app/actions/contact.ts"
+      - "app/actions/demo.ts"
+      - "app/actions/early-access.ts"
+      - "app/actions/education.ts"
+      - "app/lib/turnstile.ts"
+      - "app/lib/sheets/**"
+      - "app/lib/env.ts"
+      - "app/components/forms/FooterNewsletter.tsx"
+      - "app/components/ContactForm.tsx"
+      - "app/components/demo/DemoForm.tsx"
+      - "app/components/getaccess/GetAccessForm.tsx"
+      - "app/components/EducationForm.tsx"
+      - "app/components/email-templates/**"
+
+concurrency:
+  group: staging-smoke-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  smoke-test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      PLAYWRIGHT_TEST_BASE_URL: "https://staging.ugle.ai"
+      NEXT_PUBLIC_TURNSTILE_SITE_KEY: ${{ secrets.STAGING_TURNSTILE_SITE_KEY }}
+      TURNSTILE_SECRET_KEY: ${{ secrets.STAGING_TURNSTILE_SECRET_KEY }}
+      RESEND_API_KEY: ${{ secrets.STAGING_RESEND_API_KEY }}
+      RESEND_FROM_EMAIL: ${{ secrets.STAGING_RESEND_FROM_EMAIL }}
+      ADMIN_EMAIL: ${{ secrets.STAGING_ADMIN_EMAIL }}
+      GOOGLE_SPREADSHEET_ID: ${{ secrets.STAGING_GOOGLE_SPREADSHEET_ID }}
+      GOOGLE_CLIENT_EMAIL: ${{ secrets.STAGING_GOOGLE_CLIENT_EMAIL }}
+      GOOGLE_PRIVATE_KEY: ${{ secrets.STAGING_GOOGLE_PRIVATE_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Install Playwright (Chromium only)
+        run: bunx playwright install --with-deps chromium
+
+      - name: Run Staging Smoke Tests
+        run: |
+          FORM="${{ github.event.inputs.form || 'newsletter' }}"
+          if [ "$FORM" = "all" ]; then
+            bun run test:e2e --project=chromium
+          elif [ "$FORM" = "early_access" ]; then
+            bun run test:e2e --project=chromium --grep "Early Access"
+          else
+            bun run test:e2e --project=chromium --grep "$FORM"
+          fi
+
+      - name: Upload Playwright Report
+        uses: actions/upload-artifact@v4
+        if: ${{ !cancelled() }}
+        with:
+          name: playwright-staging-smoke-report
+          path: playwright-report/
+          retention-days: 14

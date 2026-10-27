@@ -7,7 +7,10 @@
     "prebuild": "tsx scripts/check-env.ts",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:e2e": "playwright test"
   },
   "dependencies": {
     "@marsidev/react-turnstile": "^1.5.3",
