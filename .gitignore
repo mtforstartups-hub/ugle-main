@@ -53,3 +53,4 @@ node_modules/
 *.claude
 skills-lock.json
 opencode.json
+playwrite-report-temp/

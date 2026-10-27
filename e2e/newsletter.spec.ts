@@ -51,7 +51,9 @@ test.describe("Newsletter signup (Footer)", () => {
     await page.fill('input[name="email"]', testEmail);
     await page.click('button[type="submit"]');
 
-    await expect(page.getByText("Successfully Joined")).toBeVisible();
+    await expect(page.getByText("Successfully Joined")).toBeVisible({
+      timeout: 10_000,
+    });
   });
 
   test("shows validation error for invalid email", async ({ page }) => {

@@ -1,6 +1,6 @@
 "use server";
 import * as z from "zod";
-import { Resend } from "resend";
+import { getResendClient } from "@/app/lib/resend";
 import { resendConfig } from "@/app/lib/env";
 import {
   NewsletterAdminNotificationEmail,
@@ -57,7 +57,7 @@ export async function newsletterJoin(
 
     const [emailResult, sheetsResult] = await Promise.allSettled([
       resendConfig.success
-        ? new Resend(resendConfig.data.RESEND_API_KEY).batch.send([
+        ? getResendClient()!.batch.send([
             {
               from: `Ugle <${resendConfig.data.RESEND_FROM_EMAIL}>`,
               to: [subscriberEmail],

@@ -1,6 +1,6 @@
 "use server";
 import * as z from "zod";
-import { Resend } from "resend";
+import { getResendClient } from "@/app/lib/resend";
 import { resendConfig } from "@/app/lib/env";
 import {
   EarlyAccessConfirmationEmail,
@@ -64,7 +64,7 @@ export async function requestEarlyAccess(
     const [emailResult, sheetsResult] = await Promise.allSettled([
       // Operation 1: Send confirmation + admin notification emails via Resend
       resendConfig.success
-        ? new Resend(resendConfig.data.RESEND_API_KEY).batch.send([
+        ? getResendClient()!.batch.send([
             {
               from: `Ugle <${resendConfig.data.RESEND_FROM_EMAIL}>`,
               to: [email],
