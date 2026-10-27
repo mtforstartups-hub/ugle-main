@@ -27,7 +27,7 @@ const sheetsSchema = z.object({
   GOOGLE_PRIVATE_KEY: z
     .string()
     .min(10, "Private key is too short")
-    .transform((val) => val.replace(/\\n/g, "\n")),
+    .transform((val) => val.trim().replace(/^["']|["']$/g, "").replace(/\\n/g, "\n")),
   GOOGLE_SPREADSHEET_ID: z.string().min(5),
 });
 
