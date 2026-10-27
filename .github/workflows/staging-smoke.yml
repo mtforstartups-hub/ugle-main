@@ -44,7 +44,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     env:
-      PLAYWRIGHT_TEST_BASE_URL: "https://staging.ugle.ai"
+      PLAYWRIGHT_TEST_BASE_URL: "https://preview-ugle-cf.vercel.app"
       NEXT_PUBLIC_TURNSTILE_SITE_KEY: ${{ secrets.STAGING_TURNSTILE_SITE_KEY }}
       TURNSTILE_SECRET_KEY: ${{ secrets.STAGING_TURNSTILE_SECRET_KEY }}
       RESEND_API_KEY: ${{ secrets.STAGING_RESEND_API_KEY }}
@@ -54,7 +54,7 @@ jobs:
       GOOGLE_CLIENT_EMAIL: ${{ secrets.STAGING_GOOGLE_CLIENT_EMAIL }}
       GOOGLE_PRIVATE_KEY: ${{ secrets.STAGING_GOOGLE_PRIVATE_KEY }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Setup Bun
         uses: oven-sh/setup-bun@v2
@@ -79,7 +79,7 @@ jobs:
           fi
 
       - name: Upload Playwright Report
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         if: ${{ !cancelled() }}
         with:
           name: playwright-staging-smoke-report
