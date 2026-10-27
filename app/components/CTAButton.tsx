@@ -2,7 +2,7 @@ import Link from "next/link";
 import React from "react";
 
 export default function CTAButton({
-  type = "primary",
+  type: _type = "primary",
   link = "/download",
   title,
 }: {

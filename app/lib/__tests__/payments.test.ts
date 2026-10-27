@@ -22,7 +22,7 @@ describe("checkoutUrlFor", () => {
 
   it("uses the exact Dodo link when the visitor country is unknown", () => {
     expect(checkoutUrlFor("US", null)).toBe(DODO_CHECKOUT_URL);
-    expect(checkoutUrlFor("US", undefined as any)).toBe(DODO_CHECKOUT_URL);
+    expect(checkoutUrlFor("US", undefined)).toBe(DODO_CHECKOUT_URL);
     expect(checkoutUrlFor("GB", "")).toBe(DODO_CHECKOUT_URL);
   });
 

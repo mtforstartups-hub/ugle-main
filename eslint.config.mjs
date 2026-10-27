@@ -10,7 +10,19 @@ const eslintConfig = defineConfig([
       "react-hooks/set-state-in-effect": "warn",
       "prefer-rest-params": "warn",
       "@next/next/no-img-element": "warn",
-      "@typescript-eslint/no-unused-vars": "warn",
+      "@typescript-eslint/no-unused-vars": [
+        "warn",
+        {
+          argsIgnorePattern: "^_",
+          varsIgnorePattern: "^_",
+        },
+      ],
+    },
+  },
+  {
+    files: ["app/components/email-templates/**"],
+    rules: {
+      "@next/next/no-img-element": "off",
     },
   },
   // Override default ignores of eslint-config-next.

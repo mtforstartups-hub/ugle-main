@@ -3,7 +3,7 @@ import { motion } from "motion/react";
 
 export default function UseCaseHeader({
   title,
-  subtitle,
+  subtitle: _subtitle,
   badge,
 }: {
   title: string;
