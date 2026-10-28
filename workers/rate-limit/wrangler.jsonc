@@ -3,13 +3,16 @@
   "name": "ugle-rate-limit",
   "main": "src/index.ts",
   "compatibility_date": "2026-09-30",
+  "compatibility_flags": ["nodejs_compat"],
   "observability": {
     "enabled": true
   },
   "vars": {
     // Fixed window limits per IP. Tune here and redeploy.
     "HOURLY_LIMIT": "5",
-    "DAILY_LIMIT": "15"
+    "DAILY_LIMIT": "15",
+    // How long a claimed email stays reserved (one trial per inbox).
+    "CLAIM_TTL_DAYS": "180"
   },
   "durable_objects": {
     "bindings": [
