@@ -23,6 +23,10 @@ vi.mock("@/app/lib/turnstile", () => ({
   verifyTurnstile: vi.fn().mockResolvedValue(true),
 }));
 
+vi.mock("@/app/lib/honeypot", () => ({
+  validateHoneypot: vi.fn().mockReturnValue({ isValid: true, error: null }),
+}));
+
 describe("submitContactInquiry", () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -38,6 +42,7 @@ describe("submitContactInquiry", () => {
     formData.set("company", "Acme Media");
     formData.set("seats", "10-50");
     formData.set("usecase", "Redacting video transcripts");
+    formData.set("ugle-honeypot", ""); // honeypot field
     return formData;
   };
 
@@ -133,5 +138,40 @@ describe("submitContactInquiry", () => {
     expect(result.error).toMatch(/verification failed/i);
     expect(mockBatchSend).not.toHaveBeenCalled();
     expect(mockSheetAppend).not.toHaveBeenCalled();
+  });
+
+  it("rejects header-injection characters in subject fields", async () => {
+    const formData = validFormData();
+    formData.set("firstName", "John\r\nBcc: evil@example.com");
+
+    const result = await submitContactInquiry(
+      { success: false, message: "" },
+      formData,
+    );
+
+    expect(result.success).toBe(false);
+    expect(result.error).toMatch(/invalid characters/i);
+    expect(mockBatchSend).not.toHaveBeenCalled();
+    expect(mockSheetAppend).not.toHaveBeenCalled();
+  });
+
+  it("rate limits repeated submissions from the same email", async () => {
+    for (let i = 0; i < 3; i++) {
+      const result = await submitContactInquiry(
+        { success: false, message: "" },
+        validFormData(),
+      );
+      expect(result.success).toBe(true);
+    }
+
+    const blocked = await submitContactInquiry(
+      { success: false, message: "" },
+      validFormData(),
+    );
+
+    expect(blocked.success).toBe(false);
+    expect(blocked.error).toBe("Rate limit exceeded");
+    expect(mockBatchSend).toHaveBeenCalledTimes(3);
+    expect(mockSheetAppend).toHaveBeenCalledTimes(3);
   });
 });

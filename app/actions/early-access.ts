@@ -8,15 +8,24 @@ import {
 } from "../components/email-templates/EarlyAccessTemplates";
 import { EarlyAccessSheetService } from "@/app/lib/sheets";
 import { verifyTurnstile } from "@/app/lib/turnstile";
+import { rateLimit } from "@/app/lib/rate-limit";
+import { validateHoneypot } from "@/app/lib/honeypot";
+import {
+  emailField,
+  singleLineText,
+  subjectText,
+} from "@/app/lib/validation";
 
 const earlyAccessSchema = z.object({
-  firstName: z.string().min(1, "First name is required"),
-  lastName: z.string().min(1, "Last name is required"),
-  email: z.email("Invalid email address"),
-  phone: z.string().min(1, "Contact number is required"),
+  firstName: subjectText("First name is required"),
+  lastName: subjectText("Last name is required"),
+  email: emailField(),
+  phone: singleLineText("Contact number is required", 30),
   os: z.enum(["macOS", "Windows"], {
     error: "Please select your primary OS",
   }),
+  // Honeypot field - bots will fill this in, humans will leave empty
+  "ugle-honeypot": z.string().optional(),
 });
 
 export type ActionState = {
@@ -25,6 +34,14 @@ export type ActionState = {
   error?: string;
 };
 
+/**
+ * Extract honeypot value from formData
+ * The honeypot field should be hidden via CSS; bots typically fill it in.
+ */
+function getHoneypotValue(formData: FormData): string | null {
+  return formData.get("ugle-honeypot") as string | null;
+}
+
 export async function requestEarlyAccess(
   initialState: ActionState,
   formData: FormData,
@@ -32,8 +49,10 @@ export async function requestEarlyAccess(
   try {
     const turnstileToken = formData.get("cf-turnstile-response") as
       string | null;
-    const isHuman = await verifyTurnstile(turnstileToken);
+    const honeypotValue = getHoneypotValue(formData);
 
+    // 1. Turnstile verification
+    const isHuman = await verifyTurnstile(turnstileToken);
     if (!isHuman) {
       return {
         success: false,
@@ -42,13 +61,37 @@ export async function requestEarlyAccess(
       };
     }
 
-    const raw = Object.fromEntries(formData);
+    // 2. Honeypot check - bots often fill hidden fields
+    const honeypotResult = validateHoneypot(honeypotValue);
+    if (!honeypotResult.isValid) {
+      return {
+        success: false,
+        message: honeypotResult.error,
+        error: honeypotResult.error,
+      };
+    }
 
+    // 3. Zod schema validation (includes honeypot optional field)
+    const raw = Object.fromEntries(formData);
     const result = earlyAccessSchema.safeParse(raw);
 
     if (!result.success) {
       const errorMsg = result.error.issues[0]?.message || "Invalid input";
       return { success: false, message: errorMsg, error: errorMsg };
+    }
+
+    // 4. Rate limiting per email - prevent flooding
+    const rateLimitCheck = rateLimit(`earlyaccess-${result.data.email}`, {
+      limit: 3,
+      interval: 60 * 60 * 1000, // 1 hour
+    });
+    if (!rateLimitCheck.success) {
+      return {
+        success: false,
+        message:
+          "You've submitted too many requests. Please wait an hour before trying again.",
+        error: "Rate limit exceeded",
+      };
     }
 
     const { firstName, lastName, email, phone, os } = result.data;
@@ -58,6 +101,8 @@ export async function requestEarlyAccess(
       timeStyle: "short",
     }).format(new Date());
 
+    // 5. Subjects are built from these already-validated fields: Zod rejects
+    // any control characters, so they can't carry header-injection payloads.
     // Run both operations concurrently and independently.
     // Promise.allSettled guarantees both are always attempted regardless of
     // whether the other one fails.

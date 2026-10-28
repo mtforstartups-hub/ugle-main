@@ -5,6 +5,7 @@ import { Check } from "lucide-react";
 import { motion } from "motion/react";
 import { Turnstile, type TurnstileInstance } from "@marsidev/react-turnstile";
 import { requestDemo, type ActionState } from "@/app/actions/demo";
+import HoneypotField from "@/app/components/HoneypotField";
 
 const initialState: ActionState = { success: false, message: "" };
 
@@ -32,6 +33,7 @@ export default function DemoForm() {
     >
       {!state.success ? (
         <form action={formAction} className="space-y-5 text-white">
+          <HoneypotField />
           <div className="grid md:grid-cols-2 gap-5">
             <div className="space-y-2">
               <label className="block text-[14px] font-semibold text-white/80">
@@ -127,7 +129,7 @@ export default function DemoForm() {
                 }}
                 onError={() => {
                   console.warn(
-                    "[Turnstile] Widget failed to load — submission will proceed without a token.",
+                    "[Turnstile] Widget failed to load — submission may be rejected.",
                   );
                 }}
               />

@@ -2,11 +2,15 @@ import "server-only";
 import { turnstileConfig } from "@/app/lib/env";
 
 /**
- * Verifies a Turnstile token. Fails OPEN by design: if Turnstile isn't
- * configured, or Cloudflare's endpoint errors/times out, this returns
- * `true` so the form still works. Bot-filtering is a nice-to-have here,
- * not a hard gate — trade-off is some spam risk during misconfiguration
- * or Cloudflare outages, which is preferable to blocking real users.
+ * Verifies a Turnstile token.
+ *
+ * - If Turnstile isn't configured at all, verification is skipped so local
+ *   development and previews without the keys still work.
+ * - If it IS configured, a missing or invalid token is rejected. Allowing a
+ *   missing token would let a bot bypass verification entirely by simply
+ *   omitting `cf-turnstile-response`.
+ * - If Cloudflare's endpoint errors or times out, we fail open so an outage
+ *   on their side doesn't take down lead capture.
  */
 export async function verifyTurnstile(token: string | null): Promise<boolean> {
   if (!turnstileConfig.success) {
@@ -15,11 +19,10 @@ export async function verifyTurnstile(token: string | null): Promise<boolean> {
   }
 
   if (!token) {
-    // Turnstile IS configured but the client didn't send a token
-    // (widget failed to load, blocked by an ad blocker, etc).
-    // Still fail open rather than blocking the submission.
-    console.warn("[Turnstile] No token provided — allowing submission.");
-    return true;
+    // Turnstile IS configured but the client didn't send a token. Reject:
+    // otherwise bots could skip the widget and submit directly.
+    console.warn("[Turnstile] No token provided — rejecting submission.");
+    return false;
   }
 
   try {
@@ -41,6 +44,12 @@ export async function verifyTurnstile(token: string | null): Promise<boolean> {
     }
 
     const data = await res.json();
+    if (data.success !== true) {
+      console.warn(
+        "[Turnstile] Verification rejected:",
+        data["error-codes"] ?? "unknown",
+      );
+    }
     return data.success === true;
   } catch (err) {
     console.error("[Turnstile] Verification errored:", err);

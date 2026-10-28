@@ -9,6 +9,7 @@ import {
   type ActionState,
 } from "@/app/actions/early-access";
 import { useSearchParams } from "next/navigation";
+import HoneypotField from "@/app/components/HoneypotField";
 
 const initialState: ActionState = { success: false, message: "" };
 
@@ -71,6 +72,7 @@ export default function GetAccessForm() {
     >
       {!state.success ? (
         <form action={formAction} className="space-y-6">
+          <HoneypotField />
           <div className="grid md:grid-cols-2 gap-6">
             <div className="space-y-2">
               <label className="block text-[15px] font-bold text-ugle-slate">
@@ -142,7 +144,7 @@ export default function GetAccessForm() {
                 }}
                 onError={() => {
                   console.warn(
-                    "[Turnstile] Widget failed to load — submission will proceed without a token.",
+                    "[Turnstile] Widget failed to load — submission may be rejected.",
                   );
                 }}
               />

@@ -43,17 +43,20 @@ test.describe("Newsletter signup (Footer)", () => {
     }
   });
 
-  test("still succeeds when Turnstile blocks (fails open per design)", async ({
+  test("rejects a bot submission when the honeypot is filled", async ({
     page,
   }) => {
     await page.goto("/");
-    const testEmail = "delivered@resend.dev";
-    await page.fill('input[name="email"]', testEmail);
+    await page.fill('input[name="email"]', "bot@example.com");
+    await page
+      .locator('input[name="ugle-honeypot"]')
+      .fill("spam", { force: true });
     await page.click('button[type="submit"]');
 
-    await expect(page.getByText("Successfully Joined")).toBeVisible({
+    await expect(page.getByText(/verification failed/i)).toBeVisible({
       timeout: 10_000,
     });
+    await expect(page.getByText("Successfully Joined")).not.toBeVisible();
   });
 
   test("shows validation error for invalid email", async ({ page }) => {

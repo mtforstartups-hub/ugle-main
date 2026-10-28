@@ -23,6 +23,10 @@ vi.mock("@/app/lib/turnstile", () => ({
   verifyTurnstile: vi.fn().mockResolvedValue(true),
 }));
 
+vi.mock("@/app/lib/honeypot", () => ({
+  validateHoneypot: vi.fn().mockReturnValue({ isValid: true, error: null }),
+}));
+
 describe("newsletterJoin", () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -33,6 +37,7 @@ describe("newsletterJoin", () => {
   it("succeeds when both email and sheets succeed", async () => {
     const formData = new FormData();
     formData.set("email", "test@example.com");
+    formData.set("ugle-honeypot", ""); // honeypot field
 
     const result = await newsletterJoin(
       { success: false, message: "" },
@@ -51,6 +56,7 @@ describe("newsletterJoin", () => {
   it("rejects invalid email without calling Turnstile", async () => {
     const formData = new FormData();
     formData.set("email", "not-an-email");
+    formData.set("ugle-honeypot", ""); // honeypot field
 
     const result = await newsletterJoin(
       { success: false, message: "" },
@@ -68,6 +74,7 @@ describe("newsletterJoin", () => {
 
     const formData = new FormData();
     formData.set("email", "test2@example.com");
+    formData.set("ugle-honeypot", ""); // honeypot field
 
     const result = await newsletterJoin(
       { success: false, message: "" },
@@ -84,6 +91,7 @@ describe("newsletterJoin", () => {
 
     const formData = new FormData();
     formData.set("email", "test3@example.com");
+    formData.set("ugle-honeypot", ""); // honeypot field
 
     const result = await newsletterJoin(
       { success: false, message: "" },
@@ -99,6 +107,7 @@ describe("newsletterJoin", () => {
 
     const formData = new FormData();
     formData.set("email", "bot@example.com");
+    formData.set("ugle-honeypot", ""); // honeypot field
 
     const result = await newsletterJoin(
       { success: false, message: "" },

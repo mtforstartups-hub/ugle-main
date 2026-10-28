@@ -12,12 +12,13 @@ describe("verifyTurnstile", () => {
     global.fetch = originalFetch;
   });
 
-  it("fails open and returns true when token is null or empty", async () => {
+  it("rejects when Turnstile is configured but no token is provided", async () => {
+    // vitest.setup.ts configures a secret key, so verification is enforced.
     const resultNull = await verifyTurnstile(null);
-    expect(resultNull).toBe(true);
+    expect(resultNull).toBe(false);
 
     const resultEmpty = await verifyTurnstile("");
-    expect(resultEmpty).toBe(true);
+    expect(resultEmpty).toBe(false);
   });
 
   it("returns true when Cloudflare confirms valid token", async () => {

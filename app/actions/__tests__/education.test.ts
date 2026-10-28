@@ -23,6 +23,10 @@ vi.mock("@/app/lib/turnstile", () => ({
   verifyTurnstile: vi.fn().mockResolvedValue(true),
 }));
 
+vi.mock("@/app/lib/honeypot", () => ({
+  validateHoneypot: vi.fn().mockReturnValue({ isValid: true, error: null }),
+}));
+
 describe("applyForEducationAccess", () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -38,6 +42,7 @@ describe("applyForEducationAccess", () => {
     formData.set("institution", "Stanford University");
     formData.set("role", "Student");
     formData.set("proofUrl", "https://stanford.edu/students/elena");
+    formData.set("ugle-honeypot", ""); // honeypot field
     return formData;
   };
 

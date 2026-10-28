@@ -23,7 +23,9 @@ export abstract class GoogleSheetsService {
     await sheets.spreadsheets.values.append({
       spreadsheetId: GOOGLE_SPREADSHEET_ID,
       range: `${this.sheetName}!A1`,
-      valueInputOption: "USER_ENTERED",
+      // RAW prevents user-supplied values such as "=IMPORTXML(...)" from being
+      // interpreted as spreadsheet formulas (formula injection).
+      valueInputOption: "RAW",
       requestBody: {
         values: [values],
       },

@@ -23,6 +23,10 @@ vi.mock("@/app/lib/turnstile", () => ({
   verifyTurnstile: vi.fn().mockResolvedValue(true),
 }));
 
+vi.mock("@/app/lib/honeypot", () => ({
+  validateHoneypot: vi.fn().mockReturnValue({ isValid: true, error: null }),
+}));
+
 describe("requestEarlyAccess", () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -37,6 +41,7 @@ describe("requestEarlyAccess", () => {
     formData.set("email", "david@creative.studio");
     formData.set("phone", "+1 555-0199");
     formData.set("os", os);
+    formData.set("ugle-honeypot", ""); // honeypot field
     return formData;
   };
 
