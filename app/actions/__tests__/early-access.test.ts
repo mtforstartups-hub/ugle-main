@@ -2,8 +2,21 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { requestEarlyAccess } from "../early-access";
 import { verifyTurnstile } from "@/app/lib/turnstile";
 
-const mockBatchSend = vi.fn().mockResolvedValue({ data: [{}, {}], error: null });
-const mockSheetAppend = vi.fn().mockResolvedValue(undefined);
+const {
+  mockBatchSend,
+  mockSheetAppend,
+  mockSheetEmails,
+  mockGetClientIp,
+  mockCheckIpRateLimit,
+} = vi.hoisted(() => ({
+  mockBatchSend: vi.fn().mockResolvedValue({ data: [{}, {}], error: null }),
+  mockSheetAppend: vi.fn().mockResolvedValue(undefined),
+  mockSheetEmails: vi.fn().mockResolvedValue([] as string[]),
+  mockGetClientIp: vi.fn().mockResolvedValue("198.51.100.42"),
+  mockCheckIpRateLimit: vi
+    .fn()
+    .mockResolvedValue({ allowed: true, retryAfterSeconds: 0 }),
+}));
 
 vi.mock("resend", () => ({
   Resend: class {
@@ -16,6 +29,7 @@ vi.mock("resend", () => ({
 vi.mock("@/app/lib/sheets", () => ({
   EarlyAccessSheetService: class {
     append = mockSheetAppend;
+    emails = mockSheetEmails;
   },
 }));
 
@@ -27,11 +41,25 @@ vi.mock("@/app/lib/honeypot", () => ({
   validateHoneypot: vi.fn().mockReturnValue({ isValid: true, error: null }),
 }));
 
+vi.mock("@/app/lib/client-ip", () => ({
+  getClientIp: mockGetClientIp,
+}));
+
+vi.mock("@/app/lib/ip-rate-limit", () => ({
+  checkIpRateLimit: mockCheckIpRateLimit,
+}));
+
 describe("requestEarlyAccess", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockBatchSend.mockResolvedValue({ data: [{}, {}], error: null });
     mockSheetAppend.mockResolvedValue(undefined);
+    mockSheetEmails.mockResolvedValue([]);
+    mockGetClientIp.mockResolvedValue("198.51.100.42");
+    mockCheckIpRateLimit.mockResolvedValue({
+      allowed: true,
+      retryAfterSeconds: 0,
+    });
   });
 
   const validFormData = (os = "macOS") => {
@@ -157,6 +185,39 @@ describe("requestEarlyAccess", () => {
 
     expect(result.success).toBe(false);
     expect(result.error).toMatch(/verification failed/i);
+    expect(mockBatchSend).not.toHaveBeenCalled();
+    expect(mockSheetAppend).not.toHaveBeenCalled();
+  });
+
+  it("rejects duplicate trial requests for the same email", async () => {
+    mockSheetEmails.mockResolvedValueOnce(["david@creative.studio"]);
+
+    const formData = validFormData();
+    const result = await requestEarlyAccess(
+      { success: false, message: "" },
+      formData,
+    );
+
+    expect(result.success).toBe(false);
+    expect(result.error).toMatch(/already been requested/i);
+    expect(mockBatchSend).not.toHaveBeenCalled();
+    expect(mockSheetAppend).not.toHaveBeenCalled();
+  });
+
+  it("rejects submission when IP rate limit is exceeded", async () => {
+    mockCheckIpRateLimit.mockResolvedValueOnce({
+      allowed: false,
+      retryAfterSeconds: 120,
+    });
+
+    const formData = validFormData();
+    const result = await requestEarlyAccess(
+      { success: false, message: "" },
+      formData,
+    );
+
+    expect(result.success).toBe(false);
+    expect(result.error).toMatch(/Too many trial requests from your network/i);
     expect(mockBatchSend).not.toHaveBeenCalled();
     expect(mockSheetAppend).not.toHaveBeenCalled();
   });

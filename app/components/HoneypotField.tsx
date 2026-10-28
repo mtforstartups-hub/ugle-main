@@ -23,17 +23,16 @@ const hiddenStyles: CSSProperties = {
 export default function HoneypotField() {
   return (
     <div aria-hidden="true" style={hiddenStyles}>
-      <label htmlFor={HONEYPOT_FIELD_NAME}>
+      <label>
         Leave this field empty
+        <input
+          type="text"
+          name={HONEYPOT_FIELD_NAME}
+          tabIndex={-1}
+          autoComplete="off"
+          defaultValue=""
+        />
       </label>
-      <input
-        id={HONEYPOT_FIELD_NAME}
-        type="text"
-        name={HONEYPOT_FIELD_NAME}
-        tabIndex={-1}
-        autoComplete="off"
-        defaultValue=""
-      />
     </div>
   );
 }

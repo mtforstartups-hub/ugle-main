@@ -1,5 +1,6 @@
 import "server-only";
 import { headers } from "next/headers";
+import { isIP } from "node:net";
 
 /**
  * Best-effort client IP for abuse checks.
@@ -35,12 +36,25 @@ function firstToken(value: string | null): string | null {
   const first = value.split(",")[0]?.trim();
   if (!first) return null;
 
-  // Strip an optional port: "203.0.113.4:51234" or "[2001:db8::1]:443"
-  const withoutPort = first.startsWith("[")
-    ? first.slice(0, first.indexOf("]") + 1).replace(/^\[|\]$/g, "")
-    : first.replace(/:\d+$/, "");
+  const withoutPort = stripPort(first);
 
   return withoutPort.length > 0 && withoutPort.length <= 64
     ? withoutPort
     : null;
+}
+
+// Strip an optional port: "203.0.113.4:51234" or "[2001:db8::1]:443"
+function stripPort(addr: string): string {
+  // Bracketed IPv6, with or without a port: "[::1]:8080" or "[::1]"
+  if (addr.startsWith("[")) {
+    const end = addr.indexOf("]");
+    return end === -1 ? addr : addr.slice(1, end);
+  }
+
+  // Already a valid bare IPv4 or IPv6 address, so there's no port to strip
+  if (isIP(addr)) return addr;
+
+  // "1.2.3.4:80" or "example.com:80"
+  const i = addr.lastIndexOf(":");
+  return i === -1 ? addr : addr.slice(0, i);
 }
