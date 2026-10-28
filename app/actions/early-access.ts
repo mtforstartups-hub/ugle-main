@@ -15,6 +15,8 @@ import {
   isDisposableEmail,
 } from "@/app/lib/disposable-email";
 import { normalizeEmail } from "@/app/lib/email-identity";
+import { getClientIp } from "@/app/lib/client-ip";
+import { checkIpRateLimit } from "@/app/lib/ip-rate-limit";
 import {
   emailField,
   singleLineText,
@@ -90,7 +92,23 @@ export async function requestEarlyAccess(
       return { success: false, message: errorMsg, error: errorMsg };
     }
 
-    // 4. Rate limiting per normalized email - prevent flooding. Normalizing
+    // 4. IP rate limiting (Cloudflare Worker + Durable Object). This is the
+    // layer that catches one person cycling through fresh email addresses.
+    // Skipped when no client IP is available or the limiter isn't configured.
+    const clientIp = await getClientIp();
+    if (clientIp) {
+      const ipCheck = await checkIpRateLimit(clientIp);
+      if (!ipCheck.allowed) {
+        const minutes = Math.max(
+          1,
+          Math.ceil(ipCheck.retryAfterSeconds / 60),
+        );
+        const message = `Too many trial requests from your network. Please try again in about ${minutes} minute${minutes === 1 ? "" : "s"}.`;
+        return { success: false, message, error: message };
+      }
+    }
+
+    // 5. Rate limiting per normalized email - prevent flooding. Normalizing
     // first means aliases of the same inbox share one bucket.
     const normalizedEmail = normalizeEmail(result.data.email);
     const rateLimitCheck = rateLimit(`earlyaccess-${normalizedEmail}`, {
@@ -108,7 +126,7 @@ export async function requestEarlyAccess(
 
     const { firstName, lastName, email, phone, os } = result.data;
 
-    // 5. One trial request per inbox. Aliases (j.doe+trial2@gmail.com) resolve
+    // 6. One trial request per inbox. Aliases (j.doe+trial2@gmail.com) resolve
     // to the same normalized address, so they can't farm extra trials.
     // Fail open if the lookup itself fails: a Sheets outage must not block
     // genuine signups.
@@ -139,7 +157,7 @@ export async function requestEarlyAccess(
       timeStyle: "short",
     }).format(new Date());
 
-    // 6. Subjects are built from these already-validated fields: Zod rejects
+    // 7. Subjects are built from these already-validated fields: Zod rejects
     // any control characters, so they can't carry header-injection payloads.
     // Run both operations concurrently and independently.
     // Promise.allSettled guarantees both are always attempted regardless of

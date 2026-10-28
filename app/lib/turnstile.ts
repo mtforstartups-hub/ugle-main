@@ -49,6 +49,8 @@ export async function verifyTurnstile(token: string | null): Promise<boolean> {
         "[Turnstile] Verification rejected:",
         data["error-codes"] ?? "unknown",
       );
+    } else {
+      console.info("[Turnstile] Verification passed.");
     }
     return data.success === true;
   } catch (err) {

@@ -35,6 +35,8 @@ const eslintConfig = defineConfig([
     "playwright-report/**",
     "playwrite-report-temp/**",
     "test-results/**",
+    // Standalone Cloudflare Worker; typechecked via workers/rate-limit/tsconfig.json
+    "workers/**",
   ]),
 ]);
 
