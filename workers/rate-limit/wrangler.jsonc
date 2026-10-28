@@ -12,7 +12,10 @@
     "HOURLY_LIMIT": "5",
     "DAILY_LIMIT": "15",
     // How long a claimed email stays reserved (one trial per inbox).
-    "CLAIM_TTL_DAYS": "180"
+    "CLAIM_TTL_DAYS": "180",
+    // How long a provisional (in-flight) claim lives. It is promoted to the
+    // full TTL once the lead is captured, and self-expires otherwise.
+    "PROVISIONAL_CLAIM_MINUTES": "10"
   },
   "durable_objects": {
     "bindings": [

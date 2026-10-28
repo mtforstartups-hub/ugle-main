@@ -16,7 +16,8 @@
  *                      body: { namespace: "email", key, provisional?: boolean }
  *   POST /confirm   -> { confirmed }             upgrade a provisional claim
  *                                                to the full TTL
- *   POST /release   -> { released }              release a reservation
+ *   POST /release   -> { released }              release a provisional claim
+ *                      body: { namespace: "email", key, force?: boolean }
  *   POST /backfill  -> { inserted, invalid }     one-off import of existing
  *                      body: { emails: string[] } (already normalized)
  *
@@ -58,6 +59,9 @@ const RETENTION_DAYS = 2;
 
 const DEFAULT_CLAIM_TTL_DAYS = 180;
 const DEFAULT_PROVISIONAL_MINUTES = 10;
+
+/** Grace period when deciding whether a claim is still provisional. */
+const RELEASE_SLACK_MS = 60 * 1000;
 
 const MAX_BODY_BYTES = 256 * 1024;
 const MAX_BACKFILL_BATCH = 500;
@@ -352,7 +356,19 @@ export default {
       } else if (url.pathname === "/confirm") {
         payload = { key: hashedKey, ttlSeconds: fullTtlSeconds };
       } else if (url.pathname === "/release") {
-        payload = { key: hashedKey };
+        // Only provisional reservations may be released by the app. A claim
+        // that was already confirmed carries the full TTL and must not be
+        // deleted by a late/duplicate release call. `force` exists for manual
+        // operator recovery (e.g. unblocking your own address while testing).
+        payload = {
+          key: hashedKey,
+          ttlSeconds:
+            positiveInt(
+              env.PROVISIONAL_CLAIM_MINUTES,
+              DEFAULT_PROVISIONAL_MINUTES,
+            ) * 60,
+          force: body.force === true,
+        };
       } else {
         payload = {
           key: hashedKey,
@@ -464,7 +480,11 @@ export class RateLimiter implements DurableObject {
           positiveInt(payload.ttlSeconds, DEFAULT_CLAIM_TTL_DAYS * 86400),
         );
       case "/release":
-        return this.release(key);
+        return this.release(
+          key,
+          positiveInt(payload.ttlSeconds, DEFAULT_PROVISIONAL_MINUTES * 60),
+          payload.force === true,
+        );
       case "/check":
         return this.check(key, payload);
       default:
@@ -514,11 +534,34 @@ export class RateLimiter implements DurableObject {
     return json({ confirmed: rows.length > 0 });
   }
 
-  private release(key: string): Response {
+  /**
+   * Release a reservation. By default only claims that are still provisional
+   * (expiring within the provisional window) are deleted, so a late or
+   * duplicate release from a failed request cannot erase a claim that a
+   * concurrent request already confirmed for the full TTL.
+   */
+  private release(
+    key: string,
+    provisionalSeconds: number,
+    force: boolean,
+  ): Response {
+    if (force) {
+      const rows = this.ctx.storage.sql
+        .exec<{ key: string }>(
+          "DELETE FROM claims WHERE key = ? RETURNING key",
+          key,
+        )
+        .toArray();
+
+      return json({ released: rows.length > 0, forced: true });
+    }
+
+    const cutoff = Date.now() + provisionalSeconds * 1000 + RELEASE_SLACK_MS;
     const rows = this.ctx.storage.sql
       .exec<{ key: string }>(
-        "DELETE FROM claims WHERE key = ? RETURNING key",
+        "DELETE FROM claims WHERE key = ? AND expires_at <= ? RETURNING key",
         key,
+        cutoff,
       )
       .toArray();
 

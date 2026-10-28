@@ -151,6 +151,29 @@ describe("ip-rate-limit", () => {
       });
     });
 
+    it("only sends the provisional flag when asked", async () => {
+      const fetchMock = mockFetch({
+        ok: true,
+        json: async () => ({ claimed: true }),
+      });
+      const { claimEmail } = await loadModule();
+
+      await claimEmail("johndoe@gmail.com", { provisional: true });
+
+      expect(JSON.parse(fetchMock.mock.calls[0][1].body)).toEqual({
+        key: "johndoe@gmail.com",
+        namespace: "email",
+        provisional: true,
+      });
+
+      await claimEmail("johndoe@gmail.com", { provisional: false });
+
+      expect(JSON.parse(fetchMock.mock.calls[1][1].body)).toEqual({
+        key: "johndoe@gmail.com",
+        namespace: "email",
+      });
+    });
+
     it("falls back when the worker has not been redeployed (404)", async () => {
       mockFetch({ ok: false, status: 404 });
       const { claimEmail } = await loadModule();
@@ -168,6 +191,55 @@ describe("ip-rate-limit", () => {
       expect(await claimEmail("johndoe@gmail.com")).toEqual({
         durable: false,
         claimed: false,
+      });
+    });
+  });
+
+  describe("confirmEmailClaim", () => {
+    it("promotes the claim and reports the durable answer", async () => {
+      const fetchMock = mockFetch({
+        ok: true,
+        json: async () => ({ confirmed: true }),
+      });
+      const { confirmEmailClaim } = await loadModule();
+
+      const result = await confirmEmailClaim("johndoe@gmail.com");
+
+      expect(result).toEqual({ durable: true, confirmed: true });
+      expect(fetchMock.mock.calls[0][0]).toBe(`${WORKER_URL}/confirm`);
+      expect(JSON.parse(fetchMock.mock.calls[0][1].body)).toEqual({
+        key: "johndoe@gmail.com",
+        namespace: "email",
+      });
+    });
+
+    it("reports a lapsed claim as not confirmed", async () => {
+      mockFetch({ ok: true, json: async () => ({ confirmed: false }) });
+      const { confirmEmailClaim } = await loadModule();
+
+      expect(await confirmEmailClaim("johndoe@gmail.com")).toEqual({
+        durable: true,
+        confirmed: false,
+      });
+    });
+
+    it("fails open when the worker errors", async () => {
+      mockFetch({ ok: false, status: 503 });
+      const { confirmEmailClaim } = await loadModule();
+
+      expect(await confirmEmailClaim("johndoe@gmail.com")).toEqual({
+        durable: false,
+        confirmed: false,
+      });
+    });
+
+    it("fails open on an unexpected response shape", async () => {
+      mockFetch({ ok: true, json: async () => ({ ok: true }) });
+      const { confirmEmailClaim } = await loadModule();
+
+      expect(await confirmEmailClaim("johndoe@gmail.com")).toEqual({
+        durable: false,
+        confirmed: false,
       });
     });
   });

@@ -20,6 +20,7 @@ import {
   checkEmailRateLimit,
   checkIpRateLimit,
   claimEmail,
+  confirmEmailClaim,
   releaseEmailClaim,
 } from "@/app/lib/ip-rate-limit";
 import {
@@ -169,8 +170,13 @@ export async function requestEarlyAccess(
     // the O(n) full-column read on every submission and no longer depends on
     // Sheets being configured. Sheets is only read as a fallback when the
     // claim store is unavailable.
+    //
+    // The claim is provisional (short TTL): it is promoted to the full TTL only
+    // after a lead has actually been captured. If this request dies between
+    // here and the integrations, the reservation lapses on its own instead of
+    // blocking the inbox for months.
     let claimHeld = false;
-    const claim = await claimEmail(normalizedEmail);
+    const claim = await claimEmail(normalizedEmail, { provisional: true });
 
     if (claim.durable) {
       if (!claim.claimed) {
@@ -302,6 +308,19 @@ export async function requestEarlyAccess(
         "[EarlyAccess] ALERT: lead saved to Sheets but no emails were sent - admin was not notified.",
         { os, submittedAt },
       );
+    }
+
+    // Promote the provisional reservation to the full TTL now that the lead is
+    // captured. Awaited so a serverless runtime cannot drop it, but never fatal:
+    // if it fails the claim simply lapses early.
+    if (claimHeld) {
+      const confirmation = await confirmEmailClaim(normalizedEmail);
+      if (!confirmation.confirmed) {
+        console.warn(
+          "[EarlyAccess] Claim confirmation failed - duplicate protection for this email lapses when the provisional claim expires.",
+          { durable: confirmation.durable },
+        );
+      }
     }
 
     return { success: true, message: "Request submitted" };

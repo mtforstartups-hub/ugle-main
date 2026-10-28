@@ -41,6 +41,22 @@ export type EmailClaimResult = {
   claimed: boolean;
 };
 
+export type EmailConfirmResult = {
+  /** True only when the durable store answered. */
+  durable: boolean;
+  /** True only when a live claim was promoted to the full TTL. */
+  confirmed: boolean;
+};
+
+export type ClaimOptions = {
+  /**
+   * Reserve for a few minutes only. The caller must promote it with
+   * `confirmEmailClaim` once the lead has been captured, so a crash between
+   * claiming and sending cannot block the inbox for the full TTL.
+   */
+  provisional?: boolean;
+};
+
 const ALLOWED: IpRateLimitResult = {
   allowed: true,
   retryAfterSeconds: 0,
@@ -131,13 +147,20 @@ export function checkEmailRateLimit(
 /**
  * Atomically reserve an email in the durable store. Two concurrent requests
  * for the same inbox cannot both get `{ durable: true, claimed: true }`.
+ *
+ * Pass `{ provisional: true }` to reserve for minutes instead of the full TTL.
+ * A provisional claim self-expires, so a request that dies before it can send
+ * anything never blocks the inbox. Promote it with `confirmEmailClaim` on
+ * success, or call `releaseEmailClaim` on a clean failure.
  */
 export async function claimEmail(
   normalizedEmail: string,
+  options: ClaimOptions = {},
 ): Promise<EmailClaimResult> {
   const res = await post("/claim", {
     key: normalizedEmail,
     namespace: "email",
+    ...(options.provisional ? { provisional: true } : {}),
   });
 
   if (!res) return { durable: false, claimed: false };
@@ -153,6 +176,34 @@ export async function claimEmail(
   }
 
   return { durable: true, claimed: data.claimed };
+}
+
+/**
+ * Promote a provisional claim to the full TTL. Failing to confirm only means
+ * the reservation lapses early (duplicate protection weakens briefly); it must
+ * never turn a captured lead into a user-visible error.
+ */
+export async function confirmEmailClaim(
+  normalizedEmail: string,
+): Promise<EmailConfirmResult> {
+  const res = await post("/confirm", {
+    key: normalizedEmail,
+    namespace: "email",
+  });
+
+  if (!res) return { durable: false, confirmed: false };
+
+  if (!res.ok) {
+    console.error("[RateLimit] Confirm responded:", res.status);
+    return { durable: false, confirmed: false };
+  }
+
+  const data = await readJson(res);
+  if (typeof data?.confirmed !== "boolean") {
+    return { durable: false, confirmed: false };
+  }
+
+  return { durable: true, confirmed: data.confirmed };
 }
 
 /**
