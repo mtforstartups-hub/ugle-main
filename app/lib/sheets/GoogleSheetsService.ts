@@ -4,13 +4,12 @@ import { sheetsConfig } from "@/app/lib/env";
 export abstract class GoogleSheetsService {
   protected abstract readonly sheetName: string;
 
-  protected async appendRow(values: string[]): Promise<void> {
+  private getClient() {
     if (!sheetsConfig.success) {
       throw new Error("Google Sheets is not configured");
     }
 
-    const { GOOGLE_CLIENT_EMAIL, GOOGLE_PRIVATE_KEY, GOOGLE_SPREADSHEET_ID } =
-      sheetsConfig.data;
+    const { GOOGLE_CLIENT_EMAIL, GOOGLE_PRIVATE_KEY } = sheetsConfig.data;
 
     const auth = new google.auth.JWT({
       email: GOOGLE_CLIENT_EMAIL,
@@ -18,10 +17,17 @@ export abstract class GoogleSheetsService {
       scopes: ["https://www.googleapis.com/auth/spreadsheets"],
     });
 
-    const sheets = google.sheets({ version: "v4", auth });
+    return {
+      sheets: google.sheets({ version: "v4", auth }),
+      spreadsheetId: sheetsConfig.data.GOOGLE_SPREADSHEET_ID,
+    };
+  }
+
+  protected async appendRow(values: string[]): Promise<void> {
+    const { sheets, spreadsheetId } = this.getClient();
 
     await sheets.spreadsheets.values.append({
-      spreadsheetId: GOOGLE_SPREADSHEET_ID,
+      spreadsheetId,
       range: `${this.sheetName}!A1`,
       // RAW prevents user-supplied values such as "=IMPORTXML(...)" from being
       // interpreted as spreadsheet formulas (formula injection).
@@ -30,5 +36,20 @@ export abstract class GoogleSheetsService {
         values: [values],
       },
     });
+  }
+
+  /**
+   * Read a single column (e.g. "C") as a flat list of strings.
+   * Empty cells are returned as empty strings so indexes stay meaningful.
+   */
+  protected async readColumn(column: string): Promise<string[]> {
+    const { sheets, spreadsheetId } = this.getClient();
+
+    const res = await sheets.spreadsheets.values.get({
+      spreadsheetId,
+      range: `${this.sheetName}!${column}:${column}`,
+    });
+
+    return (res.data.values ?? []).map((row) => String(row[0] ?? ""));
   }
 }

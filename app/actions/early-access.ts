@@ -1,7 +1,7 @@
 "use server";
 import * as z from "zod";
 import { getResendClient } from "@/app/lib/resend";
-import { resendConfig } from "@/app/lib/env";
+import { resendConfig, sheetsConfig } from "@/app/lib/env";
 import {
   EarlyAccessConfirmationEmail,
   EarlyAccessAdminNotificationEmail,
@@ -11,6 +11,11 @@ import { verifyTurnstile } from "@/app/lib/turnstile";
 import { rateLimit } from "@/app/lib/rate-limit";
 import { validateHoneypot } from "@/app/lib/honeypot";
 import {
+  DISPOSABLE_EMAIL_MESSAGE,
+  isDisposableEmail,
+} from "@/app/lib/disposable-email";
+import { normalizeEmail } from "@/app/lib/email-identity";
+import {
   emailField,
   singleLineText,
   subjectText,
@@ -19,7 +24,12 @@ import {
 const earlyAccessSchema = z.object({
   firstName: subjectText("First name is required"),
   lastName: subjectText("Last name is required"),
-  email: emailField(),
+  // Trial requests are the main abuse target: block throwaway inboxes so one
+  // person can't farm unlimited trials with disposable aliases.
+  email: emailField().refine(
+    (value) => !isDisposableEmail(value),
+    DISPOSABLE_EMAIL_MESSAGE,
+  ),
   phone: singleLineText("Contact number is required", 30),
   os: z.enum(["macOS", "Windows"], {
     error: "Please select your primary OS",
@@ -80,8 +90,10 @@ export async function requestEarlyAccess(
       return { success: false, message: errorMsg, error: errorMsg };
     }
 
-    // 4. Rate limiting per email - prevent flooding
-    const rateLimitCheck = rateLimit(`earlyaccess-${result.data.email}`, {
+    // 4. Rate limiting per normalized email - prevent flooding. Normalizing
+    // first means aliases of the same inbox share one bucket.
+    const normalizedEmail = normalizeEmail(result.data.email);
+    const rateLimitCheck = rateLimit(`earlyaccess-${normalizedEmail}`, {
       limit: 3,
       interval: 60 * 60 * 1000, // 1 hour
     });
@@ -95,13 +107,39 @@ export async function requestEarlyAccess(
     }
 
     const { firstName, lastName, email, phone, os } = result.data;
+
+    // 5. One trial request per inbox. Aliases (j.doe+trial2@gmail.com) resolve
+    // to the same normalized address, so they can't farm extra trials.
+    // Fail open if the lookup itself fails: a Sheets outage must not block
+    // genuine signups.
+    if (sheetsConfig.success && normalizedEmail) {
+      try {
+        const existingEmails = await new EarlyAccessSheetService().emails();
+        const alreadyRequested = existingEmails.some(
+          (existing) => normalizeEmail(existing) === normalizedEmail,
+        );
+
+        if (alreadyRequested) {
+          return {
+            success: false,
+            message:
+              "A trial has already been requested with this email. Contact support if you need help accessing it.",
+            error:
+              "A trial has already been requested with this email. Contact support if you need help accessing it.",
+          };
+        }
+      } catch (err) {
+        console.error("[EarlyAccess] Duplicate email check failed:", err);
+      }
+    }
+
     const submittedAt = new Intl.DateTimeFormat("en-IN", {
       timeZone: "Asia/Kolkata",
       dateStyle: "medium",
       timeStyle: "short",
     }).format(new Date());
 
-    // 5. Subjects are built from these already-validated fields: Zod rejects
+    // 6. Subjects are built from these already-validated fields: Zod rejects
     // any control characters, so they can't carry header-injection payloads.
     // Run both operations concurrently and independently.
     // Promise.allSettled guarantees both are always attempted regardless of
