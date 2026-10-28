@@ -16,6 +16,11 @@ test.describe("Request Trial / Early Access Form (/request-trial)", () => {
     await form.locator('input[name="phone"]').fill("+1 415-555-0134");
     await form.locator('input[name="os"][value="macOS"]').check();
 
+    // Wait for Turnstile widget to populate token
+    await expect(form.locator('input[name="cf-turnstile-response"]')).not.toHaveValue("", {
+      timeout: 10_000,
+    });
+
     // Submit form
     await form.getByRole("button", { name: /request access/i }).click();
 

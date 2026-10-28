@@ -23,6 +23,10 @@ vi.mock("@/app/lib/turnstile", () => ({
   verifyTurnstile: vi.fn().mockResolvedValue(true),
 }));
 
+vi.mock("@/app/lib/honeypot", () => ({
+  validateHoneypot: vi.fn().mockReturnValue({ isValid: true, error: null }),
+}));
+
 describe("requestDemo", () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -38,6 +42,7 @@ describe("requestDemo", () => {
     formData.set("company", "Broadcast News");
     formData.set("teamSize", "50-100");
     formData.set("currentSearch", "Manual review of daily audio/video footage");
+    formData.set("ugle-honeypot", ""); // honeypot field
     return formData;
   };
 

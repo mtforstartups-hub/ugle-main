@@ -9,6 +9,7 @@ import {
   type ActionState,
 } from "@/app/actions/early-access";
 import { useSearchParams } from "next/navigation";
+import HoneypotField from "@/app/components/HoneypotField";
 
 const initialState: ActionState = { success: false, message: "" };
 
@@ -56,6 +57,8 @@ export default function GetAccessForm() {
   );
   const turnstileRef = useRef<TurnstileInstance>(null);
 
+  // Turnstile tokens are single-use. After a failed submission the token has
+  // already been consumed, so refresh it before the user tries again.
   useEffect(() => {
     if (!isPending && state.error) {
       turnstileRef.current?.reset();
@@ -71,25 +74,36 @@ export default function GetAccessForm() {
     >
       {!state.success ? (
         <form action={formAction} className="space-y-6">
+          <HoneypotField />
           <div className="grid md:grid-cols-2 gap-6">
             <div className="space-y-2">
-              <label className="block text-[15px] font-bold text-ugle-slate">
+              <label
+                htmlFor="early-access-first-name"
+                className="block text-[15px] font-bold text-ugle-slate"
+              >
                 First name
               </label>
               <input
+                id="early-access-first-name"
                 type="text"
                 name="firstName"
+                autoComplete="given-name"
                 required
                 className={inputClass}
               />
             </div>
             <div className="space-y-2">
-              <label className="block text-[15px] font-bold text-ugle-slate">
+              <label
+                htmlFor="early-access-last-name"
+                className="block text-[15px] font-bold text-ugle-slate"
+              >
                 Last name
               </label>
               <input
+                id="early-access-last-name"
                 type="text"
                 name="lastName"
+                autoComplete="family-name"
                 required
                 className={inputClass}
               />
@@ -97,17 +111,37 @@ export default function GetAccessForm() {
           </div>
 
           <div className="space-y-2">
-            <label className="block text-[15px] font-bold text-ugle-slate">
+            <label
+              htmlFor="early-access-email"
+              className="block text-[15px] font-bold text-ugle-slate"
+            >
               Email
             </label>
-            <input type="email" name="email" required className={inputClass} />
+            <input
+              id="early-access-email"
+              type="email"
+              name="email"
+              autoComplete="email"
+              required
+              className={inputClass}
+            />
           </div>
 
           <div className="space-y-2">
-            <label className="block text-[15px] font-bold text-ugle-slate">
+            <label
+              htmlFor="early-access-phone"
+              className="block text-[15px] font-bold text-ugle-slate"
+            >
               Contact number
             </label>
-            <input type="tel" name="phone" required className={inputClass} />
+            <input
+              id="early-access-phone"
+              type="tel"
+              name="phone"
+              autoComplete="tel"
+              required
+              className={inputClass}
+            />
           </div>
 
           <div className="space-y-2">
@@ -127,7 +161,13 @@ export default function GetAccessForm() {
           </div>
 
           {state.error && (
-            <p className="text-red-500 text-sm font-medium">{state.error}</p>
+            <p
+              role="alert"
+              aria-live="polite"
+              className="text-red-500 text-sm font-medium"
+            >
+              {state.error}
+            </p>
           )}
 
           {/* Turnstile widget */}
@@ -142,8 +182,13 @@ export default function GetAccessForm() {
                 }}
                 onError={() => {
                   console.warn(
-                    "[Turnstile] Widget failed to load — submission will proceed without a token.",
+                    "[Turnstile] Widget failed to load — submission may be rejected.",
                   );
+                }}
+                onExpire={() => {
+                  // Refresh before the user submits so an expired token does
+                  // not turn into a confusing "Verification failed" error.
+                  turnstileRef.current?.reset();
                 }}
               />
             </div>

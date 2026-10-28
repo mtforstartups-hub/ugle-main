@@ -9,6 +9,7 @@ import {
   submitContactInquiry,
   type ActionState,
 } from "@/app/actions/contact";
+import HoneypotField from "./HoneypotField";
 
 export const FormInput = ({
   label,
@@ -159,6 +160,7 @@ export default function ContactForm() {
           action={formAction}
           className="bg-white border border-ugle-light/60 rounded-2xl p-8 md:p-10 max-w-xl mx-auto shadow-sm"
         >
+          <HoneypotField />
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <FormInput id="firstName" label="First Name" />
             <FormInput id="lastName" label="Last Name" />
@@ -200,7 +202,7 @@ export default function ContactForm() {
                 }}
                 onError={() => {
                   console.warn(
-                    "[Turnstile] Widget failed to load — submission will proceed without a token.",
+                    "[Turnstile] Widget failed to load — submission may be rejected.",
                   );
                 }}
               />

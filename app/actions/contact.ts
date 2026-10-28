@@ -8,14 +8,23 @@ import {
 } from "../components/email-templates/ContactTemplates";
 import { ContactFormSheetService } from "@/app/lib/sheets";
 import { verifyTurnstile } from "@/app/lib/turnstile";
+import { rateLimit } from "@/app/lib/rate-limit";
+import { validateHoneypot } from "@/app/lib/honeypot";
+import {
+  emailField,
+  paragraphText,
+  subjectText,
+} from "@/app/lib/validation";
 
 const contactSchema = z.object({
-  firstName: z.string().min(1, "First name is required"),
-  lastName: z.string().min(1, "Last name is required"),
-  email: z.email("Invalid email address"),
-  company: z.string().min(1, "Company name is required"),
-  seats: z.string().min(1, "Please select a seat count"),
-  usecase: z.string().min(1, "Please describe your use case"),
+  firstName: subjectText("First name is required"),
+  lastName: subjectText("Last name is required"),
+  email: emailField(),
+  company: subjectText("Company name is required"),
+  seats: subjectText("Please select a seat count", 50),
+  usecase: paragraphText("Please describe your use case"),
+  // Honeypot field - bots will fill this in, humans will leave empty
+  "ugle-honeypot": z.string().optional(),
 });
 
 export type ActionState = {
@@ -24,6 +33,14 @@ export type ActionState = {
   error?: string;
 };
 
+/**
+ * Extract honeypot value from formData
+ * The honeypot field should be hidden via CSS; bots typically fill it in.
+ */
+function getHoneypotValue(formData: FormData): string | null {
+  return formData.get("ugle-honeypot") as string | null;
+}
+
 export async function submitContactInquiry(
   initialState: ActionState,
   formData: FormData,
@@ -31,8 +48,10 @@ export async function submitContactInquiry(
   try {
     const turnstileToken = formData.get("cf-turnstile-response") as
       string | null;
-    const isHuman = await verifyTurnstile(turnstileToken);
+    const honeypotValue = getHoneypotValue(formData);
 
+    // 1. Turnstile verification
+    const isHuman = await verifyTurnstile(turnstileToken);
     if (!isHuman) {
       return {
         success: false,
@@ -41,13 +60,37 @@ export async function submitContactInquiry(
       };
     }
 
-    const raw = Object.fromEntries(formData);
+    // 2. Honeypot check - bots often fill hidden fields
+    const honeypotResult = validateHoneypot(honeypotValue);
+    if (!honeypotResult.isValid) {
+      return {
+        success: false,
+        message: honeypotResult.error,
+        error: honeypotResult.error,
+      };
+    }
 
+    // 3. Zod schema validation (includes honeypot optional field)
+    const raw = Object.fromEntries(formData);
     const result = contactSchema.safeParse(raw);
 
     if (!result.success) {
       const errorMsg = result.error.issues[0]?.message || "Invalid input";
       return { success: false, message: errorMsg, error: errorMsg };
+    }
+
+    // 4. Rate limiting per email - prevent flooding
+    const rateLimitCheck = rateLimit(`contact-${result.data.email}`, {
+      limit: 3,
+      interval: 60 * 60 * 1000, // 1 hour
+    });
+    if (!rateLimitCheck.success) {
+      return {
+        success: false,
+        message:
+          "You've submitted too many requests. Please wait an hour before trying again.",
+        error: "Rate limit exceeded",
+      };
     }
 
     const { firstName, lastName, email, company, seats, usecase } = result.data;
@@ -57,6 +100,8 @@ export async function submitContactInquiry(
       timeStyle: "short",
     }).format(new Date());
 
+    // 5. Subjects are built from these already-validated fields: Zod rejects
+    // any control characters, so they can't carry header-injection payloads.
     const [emailResult, sheetsResult] = await Promise.allSettled([
       resendConfig.success
         ? getResendClient()!.batch.send([

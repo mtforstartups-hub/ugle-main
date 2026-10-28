@@ -9,6 +9,9 @@ export interface EarlyAccessRow {
   submittedAt: string;
 }
 
+/** Column C, matching the order used by `append`. */
+const EMAIL_COLUMN = "C";
+
 export class EarlyAccessSheetService extends GoogleSheetsService {
   // Must match the exact tab name in your Google Spreadsheet
   protected readonly sheetName = "EarlyAccess";
@@ -26,5 +29,10 @@ export class EarlyAccessSheetService extends GoogleSheetsService {
       data.os,
       data.submittedAt,
     ]);
+  }
+
+  /** Every email address already recorded in the sheet, in row order. */
+  async emails(): Promise<string[]> {
+    return this.readColumn(EMAIL_COLUMN);
   }
 }

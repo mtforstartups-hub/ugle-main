@@ -4,6 +4,7 @@ import { AnimatePresence, motion } from "motion/react";
 import { Check, Loader2 } from "lucide-react";
 import { Turnstile, type TurnstileInstance } from "@marsidev/react-turnstile";
 import { newsletterJoin, type ActionState } from "@/app/actions/newsletter";
+import HoneypotField from "@/app/components/HoneypotField";
 
 const initialState: ActionState = {
   success: false,
@@ -52,6 +53,7 @@ export default function FooterNewsletter() {
           exit={{ opacity: 0 }}
           className="flex flex-col w-full relative"
         >
+          <HoneypotField />
           <div className="flex flex-col sm:flex-row w-full gap-2 sm:gap-0 relative">
             <input
               type="email"
@@ -82,9 +84,9 @@ export default function FooterNewsletter() {
           </div>
 
           {/* Only mount the widget when a real site key is configured.
-              If NEXT_PUBLIC_TURNSTILE_SITE_KEY is missing, the form still
-              submits fine — the server action fails open when the token
-              (or the whole Turnstile config) is absent. */}
+              If NEXT_PUBLIC_TURNSTILE_SITE_KEY is missing, the server
+              action skips verification when Turnstile isn't configured;
+              otherwise a missing token is rejected. */}
           {TURNSTILE_SITE_KEY && (
             <div className="mt-2">
               <Turnstile
@@ -96,11 +98,11 @@ export default function FooterNewsletter() {
                 }}
                 onError={() => {
                   // Cloudflare's script itself failed to load/verify
-                  // (network blip, ad blocker, etc). Don't block the
-                  // user — just log it and let the server-side
-                  // fail-open logic handle the missing token.
+                  // (network blip, ad blocker, etc). The server now rejects
+                  // a missing token when Turnstile is configured, so tell
+                  // the user rather than silently dropping their submission.
                   console.warn(
-                    "[Turnstile] Widget failed to load — submission will proceed without a token.",
+                    "[Turnstile] Widget failed to load — submission may be rejected.",
                   );
                 }}
               />

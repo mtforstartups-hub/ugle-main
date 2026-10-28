@@ -54,3 +54,8 @@ node_modules/
 skills-lock.json
 opencode.json
 playwrite-report-temp/
+
+# Wrangler local state (workers/rate-limit)
+.wrangler/
+workers/rate-limit/.dev.vars
+
