@@ -12,8 +12,8 @@ const { mockAction, mockReset, nav } = vi.hoisted(() => ({
   nav: { platform: null as string | null },
 }));
 
-vi.mock("@/app/actions/early-access", () => ({
-  requestEarlyAccess: mockAction,
+vi.mock("@/app/actions/request-trial", () => ({
+  requestTrial: mockAction,
 }));
 
 vi.mock("next/navigation", () => ({
@@ -199,7 +199,7 @@ describe("GetAccessForm", () => {
     expect(
       container.querySelector("h2")?.textContent,
     ).toBe("Request Received");
-    expect(container.textContent).toMatch(/we'll be in touch soon/i);
+    expect(container.textContent).toContain("Request submitted");
   });
 
   it("shows a server error in an alert and does not show success", async () => {
@@ -237,7 +237,34 @@ describe("GetAccessForm", () => {
     fillValidForm();
     await submitForm();
 
-    expect(mockReset).not.toHaveBeenCalled();
+        expect(mockReset).not.toHaveBeenCalled();
+  });
+
+  it("displays server error message even when state.error is omitted", async () => {
+    mockAction.mockResolvedValueOnce({
+      success: false,
+      message: "Network rate limit exceeded",
+    });
+
+    fillValidForm();
+    await submitForm();
+
+    const alert = container.querySelector("[role='alert']");
+    expect(alert?.textContent).toBe("Network rate limit exceeded");
+    expect(mockReset).toHaveBeenCalledTimes(1);
+  });
+
+  it("displays custom message on success such as cap_reached", async () => {
+    const capMessage = "We're overwhelmed by the response - email support@ugle.ai";
+    mockAction.mockResolvedValueOnce({
+      success: true,
+      message: capMessage,
+    });
+
+    fillValidForm();
+    await submitForm();
+
+    expect(container.textContent).toContain(capMessage);
   });
 
   it("disables the submit button and shows a pending label while in flight", async () => {

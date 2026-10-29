@@ -185,22 +185,22 @@ function DetailRow({ label, value, isLast, highlight }: DetailRowProps) {
 }
 
 // ---------------------------------------------------------------------------
-// EarlyAccessConfirmationEmail — sent to the requester
+// TrialConfirmationEmail — sent to the requester
 // ---------------------------------------------------------------------------
 
-export interface EarlyAccessConfirmationEmailProps {
+export interface TrialConfirmationEmailProps {
   firstName: string;
   email: string;
   os: string;
 }
 
-export function EarlyAccessConfirmationEmail({
+export function TrialConfirmationEmail({
   firstName,
   email,
   os,
-}: EarlyAccessConfirmationEmailProps) {
+}: TrialConfirmationEmailProps) {
   return (
-    <EmailShell badge="Early Access">
+    <EmailShell badge="Free Trial">
       {/* Hero */}
       <tr>
         <td style={{ padding: "44px 48px 28px" }}>
@@ -238,8 +238,7 @@ export function EarlyAccessConfirmationEmail({
               letterSpacing: "-0.02em",
             }}
           >
-            You&apos;re in, {firstName}! Your early access invitation is on its
-            way.
+            You&apos;re in, {firstName}! Your 15-day trial is on its way.
           </h1>
 
           <p
@@ -397,10 +396,10 @@ export function EarlyAccessConfirmationEmail({
 }
 
 // ---------------------------------------------------------------------------
-// EarlyAccessAdminNotificationEmail — sent to admin inbox
+// TrialAdminNotificationEmail — sent to admin inbox
 // ---------------------------------------------------------------------------
 
-export interface EarlyAccessAdminNotificationEmailProps {
+export interface TrialAdminNotificationEmailProps {
   firstName: string;
   lastName: string;
   email: string;
@@ -409,14 +408,14 @@ export interface EarlyAccessAdminNotificationEmailProps {
   submittedAt: string;
 }
 
-export function EarlyAccessAdminNotificationEmail({
+export function TrialAdminNotificationEmail({
   firstName,
   lastName,
   email,
   phone,
   os,
   submittedAt,
-}: EarlyAccessAdminNotificationEmailProps) {
+}: TrialAdminNotificationEmailProps) {
   return (
     <EmailShell badge="Admin Notification">
       <tr>
@@ -431,7 +430,7 @@ export function EarlyAccessAdminNotificationEmail({
               letterSpacing: "-0.02em",
             }}
           >
-            New early access request
+            New Trial request
           </h1>
           <p
             style={{
@@ -512,12 +511,11 @@ export function EarlyAccessAdminNotificationEmail({
   );
 }
 
-
 // ---------------------------------------------------------------------------
-// EarlyAccessAdminAlertEmail — sent when ugle-api requires manual action
+// TrialAdminAlertEmail — sent when ugle-api requires manual action
 // ---------------------------------------------------------------------------
 
-export interface EarlyAccessAdminAlertEmailProps {
+export interface TrialAdminAlertEmailProps {
   firstName: string;
   lastName: string;
   email: string;
@@ -527,7 +525,7 @@ export interface EarlyAccessAdminAlertEmailProps {
   notice: string;
 }
 
-export function EarlyAccessAdminAlertEmail({
+export function TrialAdminAlertEmail({
   firstName,
   lastName,
   email,
@@ -535,7 +533,7 @@ export function EarlyAccessAdminAlertEmail({
   os,
   submittedAt,
   notice,
-}: EarlyAccessAdminAlertEmailProps) {
+}: TrialAdminAlertEmailProps) {
   return (
     <EmailShell badge="Action Required">
       <tr>

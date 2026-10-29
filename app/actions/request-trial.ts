@@ -2,12 +2,6 @@
 import * as z from "zod";
 import { getResendClient } from "@/app/lib/resend";
 import { resendConfig, trialApiConfig } from "@/app/lib/env";
-import {
-  EarlyAccessConfirmationEmail,
-  EarlyAccessAdminNotificationEmail,
-  EarlyAccessAdminAlertEmail,
-} from "../components/email-templates/EarlyAccessTemplates";
-import { EarlyAccessSheetService } from "@/app/lib/sheets";
 import { verifyTurnstile } from "@/app/lib/turnstile";
 import { validateHoneypot } from "@/app/lib/honeypot";
 import {
@@ -18,8 +12,14 @@ import { normalizeEmail } from "@/app/lib/email-identity";
 import { getClientIp } from "@/app/lib/client-ip";
 import { checkIpRateLimit } from "@/app/lib/ip-rate-limit";
 import { emailField, singleLineText, subjectText } from "@/app/lib/validation";
+import {
+  TrialAdminAlertEmail,
+  TrialAdminNotificationEmail,
+  TrialConfirmationEmail,
+} from "../components/email-templates/TrialTemplates";
+import { TrialSheetService } from "@/app/lib/sheets";
 
-const earlyAccessSchema = z.object({
+const requestTrialSchema = z.object({
   firstName: subjectText("First name is required"),
   lastName: subjectText("Last name is required"),
   // Trial requests are the main abuse target: block throwaway inboxes so one
@@ -114,8 +114,8 @@ async function callTrialApi(params: {
     last_name: params.lastName,
     email: params.email,
     phone: params.phone,
-    // API spec: os must be lowercase "macos"; field is informational for others.
-    os: params.os === "macOS" ? "macos" : params.os.toLowerCase(),
+    // API spec: os must be the literal string "macos" (the only accepted value).
+    os: "macos",
   });
 
   const headers = {
@@ -141,7 +141,10 @@ async function callTrialApi(params: {
   ): Promise<TrialApiOutcome | null> {
     if (!res) return null; // transient failure — eligible for retry
 
-    if (res.status === 202) return { status: "ok" };
+    if (res.status === 202) {
+      console.log("[RequestTrial] Trial API accepted the request (202).");
+      return { status: "ok" };
+    }
 
     if (res.status === 503) {
       let json: { error?: string } = {};
@@ -159,7 +162,7 @@ async function callTrialApi(params: {
     // 400 / 401: not retried (would fail the same way)
     if (res.status === 400 || res.status === 401) {
       console.error(
-        "[EarlyAccess] Trial API rejected the request:",
+        "[RequestTrial] Trial API rejected the request:",
         res.status,
       );
       return { status: "needs_manual_check" };
@@ -204,7 +207,7 @@ async function sendAdminAlertEmail(params: {
         from: `Ugle <${resendConfig.data.RESEND_FROM_EMAIL}>`,
         to: resendConfig.data.ADMIN_EMAIL,
         subject: params.subject,
-        react: EarlyAccessAdminAlertEmail({
+        react: TrialAdminAlertEmail({
           firstName: params.firstName,
           lastName: params.lastName,
           email: params.email,
@@ -216,7 +219,7 @@ async function sendAdminAlertEmail(params: {
       },
     ]);
   } catch (err) {
-    console.error("[EarlyAccess] Failed to send admin alert email:", err);
+    console.error("[RequestTrial] Failed to send admin alert email:", err);
   }
 }
 
@@ -224,7 +227,7 @@ async function sendAdminAlertEmail(params: {
 // Server action
 // ---------------------------------------------------------------------------
 
-export async function requestEarlyAccess(
+export async function requestTrial(
   initialState: ActionState,
   formData: FormData,
 ): Promise<ActionState> {
@@ -249,7 +252,7 @@ export async function requestEarlyAccess(
     // Turnstile: a typo in the form must not consume the single-use token
     // (otherwise the corrected retry fails verification).
     const raw = Object.fromEntries(formData);
-    const result = earlyAccessSchema.safeParse(raw);
+    const result = requestTrialSchema.safeParse(raw);
 
     if (!result.success) {
       const errorMsg = result.error.issues[0]?.message || "Invalid input";
@@ -312,14 +315,14 @@ export async function requestEarlyAccess(
             {
               from: `Ugle <${resendConfig.data.RESEND_FROM_EMAIL}>`,
               to: [email],
-              subject: `${firstName}, you're on the Ugle early access list ⚡`,
-              react: EarlyAccessConfirmationEmail({ firstName, email, os }),
+              subject: `${firstName}, your Ugle trial request is confirmed ⚡`,
+              react: TrialConfirmationEmail({ firstName, email, os }),
             },
             {
               from: `Ugle <${resendConfig.data.RESEND_FROM_EMAIL}>`,
               to: resendConfig.data.ADMIN_EMAIL,
-              subject: `New early access request: ${firstName} ${lastName} (${os})`,
-              react: EarlyAccessAdminNotificationEmail({
+              subject: `New trial request: ${firstName} ${lastName} (${os})`,
+              react: TrialAdminNotificationEmail({
                 firstName,
                 lastName,
                 email,
@@ -333,7 +336,7 @@ export async function requestEarlyAccess(
 
         // Operation 2: Append lead row to Google Sheets
         (async () => {
-          return new EarlyAccessSheetService().append({
+          return new TrialSheetService().append({
             firstName,
             lastName,
             email,
@@ -361,21 +364,24 @@ export async function requestEarlyAccess(
       sentEmailCount(emailResult.value) === 2;
 
     if (emailResult.status === "rejected") {
-      console.error("[EarlyAccess] Resend failed:", emailResult.reason);
+      console.error("[RequestTrial] Resend failed:", emailResult.reason);
     } else if (emailResult.value.error) {
       console.error(
-        "[EarlyAccess] Resend batch error:",
+        "[RequestTrial] Resend batch error:",
         emailResult.value.error,
       );
     }
 
     if (sheetsResult.status === "rejected") {
-      console.error("[EarlyAccess] Google Sheets failed:", sheetsResult.reason);
+      console.error(
+        "[RequestTrial] Google Sheets failed:",
+        sheetsResult.reason,
+      );
     }
 
     if (!emailOk && sheetsResult.status === "fulfilled") {
       console.error(
-        "[EarlyAccess] ALERT: lead saved to Sheets but no emails were sent — admin was not notified.",
+        "[RequestTrial] ALERT: lead saved to Sheets but no emails were sent — admin was not notified.",
         { os, submittedAt },
       );
     }
@@ -384,7 +390,7 @@ export async function requestEarlyAccess(
     //    Only cap_reached changes the visitor's message (trial.md).
     if (trialApiResult.status === "rejected") {
       console.error(
-        "[EarlyAccess] Trial API call threw:",
+        "[RequestTrial] Trial API call threw:",
         trialApiResult.reason,
       );
     }
@@ -408,7 +414,7 @@ export async function requestEarlyAccess(
       case "trials_disabled": {
         const notice =
           "ugle-api did NOT accept this request — send the key by hand";
-        console.error(`[EarlyAccess] ALERT: ${notice}`, { os, submittedAt });
+        console.error(`[RequestTrial] ALERT: ${notice}`, { os, submittedAt });
         await sendAdminAlertEmail({
           firstName,
           lastName,
@@ -424,7 +430,7 @@ export async function requestEarlyAccess(
 
       case "needs_manual_check": {
         const notice = `ugle-api may not have accepted this request. Run \`ugle-api trial reissue --email ${email}\` first: hand-send a key only if it reports no trial.`;
-        console.error(`[EarlyAccess] ALERT: ${notice}`, { os, submittedAt });
+        console.error(`[RequestTrial] ALERT: ${notice}`, { os, submittedAt });
         await sendAdminAlertEmail({
           firstName,
           lastName,
@@ -450,7 +456,7 @@ export async function requestEarlyAccess(
         };
     }
   } catch (err) {
-    console.error("[EarlyAccess] Unexpected error:", err);
+    console.error("[RequestTrial] Unexpected error:", err);
     return {
       success: false,
       message: "Something went wrong. Please try again.",

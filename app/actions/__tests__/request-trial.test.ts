@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { requestEarlyAccess } from "../early-access";
+import { requestTrial } from "../request-trial";
 import { verifyTurnstile } from "@/app/lib/turnstile";
 import * as envModule from "@/app/lib/env";
 
@@ -31,7 +31,7 @@ vi.mock("resend", () => ({
 }));
 
 vi.mock("@/app/lib/sheets", () => ({
-  EarlyAccessSheetService: class {
+  TrialSheetService: class {
     append = mockSheetAppend;
     emails = vi.fn().mockResolvedValue([]);
   },
@@ -69,10 +69,10 @@ function validFormData(overrides: Record<string, string> = {}) {
 }
 
 function submit(formData: FormData) {
-  return requestEarlyAccess(initial, formData);
+  return requestTrial(initial, formData);
 }
 
-describe("requestEarlyAccess", () => {
+describe("requestTrial", () => {
   const originalFetch = global.fetch;
 
   beforeEach(() => {
@@ -120,7 +120,7 @@ describe("requestEarlyAccess", () => {
       // Admin notification
       expect(emailPayload[1].to).toEqual(["admin@ugle.ai"]);
       expect(emailPayload[1].subject).toBe(
-        "New early access request: David Miller (macOS)",
+        "New trial request: David Miller (macOS)",
       );
       expect(emailPayload[1].react).toBeTruthy();
     });
