@@ -171,7 +171,7 @@ describe("requestEarlyAccess", () => {
           TRIAL_API_SECRET: "test-trial-secret",
           TRIAL_API_URL: "https://trial-api.internal/v1/trials",
         },
-      } as any);
+      } as unknown as typeof envModule.trialApiConfig);
     });
 
     it("returns 202 ok with 'Check your inbox for your key.'", async () => {
