@@ -17,6 +17,11 @@ test.describe("Demo Request Form (/request-demo)", () => {
     await form.locator('select[name="teamSize"]').selectOption("6-20 editors");
     await form.locator('textarea[name="currentSearch"]').fill("Keyword searching through local storage drives and Premiere projects.");
 
+    // Wait for Turnstile widget to populate token
+    await expect(form.locator('input[name="cf-turnstile-response"]')).not.toHaveValue("", {
+      timeout: 10_000,
+    });
+
     // Submit form
     await form.getByRole("button", { name: /submit organisation request/i }).click();
 

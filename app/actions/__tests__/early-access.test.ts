@@ -10,6 +10,7 @@ const {
   mockCheckIpRateLimit,
   mockCheckEmailRateLimit,
   mockClaimEmail,
+  mockConfirmEmailClaim,
   mockReleaseEmailClaim,
 } = vi.hoisted(() => ({
   mockBatchSend: vi.fn().mockResolvedValue({
@@ -32,6 +33,9 @@ const {
   mockClaimEmail: vi
     .fn()
     .mockResolvedValue({ durable: false, claimed: false }),
+  mockConfirmEmailClaim: vi
+    .fn()
+    .mockResolvedValue({ durable: true, confirmed: true }),
   mockReleaseEmailClaim: vi.fn().mockResolvedValue(undefined),
 }));
 
@@ -65,6 +69,7 @@ vi.mock("@/app/lib/ip-rate-limit", () => ({
   checkIpRateLimit: mockCheckIpRateLimit,
   checkEmailRateLimit: mockCheckEmailRateLimit,
   claimEmail: mockClaimEmail,
+  confirmEmailClaim: mockConfirmEmailClaim,
   releaseEmailClaim: mockReleaseEmailClaim,
 }));
 
@@ -112,6 +117,10 @@ describe("requestEarlyAccess", () => {
       checked: false,
     });
     mockClaimEmail.mockResolvedValue({ durable: false, claimed: false });
+    mockConfirmEmailClaim.mockResolvedValue({
+      durable: true,
+      confirmed: true,
+    });
     mockReleaseEmailClaim.mockResolvedValue(undefined);
     vi.mocked(verifyTurnstile).mockResolvedValue(true);
   });
@@ -323,6 +332,24 @@ describe("requestEarlyAccess", () => {
       expect(result.success).toBe(false);
       expect(result.error).toMatch(/already been requested/i);
     });
+
+    it("claims provisionally so a crashed request cannot block the inbox for months", async () => {
+      mockClaimEmail.mockResolvedValueOnce({ durable: true, claimed: true });
+
+      await submit(validFormData());
+
+      expect(mockClaimEmail).toHaveBeenCalledWith("david@creative.studio", {
+        provisional: true,
+      });
+    });
+
+    it("does not confirm the claim when the email was already taken", async () => {
+      mockClaimEmail.mockResolvedValueOnce({ durable: true, claimed: false });
+
+      await submit(validFormData());
+
+      expect(mockConfirmEmailClaim).not.toHaveBeenCalled();
+    });
   });
 
   describe("rate limiting", () => {
@@ -440,6 +467,8 @@ describe("requestEarlyAccess", () => {
 
       expect(result.success).toBe(false);
       expect(mockReleaseEmailClaim).toHaveBeenCalledWith("david@creative.studio");
+      // A released claim must never be promoted.
+      expect(mockConfirmEmailClaim).not.toHaveBeenCalled();
     });
 
     it("keeps the durable claim when the lead was captured", async () => {
@@ -449,6 +478,53 @@ describe("requestEarlyAccess", () => {
       const result = await submit(validFormData());
 
       expect(result.success).toBe(true);
+      expect(mockReleaseEmailClaim).not.toHaveBeenCalled();
+    });
+
+    it("confirms the provisional claim once the lead is captured", async () => {
+      mockClaimEmail.mockResolvedValueOnce({ durable: true, claimed: true });
+
+      const result = await submit(validFormData());
+
+      expect(result.success).toBe(true);
+      expect(mockConfirmEmailClaim).toHaveBeenCalledWith(
+        "david@creative.studio",
+      );
+    });
+
+    it("confirms when only the email was delivered", async () => {
+      mockClaimEmail.mockResolvedValueOnce({ durable: true, claimed: true });
+      mockSheetAppend.mockRejectedValueOnce(new Error("Sheets down"));
+
+      await submit(validFormData());
+
+      expect(mockConfirmEmailClaim).toHaveBeenCalledTimes(1);
+    });
+
+    it("still succeeds and persists a full-TTL claim when confirmation fails", async () => {
+      mockClaimEmail
+        .mockResolvedValueOnce({ durable: true, claimed: true })
+        .mockResolvedValueOnce({ durable: true, claimed: true });
+      mockConfirmEmailClaim.mockResolvedValueOnce({
+        durable: true,
+        confirmed: false,
+      });
+
+      const result = await submit(validFormData());
+
+      expect(result.success).toBe(true);
+      expect(mockClaimEmail).toHaveBeenCalledTimes(2);
+      expect(mockClaimEmail).toHaveBeenLastCalledWith("david@creative.studio");
+    });
+
+    it("does not confirm when the claim store was unavailable", async () => {
+      // Fallback path: nothing was reserved, so there is nothing to promote.
+      mockClaimEmail.mockResolvedValueOnce({ durable: false, claimed: false });
+
+      const result = await submit(validFormData());
+
+      expect(result.success).toBe(true);
+      expect(mockConfirmEmailClaim).not.toHaveBeenCalled();
       expect(mockReleaseEmailClaim).not.toHaveBeenCalled();
     });
 

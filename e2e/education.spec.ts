@@ -7,16 +7,23 @@ test.describe("Education Application Form (/education)", () => {
     // Verify page heading
     await expect(page.getByRole("heading", { name: "Educational Pack" })).toBeVisible();
 
+    const form = page.locator("form").first();
+
     // Fill form fields
-    await page.locator("#firstName").fill("Elena");
-    await page.locator("#lastName").fill("Rostova");
-    await page.locator("#email").fill("delivered@resend.dev");
-    await page.locator("#institution").fill("Stanford University");
-    await page.locator("#role").selectOption("Student");
-    await page.locator("#proofUrl").fill("https://stanford.edu/~elena");
+    await form.locator("#firstName").fill("Elena");
+    await form.locator("#lastName").fill("Rostova");
+    await form.locator("#email").fill("delivered@resend.dev");
+    await form.locator("#institution").fill("Stanford University");
+    await form.locator("#role").selectOption("Student");
+    await form.locator("#proofUrl").fill("https://stanford.edu/~elena");
+
+    // Wait for Turnstile widget to populate token
+    await expect(form.locator('input[name="cf-turnstile-response"]')).not.toHaveValue("", {
+      timeout: 10_000,
+    });
 
     // Submit form
-    await page.getByRole("button", { name: /submit application/i }).click();
+    await form.getByRole("button", { name: /submit application/i }).click();
 
     // Verify submission success state
     await expect(page.getByRole("heading", { name: "Application Received" })).toBeVisible({

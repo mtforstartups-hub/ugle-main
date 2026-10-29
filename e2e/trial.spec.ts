@@ -9,10 +9,12 @@ test.describe("Request Trial / Early Access Form (/request-trial)", () => {
 
     const form = page.locator("form").first();
 
+    const testEmail = `trial_${Date.now()}@resend.dev`;
+
     // Fill form fields scoped to the trial form
     await form.locator('input[name="firstName"]').fill("Alex");
     await form.locator('input[name="lastName"]').fill("Rivera");
-    await form.locator('input[name="email"]').fill("delivered@resend.dev");
+    await form.locator('input[name="email"]').fill(testEmail);
     await form.locator('input[name="phone"]').fill("+1 415-555-0134");
     await form.locator('input[name="os"][value="macOS"]').check();
 

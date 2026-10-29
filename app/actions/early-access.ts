@@ -20,6 +20,7 @@ import {
   checkEmailRateLimit,
   checkIpRateLimit,
   claimEmail,
+  confirmEmailClaim,
   releaseEmailClaim,
 } from "@/app/lib/ip-rate-limit";
 import {
@@ -74,7 +75,12 @@ function duplicateEmailResponse(): ActionState {
  * per-email results as `{ data: { data: [{ id }] } }`.
  */
 function sentEmailCount(response: unknown): number {
-  const body = (response as { data?: { data?: unknown } } | null)?.data;
+  if (!response || typeof response !== "object") return 0;
+  const res = response as { data?: unknown };
+  if (Array.isArray(res.data)) {
+    return res.data.length;
+  }
+  const body = res.data as { data?: unknown } | null | undefined;
   return body && Array.isArray(body.data) ? body.data.length : 0;
 }
 
@@ -169,8 +175,13 @@ export async function requestEarlyAccess(
     // the O(n) full-column read on every submission and no longer depends on
     // Sheets being configured. Sheets is only read as a fallback when the
     // claim store is unavailable.
+    //
+    // The claim is provisional (short TTL): it is promoted to the full TTL only
+    // after a lead has actually been captured. If this request dies between
+    // here and the integrations, the reservation lapses on its own instead of
+    // blocking the inbox for months.
     let claimHeld = false;
-    const claim = await claimEmail(normalizedEmail);
+    const claim = await claimEmail(normalizedEmail, { provisional: true });
 
     if (claim.durable) {
       if (!claim.claimed) {
@@ -302,6 +313,29 @@ export async function requestEarlyAccess(
         "[EarlyAccess] ALERT: lead saved to Sheets but no emails were sent - admin was not notified.",
         { os, submittedAt },
       );
+    }
+
+    // Promote the provisional reservation to the full TTL now that the lead is
+    // captured. Awaited so a serverless runtime cannot drop it, but never fatal:
+    // if it fails the claim simply lapses early.
+    if (claimHeld) {
+      const confirmation = await confirmEmailClaim(normalizedEmail);
+      if (!confirmation.confirmed) {
+        // `/confirm` only promotes a claim that is still live, so the
+        // provisional reservation may have lapsed while the lead was being
+        // captured. Persist a full-TTL claim directly so a later `/claim`
+        // still sees this captured lead instead of accepting a duplicate.
+        // Best-effort: the submission already succeeded, so never change the
+        // response.
+        const reconciled = await claimEmail(normalizedEmail);
+
+        if (!reconciled.durable || !reconciled.claimed) {
+          console.warn(
+            "[EarlyAccess] Claim confirmation failed and could not be reconciled - duplicate protection for this email may lapse when the provisional claim expires.",
+            { durable: confirmation.durable },
+          );
+        }
+      }
     }
 
     return { success: true, message: "Request submitted" };

@@ -7,10 +7,18 @@ test.describe("Newsletter signup (Footer)", () => {
 
     await page.goto("/");
 
+    const form = page.locator("footer form");
+
     // Turnstile is set to the "always passes" test sitekey in .env.test / default mock,
     // so the invisible widget resolves without a real challenge.
-    await page.fill('input[name="email"]', testEmail);
-    await page.click('button[type="submit"]');
+    await form.locator('input[name="email"]').fill(testEmail);
+
+    // Wait for Turnstile widget to populate token
+    await expect(form.locator('input[name="cf-turnstile-response"]')).not.toHaveValue("", {
+      timeout: 10_000,
+    });
+
+    await form.locator('button[type="submit"]').click();
 
     // Wait for success UI
     await expect(page.getByText("Successfully Joined")).toBeVisible({
@@ -32,13 +40,16 @@ test.describe("Newsletter signup (Footer)", () => {
 
     if (
       process.env.RESEND_API_KEY &&
-      !process.env.RESEND_API_KEY.startsWith("re_test_mock")
+      !process.env.RESEND_API_KEY.startsWith("re_test_mock") &&
+      !process.env.RESEND_API_KEY.startsWith("re_test_xxx")
     ) {
       const res = await fetch("https://api.resend.com/emails", {
         headers: { Authorization: `Bearer ${process.env.RESEND_API_KEY}` },
       });
-      const { data } = await res.json();
-      const sent = data.find((e: { to: string[] }) => e.to.includes(testEmail));
+      expect(res.ok).toBe(true);
+      const body = (await res.json()) as { data?: { to: string[] }[] };
+      expect(Array.isArray(body.data)).toBe(true);
+      const sent = body.data?.find((e) => e.to.includes(testEmail));
       expect(sent).toBeTruthy();
     }
   });
