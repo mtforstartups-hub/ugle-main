@@ -22,6 +22,36 @@ export interface ChangelogRelease {
 
 export const changelogData: ChangelogRelease[] = [
   {
+    v: "v1.0.1",
+    date: "October 30, 2026",
+    items: [
+      {
+        t: "Fix",
+        text: "A free trial shows its days remaining and ends after 15 days.",
+      },
+      {
+        t: "Improvement",
+        text: "Trial licences show what a trial can do: no deactivate controls (a trial works on one Mac), and a **Buy Ugle** link to the pricing page.",
+      },
+      {
+        t: "Improvement",
+        text: "Clearer activation messages, with a **Buy Ugle** link: a Mac that already used its free trial, a trial already in use on another Mac, and an expired key each say so.",
+      },
+      {
+        t: "Improvement",
+        text: "The licence panel's actions each sit on their own line with an icon.",
+      },
+      {
+        t: "Improvement",
+        text: "The first-launch privacy note now lists every time Ugle goes online: model downloads, license activation and renewal (trial or paid), and update checks.",
+      },
+      {
+        t: "Fix",
+        text: "A connection hiccup while re-activating on the same Mac now asks you to retry instead of saying every seat is in use.",
+      },
+    ],
+  },
+  {
     v: "v1.0.0",
     date: "October 27, 2026",
     items: [
