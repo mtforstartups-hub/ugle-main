@@ -75,7 +75,12 @@ function duplicateEmailResponse(): ActionState {
  * per-email results as `{ data: { data: [{ id }] } }`.
  */
 function sentEmailCount(response: unknown): number {
-  const body = (response as { data?: { data?: unknown } } | null)?.data;
+  if (!response || typeof response !== "object") return 0;
+  const res = response as { data?: unknown };
+  if (Array.isArray(res.data)) {
+    return res.data.length;
+  }
+  const body = res.data as { data?: unknown } | null | undefined;
   return body && Array.isArray(body.data) ? body.data.length : 0;
 }
 
