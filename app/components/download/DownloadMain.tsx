@@ -47,7 +47,7 @@ export default function DownloadMain() {
               System requirements
             </h2>
             <p className="text-sm font-mono text-white/50 mb-8">
-              macOS 13.4+ · Windows 10 64-bit · v0.5.9 · September 2026
+              macOS 13.4+ · Windows 10 64-bit · v1.0.1 · October 2026
             </p>
 
             <div className="border border-white/10 rounded-xl overflow-hidden bg-white/5 backdrop-blur">
