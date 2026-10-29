@@ -11,6 +11,7 @@ const tagColorMap: Record<string, string> = {
   licence: "text-amber-600",
   license: "text-amber-600",
   removed: "text-orange-500",
+  changed: "text-amber-500",
 };
 
 function getTagClass(tag: string, customColor?: string) {

@@ -5,6 +5,7 @@ export type ChangelogTag =
   | "Fix"
   | "Licence"
   | "Removed"
+  | "Changed"
   | string;
 
 export interface ChangelogItem {
@@ -20,6 +21,52 @@ export interface ChangelogRelease {
 }
 
 export const changelogData: ChangelogRelease[] = [
+  {
+    v: "v1.0.0",
+    date: "October 27, 2026",
+    items: [
+      {
+        t: "Feature",
+        text: "Indic language pack (optional, about 701 MB): much better transcripts in Bengali, Gujarati, Hindi, Kannada, Malayalam, Marathi, Punjabi, Tamil and Telugu, with English words kept in Latin letters. Install it from the sidebar; it runs only on your computer, and Remove deletes it. Built with Indic-Transcribe Flex from Bodhan AI / AI4Bharat.",
+      },
+      {
+        t: "Feature",
+        text: "Choose a file's transcription language from the transcript editor, and re-transcribe in that language.",
+      },
+      {
+        t: "Feature",
+        text: "A new Library filter lists files whose detected language is uncertain.",
+      },
+      {
+        t: "Improvement",
+        text: "Tidier transcript header: Export and Copy sit beside the file name.",
+      },
+      {
+        t: "Fix",
+        text: "Refresh Transcript after hand edits shows the transcript as auto-generated again.",
+      },
+      {
+        t: "Fix",
+        text: "The search date filter works again: a \"From\" date no longer hides every result.",
+      },
+      {
+        t: "Fix",
+        text: "Speaker names can be confirmed or cancelled from the keyboard and with VoiceOver.",
+      },
+      {
+        t: "Improvement",
+        text: "With the Indic language pack, Hindi, Marathi, Tamil and other recordings mixed with English are recognised on Automatic even when they sound like English at first. The language menu lists Hindi as \"Hindi (also Hinglish)\".",
+      },
+      {
+        t: "Improvement",
+        text: "Clearer labels: language names in the search filter, the folder shown for copies of the same file, a plain message for damaged files, and highlighted Chinese and Japanese search words.",
+      },
+      {
+        t: "Changed",
+        text: "Ugle now needs macOS 13.4 or later (was 13.0).",
+      },
+    ],
+  },
   {
     v: "v0.6.0",
     date: "October 6, 2026",
