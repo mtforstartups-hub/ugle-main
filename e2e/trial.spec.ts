@@ -1,7 +1,7 @@
 import { test, expect } from "@playwright/test";
 
-test.describe("Request Trial / Early Access Form (/request-trial)", () => {
-  test("submits early access request with manual OS selection", async ({ page }) => {
+test.describe("Request Trial Form (/request-trial)", () => {
+  test("submits trial request with manual OS selection", async ({ page }) => {
     await page.goto("/request-trial");
 
     // Verify page heading
@@ -31,7 +31,7 @@ test.describe("Request Trial / Early Access Form (/request-trial)", () => {
       timeout: 10_000,
     });
     await expect(
-      page.getByText(/we'll be in touch soon with your early access invitation/i),
+      page.getByText(/check your inbox for your trial license key/i),
     ).toBeVisible();
   });
 

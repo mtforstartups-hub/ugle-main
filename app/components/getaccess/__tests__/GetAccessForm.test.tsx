@@ -12,8 +12,8 @@ const { mockAction, mockReset, nav } = vi.hoisted(() => ({
   nav: { platform: null as string | null },
 }));
 
-vi.mock("@/app/actions/early-access", () => ({
-  requestEarlyAccess: mockAction,
+vi.mock("@/app/actions/request-trial", () => ({
+  requestTrial: mockAction,
 }));
 
 vi.mock("next/navigation", () => ({
@@ -199,7 +199,7 @@ describe("GetAccessForm", () => {
     expect(
       container.querySelector("h2")?.textContent,
     ).toBe("Request Received");
-    expect(container.textContent).toMatch(/we'll be in touch soon/i);
+    expect(container.textContent).toMatch(/check your inbox for your trial license key/i);
   });
 
   it("shows a server error in an alert and does not show success", async () => {

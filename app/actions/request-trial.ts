@@ -1,4 +1,4 @@
-﻿"use server";
+"use server";
 import * as z from "zod";
 import { getResendClient } from "@/app/lib/resend";
 import { resendConfig, trialApiConfig } from "@/app/lib/env";
