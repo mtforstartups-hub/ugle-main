@@ -22,6 +22,11 @@ const resendSchema = z.object({
     }),
 });
 
+const trialApiSchema = z.object({
+  TRIAL_API_SECRET: z.string().min(1),
+  TRIAL_API_URL: z.url(),
+});
+
 const sheetsSchema = z.object({
   GOOGLE_CLIENT_EMAIL: z.email(),
   GOOGLE_PRIVATE_KEY: z
@@ -34,6 +39,7 @@ const sheetsSchema = z.object({
 export const turnstileConfig = turnstileSchema.safeParse(process.env);
 export const resendConfig = resendSchema.safeParse(process.env);
 export const sheetsConfig = sheetsSchema.safeParse(process.env);
+export const trialApiConfig = trialApiSchema.safeParse(process.env);
 
 // Startup warnings — visible in logs immediately, never crash anything.
 if (!turnstileConfig.success) {

@@ -1,42 +1,25 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { requestEarlyAccess } from "../early-access";
 import { verifyTurnstile } from "@/app/lib/turnstile";
+import * as envModule from "@/app/lib/env";
 
 const {
   mockBatchSend,
   mockSheetAppend,
-  mockSheetEmails,
   mockGetClientIp,
   mockCheckIpRateLimit,
-  mockCheckEmailRateLimit,
-  mockClaimEmail,
-  mockConfirmEmailClaim,
-  mockReleaseEmailClaim,
 } = vi.hoisted(() => ({
   mockBatchSend: vi.fn().mockResolvedValue({
     data: { data: [{ id: "email_1" }, { id: "email_2" }] },
     error: null,
   }),
   mockSheetAppend: vi.fn().mockResolvedValue(undefined),
-  mockSheetEmails: vi.fn().mockResolvedValue([] as string[]),
   mockGetClientIp: vi.fn().mockResolvedValue("198.51.100.42"),
   mockCheckIpRateLimit: vi.fn().mockResolvedValue({
     allowed: true,
     retryAfterSeconds: 0,
     checked: true,
   }),
-  mockCheckEmailRateLimit: vi.fn().mockResolvedValue({
-    allowed: true,
-    retryAfterSeconds: 0,
-    checked: false,
-  }),
-  mockClaimEmail: vi
-    .fn()
-    .mockResolvedValue({ durable: false, claimed: false }),
-  mockConfirmEmailClaim: vi
-    .fn()
-    .mockResolvedValue({ durable: true, confirmed: true }),
-  mockReleaseEmailClaim: vi.fn().mockResolvedValue(undefined),
 }));
 
 vi.mock("resend", () => ({
@@ -50,7 +33,7 @@ vi.mock("resend", () => ({
 vi.mock("@/app/lib/sheets", () => ({
   EarlyAccessSheetService: class {
     append = mockSheetAppend;
-    emails = mockSheetEmails;
+    emails = vi.fn().mockResolvedValue([]);
   },
 }));
 
@@ -58,19 +41,12 @@ vi.mock("@/app/lib/turnstile", () => ({
   verifyTurnstile: vi.fn().mockResolvedValue(true),
 }));
 
-// NOTE: honeypot, validation, disposable-email, email-identity and rate-limit
-// are intentionally NOT mocked - these tests exercise the real behaviour.
-
 vi.mock("@/app/lib/client-ip", () => ({
   getClientIp: mockGetClientIp,
 }));
 
 vi.mock("@/app/lib/ip-rate-limit", () => ({
   checkIpRateLimit: mockCheckIpRateLimit,
-  checkEmailRateLimit: mockCheckEmailRateLimit,
-  claimEmail: mockClaimEmail,
-  confirmEmailClaim: mockConfirmEmailClaim,
-  releaseEmailClaim: mockReleaseEmailClaim,
 }));
 
 const initial = { success: false, message: "" };
@@ -97,6 +73,8 @@ function submit(formData: FormData) {
 }
 
 describe("requestEarlyAccess", () => {
+  const originalFetch = global.fetch;
+
   beforeEach(() => {
     vi.clearAllMocks();
     mockBatchSend.mockResolvedValue({
@@ -104,28 +82,21 @@ describe("requestEarlyAccess", () => {
       error: null,
     });
     mockSheetAppend.mockResolvedValue(undefined);
-    mockSheetEmails.mockResolvedValue([]);
     mockGetClientIp.mockResolvedValue("198.51.100.42");
     mockCheckIpRateLimit.mockResolvedValue({
       allowed: true,
       retryAfterSeconds: 0,
       checked: true,
     });
-    mockCheckEmailRateLimit.mockResolvedValue({
-      allowed: true,
-      retryAfterSeconds: 0,
-      checked: false,
-    });
-    mockClaimEmail.mockResolvedValue({ durable: false, claimed: false });
-    mockConfirmEmailClaim.mockResolvedValue({
-      durable: true,
-      confirmed: true,
-    });
-    mockReleaseEmailClaim.mockResolvedValue(undefined);
     vi.mocked(verifyTurnstile).mockResolvedValue(true);
   });
 
-  describe("happy path", () => {
+  afterEach(() => {
+    global.fetch = originalFetch;
+    vi.restoreAllMocks();
+  });
+
+  describe("fallback path (ugle-api not configured)", () => {
     it("submits a macOS request and dispatches both emails + sheet row", async () => {
       const result = await submit(validFormData());
 
@@ -180,6 +151,161 @@ describe("requestEarlyAccess", () => {
         expect.objectContaining({ firstName: "David", lastName: "Miller" }),
       );
     });
+
+    it("returns error only when both Resend and Sheets fail", async () => {
+      mockBatchSend.mockRejectedValueOnce(new Error("Resend down"));
+      mockSheetAppend.mockRejectedValueOnce(new Error("Sheets down"));
+
+      const result = await submit(validFormData());
+
+      expect(result.success).toBe(false);
+      expect(result.error).toMatch(/wrong/i);
+    });
+  });
+
+  describe("ugle-api trial endpoint integration", () => {
+    beforeEach(() => {
+      vi.spyOn(envModule, "trialApiConfig", "get").mockReturnValue({
+        success: true,
+        data: {
+          TRIAL_API_SECRET: "test-trial-secret",
+          TRIAL_API_URL: "https://trial-api.internal/v1/trials",
+        },
+      } as any);
+    });
+
+    it("returns 202 ok with 'Check your inbox for your key.'", async () => {
+      global.fetch = vi.fn().mockResolvedValue({
+        status: 202,
+        ok: true,
+        json: async () => ({ status: "ok" }),
+      });
+
+      const result = await submit(validFormData());
+
+      expect(result).toEqual({
+        success: true,
+        message: "Check your inbox for your key.",
+      });
+      expect(global.fetch).toHaveBeenCalledWith(
+        "https://trial-api.internal/v1/trials",
+        expect.objectContaining({
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: "Bearer test-trial-secret",
+          },
+        }),
+      );
+    });
+
+    it("normalizes Gmail dots and +tags before calling ugle-api", async () => {
+      global.fetch = vi.fn().mockResolvedValue({
+        status: 202,
+        ok: true,
+        json: async () => ({ status: "ok" }),
+      });
+
+      await submit(validFormData({ email: "john.doe+trial@gmail.com" }));
+
+      expect(global.fetch).toHaveBeenCalledTimes(1);
+      const call = vi.mocked(global.fetch).mock.calls[0];
+      const body = JSON.parse(call[1]?.body as string);
+      expect(body.email).toBe("johndoe@gmail.com");
+      expect(body.os).toBe("macos");
+    });
+
+    it("returns overwhelmed message on 503 cap_reached", async () => {
+      global.fetch = vi.fn().mockResolvedValue({
+        status: 503,
+        json: async () => ({ error: "cap_reached" }),
+      });
+
+      const result = await submit(validFormData());
+
+      expect(result.success).toBe(true);
+      expect(result.message).toMatch(/overwhelmed/i);
+    });
+
+    it("returns 'Check your inbox for your key.' and logs admin alert on trials_disabled", async () => {
+      const consoleErrorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+      global.fetch = vi.fn().mockResolvedValue({
+        status: 503,
+        json: async () => ({ error: "trials_disabled" }),
+      });
+
+      const result = await submit(validFormData());
+
+      expect(result).toEqual({
+        success: true,
+        message: "Check your inbox for your key.",
+      });
+      expect(consoleErrorSpy).toHaveBeenCalledWith(
+        expect.stringContaining("trials_disabled"),
+        expect.any(Object),
+      );
+    });
+
+    it("retries once after 2s on 500 error and returns 'Check your inbox for your key.'", async () => {
+      const consoleErrorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+      global.fetch = vi
+        .fn()
+        .mockResolvedValueOnce({
+          status: 500,
+          json: async () => ({ error: "server_error" }),
+        })
+        .mockResolvedValueOnce({
+          status: 500,
+          json: async () => ({ error: "server_error" }),
+        });
+
+      const result = await submit(validFormData());
+
+      expect(result).toEqual({
+        success: true,
+        message: "Check your inbox for your key.",
+      });
+      expect(global.fetch).toHaveBeenCalledTimes(2);
+      expect(consoleErrorSpy).toHaveBeenCalledWith(
+        expect.stringContaining("Run `ugle-api trial reissue --email <addr>` first"),
+        expect.any(Object),
+      );
+    });
+
+    it("does not retry 400 or 401 errors", async () => {
+      const consoleErrorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+      global.fetch = vi.fn().mockResolvedValue({
+        status: 400,
+        json: async () => ({ error: "invalid_request" }),
+      });
+
+      const result = await submit(validFormData());
+
+      expect(result).toEqual({
+        success: true,
+        message: "Check your inbox for your key.",
+      });
+      expect(global.fetch).toHaveBeenCalledTimes(1);
+      expect(consoleErrorSpy).toHaveBeenCalledWith(
+        expect.stringContaining("Trial API rejected the request:"),
+        400,
+      );
+    });
+
+    it("allows the user to submit the same email multiple times without error", async () => {
+      global.fetch = vi.fn().mockResolvedValue({
+        status: 202,
+        ok: true,
+        json: async () => ({ status: "ok" }),
+      });
+
+      const first = await submit(validFormData({ email: "user@example.com" }));
+      const second = await submit(validFormData({ email: "user@example.com" }));
+
+      expect(first).toEqual({ success: true, message: "Check your inbox for your key." });
+      expect(second).toEqual({ success: true, message: "Check your inbox for your key." });
+      expect(global.fetch).toHaveBeenCalledTimes(2);
+    });
   });
 
   describe("validation", () => {
@@ -229,13 +355,17 @@ describe("requestEarlyAccess", () => {
       expect(verifyTurnstile).not.toHaveBeenCalled();
     });
 
-    it("rejects disposable email addresses", async () => {
+    it("rejects disposable email addresses without calling ugle-api", async () => {
+      const fetchSpy = vi.fn();
+      global.fetch = fetchSpy;
+
       const result = await submit(validFormData({ email: "someone@mailinator.com" }));
 
       expect(result.success).toBe(false);
       expect(result.error).toMatch(/disposable email addresses aren't accepted/i);
       expect(mockBatchSend).not.toHaveBeenCalled();
       expect(mockSheetAppend).not.toHaveBeenCalled();
+      expect(fetchSpy).not.toHaveBeenCalled();
     });
   });
 
@@ -269,90 +399,7 @@ describe("requestEarlyAccess", () => {
     });
   });
 
-  describe("duplicate prevention", () => {
-    it("rejects an email that has already requested a trial", async () => {
-      mockSheetEmails.mockResolvedValueOnce(["david@creative.studio"]);
-
-      const result = await submit(validFormData());
-
-      expect(result.success).toBe(false);
-      expect(result.error).toMatch(/already been requested/i);
-      expect(mockBatchSend).not.toHaveBeenCalled();
-      expect(mockSheetAppend).not.toHaveBeenCalled();
-    });
-
-    it("treats provider aliases as the same inbox", async () => {
-      // Gmail ignores dots and +tags: all of these are the same mailbox.
-      mockSheetEmails.mockResolvedValueOnce(["John.Doe+trial@gmail.com"]);
-
-      const result = await submit(validFormData({ email: "johndoe@gmail.com" }));
-
-      expect(result.success).toBe(false);
-      expect(result.error).toMatch(/already been requested/i);
-    });
-
-    it("fails open when the duplicate lookup itself errors", async () => {
-      mockSheetEmails.mockRejectedValueOnce(new Error("Sheets read failed"));
-
-      const result = await submit(validFormData());
-
-      expect(result.success).toBe(true);
-      expect(mockSheetAppend).toHaveBeenCalledTimes(1);
-    });
-
-    it("rejects a duplicate atomically from the durable claim store", async () => {
-      mockClaimEmail.mockResolvedValueOnce({ durable: true, claimed: false });
-
-      const result = await submit(validFormData());
-
-      expect(result.success).toBe(false);
-      expect(result.error).toMatch(/already been requested/i);
-      // No expensive full-column Sheets read is needed.
-      expect(mockSheetEmails).not.toHaveBeenCalled();
-      expect(mockBatchSend).not.toHaveBeenCalled();
-    });
-
-    it("skips the O(n) Sheets scan when the claim store answered", async () => {
-      mockClaimEmail.mockResolvedValueOnce({ durable: true, claimed: true });
-
-      const result = await submit(validFormData());
-
-      expect(result.success).toBe(true);
-      expect(mockSheetEmails).not.toHaveBeenCalled();
-      expect(mockSheetAppend).toHaveBeenCalledTimes(1);
-    });
-
-    it("protects duplicates even when Sheets is not the claim authority", async () => {
-      // Sheets isn't consulted at all once the durable store answers.
-      mockClaimEmail.mockResolvedValueOnce({ durable: true, claimed: false });
-      mockSheetEmails.mockRejectedValueOnce(new Error("Sheets down"));
-
-      const result = await submit(validFormData());
-
-      expect(result.success).toBe(false);
-      expect(result.error).toMatch(/already been requested/i);
-    });
-
-    it("claims provisionally so a crashed request cannot block the inbox for months", async () => {
-      mockClaimEmail.mockResolvedValueOnce({ durable: true, claimed: true });
-
-      await submit(validFormData());
-
-      expect(mockClaimEmail).toHaveBeenCalledWith("david@creative.studio", {
-        provisional: true,
-      });
-    });
-
-    it("does not confirm the claim when the email was already taken", async () => {
-      mockClaimEmail.mockResolvedValueOnce({ durable: true, claimed: false });
-
-      await submit(validFormData());
-
-      expect(mockConfirmEmailClaim).not.toHaveBeenCalled();
-    });
-  });
-
-  describe("rate limiting", () => {
+  describe("IP rate limiting", () => {
     it("rejects a request when the IP limit is exceeded", async () => {
       mockCheckIpRateLimit.mockResolvedValueOnce({
         allowed: false,
@@ -387,34 +434,6 @@ describe("requestEarlyAccess", () => {
       expect(result.success).toBe(true);
       expect(mockCheckIpRateLimit).not.toHaveBeenCalled();
     });
-
-    it("uses the durable per-email limiter across instances", async () => {
-      mockCheckEmailRateLimit.mockResolvedValueOnce({
-        allowed: false,
-        retryAfterSeconds: 600,
-        checked: true,
-      });
-
-      const result = await submit(validFormData());
-
-      expect(result.success).toBe(false);
-      expect(result.error).toMatch(/wait an hour/i);
-      expect(mockClaimEmail).not.toHaveBeenCalled();
-    });
-
-    it("limits repeated submissions from aliases of the same inbox", async () => {
-      // The duplicate check is mocked to return no rows, so only the per-email
-      // limiter can stop the fourth alias.
-      for (const alias of ["john+1@gmail.com", "john+2@gmail.com", "john+3@gmail.com"]) {
-        const ok = await submit(validFormData({ email: alias }));
-        expect(ok.success).toBe(true);
-      }
-
-      const blocked = await submit(validFormData({ email: "john+4@gmail.com" }));
-
-      expect(blocked.success).toBe(false);
-      expect(blocked.error).toMatch(/wait an hour/i);
-    });
   });
 
   describe("integration resilience", () => {
@@ -448,89 +467,7 @@ describe("requestEarlyAccess", () => {
       expect(mockBatchSend).toHaveBeenCalledTimes(1);
     });
 
-    it("returns an error only when both integrations fail", async () => {
-      mockBatchSend.mockRejectedValueOnce(new Error("Resend down"));
-      mockSheetAppend.mockRejectedValueOnce(new Error("Sheets down"));
-
-      const result = await submit(validFormData());
-
-      expect(result.success).toBe(false);
-      expect(result.error).toMatch(/wrong/i);
-    });
-
-    it("releases the durable claim when nothing captured the lead", async () => {
-      mockClaimEmail.mockResolvedValueOnce({ durable: true, claimed: true });
-      mockBatchSend.mockRejectedValueOnce(new Error("Resend down"));
-      mockSheetAppend.mockRejectedValueOnce(new Error("Sheets down"));
-
-      const result = await submit(validFormData());
-
-      expect(result.success).toBe(false);
-      expect(mockReleaseEmailClaim).toHaveBeenCalledWith("david@creative.studio");
-      // A released claim must never be promoted.
-      expect(mockConfirmEmailClaim).not.toHaveBeenCalled();
-    });
-
-    it("keeps the durable claim when the lead was captured", async () => {
-      mockClaimEmail.mockResolvedValueOnce({ durable: true, claimed: true });
-      mockSheetAppend.mockRejectedValueOnce(new Error("Sheets down"));
-
-      const result = await submit(validFormData());
-
-      expect(result.success).toBe(true);
-      expect(mockReleaseEmailClaim).not.toHaveBeenCalled();
-    });
-
-    it("confirms the provisional claim once the lead is captured", async () => {
-      mockClaimEmail.mockResolvedValueOnce({ durable: true, claimed: true });
-
-      const result = await submit(validFormData());
-
-      expect(result.success).toBe(true);
-      expect(mockConfirmEmailClaim).toHaveBeenCalledWith(
-        "david@creative.studio",
-      );
-    });
-
-    it("confirms when only the email was delivered", async () => {
-      mockClaimEmail.mockResolvedValueOnce({ durable: true, claimed: true });
-      mockSheetAppend.mockRejectedValueOnce(new Error("Sheets down"));
-
-      await submit(validFormData());
-
-      expect(mockConfirmEmailClaim).toHaveBeenCalledTimes(1);
-    });
-
-    it("still succeeds and persists a full-TTL claim when confirmation fails", async () => {
-      mockClaimEmail
-        .mockResolvedValueOnce({ durable: true, claimed: true })
-        .mockResolvedValueOnce({ durable: true, claimed: true });
-      mockConfirmEmailClaim.mockResolvedValueOnce({
-        durable: true,
-        confirmed: false,
-      });
-
-      const result = await submit(validFormData());
-
-      expect(result.success).toBe(true);
-      expect(mockClaimEmail).toHaveBeenCalledTimes(2);
-      expect(mockClaimEmail).toHaveBeenLastCalledWith("david@creative.studio");
-    });
-
-    it("does not confirm when the claim store was unavailable", async () => {
-      // Fallback path: nothing was reserved, so there is nothing to promote.
-      mockClaimEmail.mockResolvedValueOnce({ durable: false, claimed: false });
-
-      const result = await submit(validFormData());
-
-      expect(result.success).toBe(true);
-      expect(mockConfirmEmailClaim).not.toHaveBeenCalled();
-      expect(mockReleaseEmailClaim).not.toHaveBeenCalled();
-    });
-
-    it("treats a truncated Resend batch response as an email failure", async () => {
-      // Strict validation should send both, but only one ID returned means one
-      // recipient did not get their email.
+    it("treats a truncated Resend batch response as an email failure but succeeds if Sheets succeeds", async () => {
       mockBatchSend.mockResolvedValueOnce({
         data: { data: [{ id: "email_1" }] },
         error: null,
@@ -538,28 +475,11 @@ describe("requestEarlyAccess", () => {
 
       const result = await submit(validFormData());
 
-      // Sheets still captured the lead, so the request succeeds...
       expect(result.success).toBe(true);
       expect(mockSheetAppend).toHaveBeenCalledTimes(1);
     });
 
-    it("fails and releases the claim when the batch is truncated and Sheets fails", async () => {
-      mockClaimEmail.mockResolvedValueOnce({ durable: true, claimed: true });
-      mockBatchSend.mockResolvedValueOnce({
-        data: { data: [{ id: "email_1" }] },
-        error: null,
-      });
-      mockSheetAppend.mockRejectedValueOnce(new Error("Sheets down"));
-
-      const result = await submit(validFormData());
-
-      expect(result.success).toBe(false);
-      expect(mockReleaseEmailClaim).toHaveBeenCalledTimes(1);
-    });
-
     it("still appends to Sheets when Resend throws synchronously (regression)", async () => {
-      // A synchronous throw while building the Resend call must not abort the
-      // whole Promise.allSettled block and skip Sheets.
       mockBatchSend.mockImplementationOnce(() => {
         throw new Error("synchronous Resend failure");
       });

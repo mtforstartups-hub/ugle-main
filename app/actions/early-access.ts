@@ -1,14 +1,13 @@
 "use server";
 import * as z from "zod";
 import { getResendClient } from "@/app/lib/resend";
-import { resendConfig, sheetsConfig } from "@/app/lib/env";
+import { resendConfig, trialApiConfig } from "@/app/lib/env";
 import {
   EarlyAccessConfirmationEmail,
   EarlyAccessAdminNotificationEmail,
 } from "../components/email-templates/EarlyAccessTemplates";
 import { EarlyAccessSheetService } from "@/app/lib/sheets";
 import { verifyTurnstile } from "@/app/lib/turnstile";
-import { rateLimit } from "@/app/lib/rate-limit";
 import { validateHoneypot } from "@/app/lib/honeypot";
 import {
   DISPOSABLE_EMAIL_MESSAGE,
@@ -16,18 +15,8 @@ import {
 } from "@/app/lib/disposable-email";
 import { normalizeEmail } from "@/app/lib/email-identity";
 import { getClientIp } from "@/app/lib/client-ip";
-import {
-  checkEmailRateLimit,
-  checkIpRateLimit,
-  claimEmail,
-  confirmEmailClaim,
-  releaseEmailClaim,
-} from "@/app/lib/ip-rate-limit";
-import {
-  emailField,
-  singleLineText,
-  subjectText,
-} from "@/app/lib/validation";
+import { checkIpRateLimit } from "@/app/lib/ip-rate-limit";
+import { emailField, singleLineText, subjectText } from "@/app/lib/validation";
 
 const earlyAccessSchema = z.object({
   firstName: subjectText("First name is required"),
@@ -53,7 +42,7 @@ export type ActionState = {
 };
 
 /**
- * Extract honeypot value from formData
+ * Extract honeypot value from formData.
  * The honeypot field should be hidden via CSS; bots typically fill it in.
  */
 function getHoneypotValue(formData: FormData): string | null {
@@ -62,12 +51,6 @@ function getHoneypotValue(formData: FormData): string | null {
   // rather than casting it to string.
   if (value === null) return null;
   return typeof value === "string" ? value : "non-string-value";
-}
-
-function duplicateEmailResponse(): ActionState {
-  const message =
-    "A trial has already been requested with this email. Contact support if you need help accessing it.";
-  return { success: false, message, error: message };
 }
 
 /**
@@ -84,6 +67,121 @@ function sentEmailCount(response: unknown): number {
   return body && Array.isArray(body.data) ? body.data.length : 0;
 }
 
+// ---------------------------------------------------------------------------
+// Trial API
+// ---------------------------------------------------------------------------
+
+type TrialApiOutcome =
+  | { status: "ok" }
+  | { status: "cap_reached" }
+  | { status: "trials_disabled" }
+  | { status: "needs_manual_check" }
+  | { status: "skipped" };
+
+/**
+ * POST to the ugle-api trial provisioning endpoint.
+ *
+ * ugle-api is the authoritative system for email deduplication and key
+ * provisioning. 202 is returned for both new and repeat emails (repeat
+ * re-sends the existing key). The site never tells the visitor whether their
+ * email is already registered.
+ *
+ * Rules from trial.md:
+ * - 202                      → ok (new key issued, or existing key re-sent)
+ * - 503 cap_reached          → cap_reached  (global cap; no key issued)
+ * - 503 trials_disabled      → trials_disabled (admin must send key manually)
+ * - other 5xx / timeout /
+ *   503 unavailable          → retry once after 2 s; if retry resolves to
+ *                              202 or cap_reached handle as those; otherwise
+ *                              → needs_manual_check
+ * - 400 / 401                → needs_manual_check (never retried)
+ *
+ * Returns "skipped" when TRIAL_API_SECRET is not configured.
+ */
+async function callTrialApi(params: {
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone: string;
+  os: string;
+}): Promise<TrialApiOutcome> {
+  if (!trialApiConfig.success) return { status: "skipped" };
+
+  const { TRIAL_API_SECRET, TRIAL_API_URL } = trialApiConfig.data;
+  const body = JSON.stringify({
+    first_name: params.firstName,
+    last_name: params.lastName,
+    email: params.email,
+    phone: params.phone,
+    // API spec: os must be lowercase "macos"; field is informational for others.
+    os: params.os === "macOS" ? "macos" : params.os.toLowerCase(),
+  });
+
+  const headers = {
+    "Content-Type": "application/json",
+    Authorization: `Bearer ${TRIAL_API_SECRET}`,
+  };
+
+  async function attempt(): Promise<Response | null> {
+    try {
+      return await fetch(TRIAL_API_URL, {
+        method: "POST",
+        headers,
+        body,
+        signal: AbortSignal.timeout(10_000),
+      });
+    } catch {
+      return null; // timeout or network error
+    }
+  }
+
+  async function parseOutcome(
+    res: Response | null,
+  ): Promise<TrialApiOutcome | null> {
+    if (!res) return null; // transient failure — eligible for retry
+
+    if (res.status === 202) return { status: "ok" };
+
+    if (res.status === 503) {
+      let json: { error?: string } = {};
+      try {
+        json = await res.json();
+      } catch {
+        // empty or non-JSON body — treat as transient
+      }
+      if (json.error === "cap_reached") return { status: "cap_reached" };
+      if (json.error === "trials_disabled")
+        return { status: "trials_disabled" };
+      return null; // 503 unavailable — transient
+    }
+
+    // 400 / 401: not retried (would fail the same way)
+    if (res.status === 400 || res.status === 401) {
+      console.error(
+        "[EarlyAccess] Trial API rejected the request:",
+        res.status,
+      );
+      return { status: "needs_manual_check" };
+    }
+
+    return null; // other 5xx — transient
+  }
+
+  const firstOutcome = await parseOutcome(await attempt());
+  if (firstOutcome !== null) return firstOutcome;
+
+  // Single server-side retry after 2 s (never ask the visitor to retry)
+  await new Promise((r) => setTimeout(r, 2_000));
+  const retryOutcome = await parseOutcome(await attempt());
+  if (retryOutcome !== null) return retryOutcome;
+
+  return { status: "needs_manual_check" };
+}
+
+// ---------------------------------------------------------------------------
+// Server action
+// ---------------------------------------------------------------------------
+
 export async function requestEarlyAccess(
   initialState: ActionState,
   formData: FormData,
@@ -94,7 +192,7 @@ export async function requestEarlyAccess(
       typeof turnstileValue === "string" ? turnstileValue : null;
     const honeypotValue = getHoneypotValue(formData);
 
-    // 1. Honeypot check first - it is free, so obvious bots never reach the
+    // 1. Honeypot check first — it is free, so obvious bots never reach the
     // (paid, networked) Turnstile verification step.
     const honeypotResult = validateHoneypot(honeypotValue);
     if (!honeypotResult.isValid) {
@@ -126,87 +224,25 @@ export async function requestEarlyAccess(
       };
     }
 
-    // 4. IP rate limiting (Cloudflare Worker + Durable Object). This is the
-    // layer that catches one person cycling through fresh email addresses.
+    // 4. IP rate limiting — catches one IP cycling through many addresses.
+    // Email-level deduplication is delegated entirely to ugle-api, which
+    // returns 202 for both new and repeat emails (re-sending the existing key).
     // Skipped when no client IP is available or the limiter isn't configured.
     const clientIp = await getClientIp();
     if (clientIp) {
       const ipCheck = await checkIpRateLimit(clientIp);
       if (!ipCheck.allowed) {
-        const minutes = Math.max(
-          1,
-          Math.ceil(ipCheck.retryAfterSeconds / 60),
-        );
+        const minutes = Math.max(1, Math.ceil(ipCheck.retryAfterSeconds / 60));
         const message = `Too many trial requests from your network. Please try again in about ${minutes} minute${minutes === 1 ? "" : "s"}.`;
         return { success: false, message, error: message };
       }
     }
 
-    // 5. Rate limiting per normalized email - prevent flooding across
-    // instances. Normalizing first means aliases share one bucket. The durable
-    // limiter is authoritative when available; the in-memory limiter is only a
-    // per-instance fallback (it resets on cold starts).
-    const normalizedEmail = normalizeEmail(result.data.email);
-    const emailRateLimit = await checkEmailRateLimit(normalizedEmail);
-    const emailAllowed = emailRateLimit.checked
-      ? emailRateLimit.allowed
-      : rateLimit(`earlyaccess-${normalizedEmail}`, {
-          limit: 3,
-          interval: 60 * 60 * 1000, // 1 hour
-        }).success;
-
-    if (!emailAllowed) {
-      const message =
-        "You've submitted too many requests. Please wait an hour before trying again.";
-      return {
-        success: false,
-        message,
-        error: message,
-      };
-    }
-
     const { firstName, lastName, email, phone, os } = result.data;
-
-    // 6. One trial request per inbox. Aliases (j.doe+trial2@gmail.com) resolve
-    // to the same normalized address, so they can't farm extra trials.
-    //
-    // The durable claim is atomic, so two concurrent submissions cannot both
-    // pass (a Sheets read-then-append cannot guarantee that). It also removes
-    // the O(n) full-column read on every submission and no longer depends on
-    // Sheets being configured. Sheets is only read as a fallback when the
-    // claim store is unavailable.
-    //
-    // The claim is provisional (short TTL): it is promoted to the full TTL only
-    // after a lead has actually been captured. If this request dies between
-    // here and the integrations, the reservation lapses on its own instead of
-    // blocking the inbox for months.
-    let claimHeld = false;
-    const claim = await claimEmail(normalizedEmail, { provisional: true });
-
-    if (claim.durable) {
-      if (!claim.claimed) {
-        return duplicateEmailResponse();
-      }
-      claimHeld = true;
-    } else if (sheetsConfig.success && normalizedEmail) {
-      try {
-        const existingEmails = await new EarlyAccessSheetService().emails();
-        const alreadyRequested = existingEmails.some(
-          (existing) => normalizeEmail(existing) === normalizedEmail,
-        );
-
-        if (alreadyRequested) {
-          return duplicateEmailResponse();
-        }
-      } catch (err) {
-        // Fail open: a Sheets outage must not block genuine signups.
-        console.error("[EarlyAccess] Duplicate email check failed:", err);
-      }
-    } else {
-      console.warn(
-        "[EarlyAccess] No durable claim store or Sheets configured - duplicate trial protection is disabled.",
-      );
-    }
+    // Normalize before calling ugle-api so Gmail dots and +tags resolve to the
+    // same address. Resend and Sheets use the original address — the user
+    // entered it, and their inbox is at the un-normalized address.
+    const normalizedEmail = normalizeEmail(email);
 
     const submittedAt = new Intl.DateTimeFormat("en-IN", {
       timeZone: "Asia/Kolkata",
@@ -214,59 +250,74 @@ export async function requestEarlyAccess(
       timeStyle: "short",
     }).format(new Date());
 
-    // 7. Subjects are built from these already-validated fields: Zod rejects
-    // any control characters, so they can't carry header-injection payloads.
-    // Run both operations concurrently and independently.
-    // Promise.allSettled guarantees both are always attempted regardless of
-    // whether the other one fails.
-    // Each operation is started inside an async thunk. This matters because a
-    // *synchronous* throw while building the call (e.g. a client factory or a
-    // service constructor throwing) would otherwise escape Promise.allSettled
-    // and prevent the other integration from running at all.
-    const [emailResult, sheetsResult] = await Promise.allSettled([
-      // Operation 1: Send confirmation + admin notification emails via Resend
-      (async () => {
-        if (!resendConfig.success) {
-          throw new Error("Resend is not configured");
-        }
+    // 5. Fire all three integrations concurrently.
+    //
+    // Promise.allSettled guarantees all are always attempted regardless of
+    // whether another one fails. Each is inside an async thunk so a
+    // synchronous throw inside the thunk cannot escape allSettled and prevent
+    // the other integrations from running.
+    //
+    // ugle-api is the authoritative system. Resend and Sheets are lead-record
+    // integrations only — their outcome does NOT gate the visitor's response.
+    const [emailResult, sheetsResult, trialApiResult] =
+      await Promise.allSettled([
+        // Operation 1: Send confirmation + admin notification emails via Resend
+        (async () => {
+          if (!resendConfig.success) {
+            throw new Error("Resend is not configured");
+          }
+          return getResendClient()!.batch.send([
+            {
+              from: `Ugle <${resendConfig.data.RESEND_FROM_EMAIL}>`,
+              to: [email],
+              subject: `${firstName}, you're on the Ugle early access list ⚡`,
+              react: EarlyAccessConfirmationEmail({ firstName, email, os }),
+            },
+            {
+              from: `Ugle <${resendConfig.data.RESEND_FROM_EMAIL}>`,
+              to: resendConfig.data.ADMIN_EMAIL,
+              subject: `New early access request: ${firstName} ${lastName} (${os})`,
+              react: EarlyAccessAdminNotificationEmail({
+                firstName,
+                lastName,
+                email,
+                phone,
+                os,
+                submittedAt,
+              }),
+            },
+          ]);
+        })(),
 
-        return getResendClient()!.batch.send([
-          {
-            from: `Ugle <${resendConfig.data.RESEND_FROM_EMAIL}>`,
-            to: [email],
-            subject: `${firstName}, you're on the Ugle early access list ⚡`,
-            react: EarlyAccessConfirmationEmail({ firstName, email, os }),
-          },
-          {
-            from: `Ugle <${resendConfig.data.RESEND_FROM_EMAIL}>`,
-            to: resendConfig.data.ADMIN_EMAIL,
-            subject: `New early access request: ${firstName} ${lastName} (${os})`,
-            react: EarlyAccessAdminNotificationEmail({
-              firstName,
-              lastName,
-              email,
-              phone,
-              os,
-              submittedAt,
-            }),
-          },
-        ]);
-      })(),
+        // Operation 2: Append lead row to Google Sheets
+        (async () => {
+          return new EarlyAccessSheetService().append({
+            firstName,
+            lastName,
+            email,
+            phone,
+            os,
+            submittedAt,
+          });
+        })(),
 
-      // Operation 2: Append lead row to Google Sheets
-      (async () => {
-        return new EarlyAccessSheetService().append({
+        // Operation 3: Provision trial key via ugle-api (server-side only;
+        // secret never touches the browser).
+        callTrialApi({
           firstName,
           lastName,
-          email,
+          email: normalizedEmail,
           phone,
           os,
-          submittedAt,
-        });
-      })(),
-    ]);
+        }),
+      ]);
 
-    // Log individual failures server-side for visibility
+    // Log lead-record failures for visibility — these do not affect the visitor.
+    const emailOk =
+      emailResult.status === "fulfilled" &&
+      !emailResult.value.error &&
+      sentEmailCount(emailResult.value) === 2;
+
     if (emailResult.status === "rejected") {
       console.error("[EarlyAccess] Resend failed:", emailResult.reason);
     } else if (emailResult.value.error) {
@@ -280,65 +331,65 @@ export async function requestEarlyAccess(
       console.error("[EarlyAccess] Google Sheets failed:", sheetsResult.reason);
     }
 
-    // Option A: succeed if at least one method captured the lead.
-    //
-    // Resend's batch endpoint defaults to strict validation (all-or-nothing),
-    // but we still require both message IDs: if the response is ever truncated
-    // or sent with permissive validation, a missing ID means that recipient
-    // did not get their email.
-    const emailOk =
-      emailResult.status === "fulfilled" &&
-      !emailResult.value.error &&
-      sentEmailCount(emailResult.value) === 2;
-    const sheetsOk = sheetsResult.status === "fulfilled";
-
-    if (!emailOk && !sheetsOk) {
-      // Nothing captured this lead: release the reservation so the same inbox
-      // can retry once the outage is over.
-      if (claimHeld) {
-        await releaseEmailClaim(normalizedEmail);
-      }
-
-      return {
-        success: false,
-        message: "Something went wrong. Please try again.",
-        error: "Something went wrong. Please try again.",
-      };
-    }
-
-    if (!emailOk && sheetsOk) {
-      // The lead is safe in Sheets, but neither the user nor the admin got an
-      // email. Surface it as an actionable failure (no PII in the log).
+    if (!emailOk && sheetsResult.status === "fulfilled") {
       console.error(
-        "[EarlyAccess] ALERT: lead saved to Sheets but no emails were sent - admin was not notified.",
+        "[EarlyAccess] ALERT: lead saved to Sheets but no emails were sent — admin was not notified.",
         { os, submittedAt },
       );
     }
 
-    // Promote the provisional reservation to the full TTL now that the lead is
-    // captured. Awaited so a serverless runtime cannot drop it, but never fatal:
-    // if it fails the claim simply lapses early.
-    if (claimHeld) {
-      const confirmation = await confirmEmailClaim(normalizedEmail);
-      if (!confirmation.confirmed) {
-        // `/confirm` only promotes a claim that is still live, so the
-        // provisional reservation may have lapsed while the lead was being
-        // captured. Persist a full-TTL claim directly so a later `/claim`
-        // still sees this captured lead instead of accepting a duplicate.
-        // Best-effort: the submission already succeeded, so never change the
-        // response.
-        const reconciled = await claimEmail(normalizedEmail);
-
-        if (!reconciled.durable || !reconciled.claimed) {
-          console.warn(
-            "[EarlyAccess] Claim confirmation failed and could not be reconciled - duplicate protection for this email may lapse when the provisional claim expires.",
-            { durable: confirmation.durable },
-          );
-        }
-      }
+    // 6. Visitor response — driven entirely by ugle-api outcome.
+    //    Only cap_reached changes the visitor's message (trial.md).
+    if (trialApiResult.status === "rejected") {
+      console.error(
+        "[EarlyAccess] Trial API call threw:",
+        trialApiResult.reason,
+      );
     }
 
-    return { success: true, message: "Request submitted" };
+    const trialOutcome: TrialApiOutcome =
+      trialApiResult.status === "fulfilled"
+        ? trialApiResult.value
+        : { status: "needs_manual_check" };
+
+    switch (trialOutcome.status) {
+      case "ok":
+        return { success: true, message: "Check your inbox for your key." };
+
+      case "cap_reached":
+        return {
+          success: true,
+          message:
+            "We're overwhelmed by the response — email support@ugle.ai and we'll send your trial key.",
+        };
+
+      case "trials_disabled":
+        console.error(
+          "[EarlyAccess] ALERT: ugle-api returned trials_disabled — send the key manually.",
+          { os, submittedAt },
+        );
+        return { success: true, message: "Check your inbox for your key." };
+
+      case "needs_manual_check":
+        console.error(
+          "[EarlyAccess] ALERT: ugle-api may not have accepted this request. " +
+            "Run `ugle-api trial reissue --email <addr>` first: " +
+            "hand-send a key only if it reports no trial.",
+          { os, submittedAt },
+        );
+        return { success: true, message: "Check your inbox for your key." };
+
+      case "skipped":
+        // ugle-api not configured — fall back to whether a lead was captured.
+        if (emailOk || sheetsResult.status === "fulfilled") {
+          return { success: true, message: "Request submitted" };
+        }
+        return {
+          success: false,
+          message: "Something went wrong. Please try again.",
+          error: "Something went wrong. Please try again.",
+        };
+    }
   } catch (err) {
     console.error("[EarlyAccess] Unexpected error:", err);
     return {
