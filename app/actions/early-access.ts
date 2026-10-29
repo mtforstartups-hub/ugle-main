@@ -5,6 +5,7 @@ import { resendConfig, trialApiConfig } from "@/app/lib/env";
 import {
   EarlyAccessConfirmationEmail,
   EarlyAccessAdminNotificationEmail,
+  EarlyAccessAdminAlertEmail,
 } from "../components/email-templates/EarlyAccessTemplates";
 import { EarlyAccessSheetService } from "@/app/lib/sheets";
 import { verifyTurnstile } from "@/app/lib/turnstile";
@@ -176,6 +177,47 @@ async function callTrialApi(params: {
   if (retryOutcome !== null) return retryOutcome;
 
   return { status: "needs_manual_check" };
+}
+
+/**
+ * Dispatch an urgent notification to the admin when ugle-api returns a code
+ * that requires manual intervention. Non-blocking and fails safe.
+ */
+async function sendAdminAlertEmail(params: {
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone: string;
+  os: string;
+  submittedAt: string;
+  notice: string;
+  subject: string;
+}): Promise<void> {
+  if (!resendConfig.success) return;
+
+  try {
+    const resend = getResendClient();
+    if (!resend) return;
+
+    await resend.batch.send([
+      {
+        from: `Ugle <${resendConfig.data.RESEND_FROM_EMAIL}>`,
+        to: resendConfig.data.ADMIN_EMAIL,
+        subject: params.subject,
+        react: EarlyAccessAdminAlertEmail({
+          firstName: params.firstName,
+          lastName: params.lastName,
+          email: params.email,
+          phone: params.phone,
+          os: params.os,
+          submittedAt: params.submittedAt,
+          notice: params.notice,
+        }),
+      },
+    ]);
+  } catch (err) {
+    console.error("[EarlyAccess] Failed to send admin alert email:", err);
+  }
 }
 
 // ---------------------------------------------------------------------------
@@ -363,21 +405,38 @@ export async function requestEarlyAccess(
             "We're overwhelmed by the response — email support@ugle.ai and we'll send your trial key.",
         };
 
-      case "trials_disabled":
-        console.error(
-          "[EarlyAccess] ALERT: ugle-api returned trials_disabled — send the key manually.",
-          { os, submittedAt },
-        );
+      case "trials_disabled": {
+        const notice =
+          "ugle-api did NOT accept this request — send the key by hand";
+        console.error(`[EarlyAccess] ALERT: ${notice}`, { os, submittedAt });
+        await sendAdminAlertEmail({
+          firstName,
+          lastName,
+          email,
+          phone,
+          os,
+          submittedAt,
+          notice,
+          subject: `⚠️ ACTION REQUIRED: ugle-api did NOT accept trial request for ${firstName} ${lastName}`,
+        });
         return { success: true, message: "Check your inbox for your key." };
+      }
 
-      case "needs_manual_check":
-        console.error(
-          "[EarlyAccess] ALERT: ugle-api may not have accepted this request. " +
-            "Run `ugle-api trial reissue --email <addr>` first: " +
-            "hand-send a key only if it reports no trial.",
-          { os, submittedAt },
-        );
+      case "needs_manual_check": {
+        const notice = `ugle-api may not have accepted this request. Run \`ugle-api trial reissue --email ${email}\` first: hand-send a key only if it reports no trial.`;
+        console.error(`[EarlyAccess] ALERT: ${notice}`, { os, submittedAt });
+        await sendAdminAlertEmail({
+          firstName,
+          lastName,
+          email,
+          phone,
+          os,
+          submittedAt,
+          notice,
+          subject: `⚠️ ACTION REQUIRED: Verify trial key for ${firstName} ${lastName}`,
+        });
         return { success: true, message: "Check your inbox for your key." };
+      }
 
       case "skipped":
         // ugle-api not configured — fall back to whether a lead was captured.

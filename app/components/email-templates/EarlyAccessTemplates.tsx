@@ -511,3 +511,146 @@ export function EarlyAccessAdminNotificationEmail({
     </EmailShell>
   );
 }
+
+
+// ---------------------------------------------------------------------------
+// EarlyAccessAdminAlertEmail — sent when ugle-api requires manual action
+// ---------------------------------------------------------------------------
+
+export interface EarlyAccessAdminAlertEmailProps {
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone: string;
+  os: string;
+  submittedAt: string;
+  notice: string;
+}
+
+export function EarlyAccessAdminAlertEmail({
+  firstName,
+  lastName,
+  email,
+  phone,
+  os,
+  submittedAt,
+  notice,
+}: EarlyAccessAdminAlertEmailProps) {
+  return (
+    <EmailShell badge="Action Required">
+      <tr>
+        <td style={{ padding: "36px 48px 20px" }}>
+          <div
+            style={{
+              display: "inline-block",
+              backgroundColor: "rgba(220, 38, 38, 0.1)",
+              border: "1px solid rgba(220, 38, 38, 0.3)",
+              borderRadius: "6px",
+              padding: "4px 10px",
+              marginBottom: "16px",
+            }}
+          >
+            <span
+              style={{
+                color: "#dc2626",
+                fontSize: "11px",
+                fontWeight: 600,
+                letterSpacing: "0.1em",
+                textTransform: "uppercase" as const,
+                fontFamily: "monospace",
+              }}
+            >
+              Manual Intervention Needed
+            </span>
+          </div>
+
+          <h1
+            style={{
+              color: "#111111",
+              fontSize: "22px",
+              fontWeight: 700,
+              lineHeight: "1.3",
+              margin: "0 0 8px 0",
+              letterSpacing: "-0.02em",
+            }}
+          >
+            Action Required: Trial Key
+          </h1>
+
+          <div
+            style={{
+              backgroundColor: "#fef2f2",
+              border: "1px solid #fecaca",
+              borderRadius: "8px",
+              padding: "16px",
+              marginTop: "16px",
+            }}
+          >
+            <p
+              style={{
+                color: "#991b1b",
+                fontSize: "14px",
+                fontWeight: 600,
+                lineHeight: "1.5",
+                margin: 0,
+                fontFamily: "monospace",
+              }}
+            >
+              {notice}
+            </p>
+          </div>
+        </td>
+      </tr>
+
+      {/* Details card */}
+      <tr>
+        <td style={{ padding: "0 48px 32px" }}>
+          <div
+            style={{
+              backgroundColor: "#fafafa",
+              border: "1px solid #e4e4e7",
+              borderRadius: "12px",
+              overflow: "hidden",
+            }}
+          >
+            <table cellPadding={0} cellSpacing={0} width="100%">
+              <tbody>
+                <DetailRow
+                  label="Name"
+                  value={`${firstName} ${lastName}`}
+                  highlight
+                />
+                <DetailRow label="Email" value={email} highlight />
+                <DetailRow label="Phone" value={phone} />
+                <DetailRow label="Primary OS" value={os} isLast />
+              </tbody>
+            </table>
+          </div>
+        </td>
+      </tr>
+
+      {/* Context note */}
+      <tr>
+        <td style={{ padding: "0 48px 36px" }}>
+          <div
+            style={{
+              height: "1px",
+              backgroundColor: "#f0f0f0",
+              marginBottom: "16px",
+            }}
+          />
+          <p
+            style={{
+              color: "#a1a1aa",
+              fontSize: "12px",
+              fontFamily: "monospace",
+              margin: 0,
+            }}
+          >
+            Submitted: {submittedAt}
+          </p>
+        </td>
+      </tr>
+    </EmailShell>
+  );
+}

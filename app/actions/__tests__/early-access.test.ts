@@ -197,6 +197,8 @@ describe("requestEarlyAccess", () => {
           },
         }),
       );
+      // Batch send called only once for initial user + admin emails
+      expect(mockBatchSend).toHaveBeenCalledTimes(1);
     });
 
     it("normalizes Gmail dots and +tags before calling ugle-api", async () => {
@@ -215,7 +217,7 @@ describe("requestEarlyAccess", () => {
       expect(body.os).toBe("macos");
     });
 
-    it("returns overwhelmed message on 503 cap_reached", async () => {
+    it("returns overwhelmed message on 503 cap_reached without extra admin alert email", async () => {
       global.fetch = vi.fn().mockResolvedValue({
         status: 503,
         json: async () => ({ error: "cap_reached" }),
@@ -225,9 +227,10 @@ describe("requestEarlyAccess", () => {
 
       expect(result.success).toBe(true);
       expect(result.message).toMatch(/overwhelmed/i);
+      expect(mockBatchSend).toHaveBeenCalledTimes(1);
     });
 
-    it("returns 'Check your inbox for your key.' and logs admin alert on trials_disabled", async () => {
+    it("returns 'Check your inbox for your key.', logs console alert, and sends admin alert email on trials_disabled", async () => {
       const consoleErrorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
       global.fetch = vi.fn().mockResolvedValue({
         status: 503,
@@ -241,12 +244,18 @@ describe("requestEarlyAccess", () => {
         message: "Check your inbox for your key.",
       });
       expect(consoleErrorSpy).toHaveBeenCalledWith(
-        expect.stringContaining("trials_disabled"),
+        expect.stringContaining("ugle-api did NOT accept this request — send the key by hand"),
         expect.any(Object),
       );
+      // Called twice: once for initial emails, second for admin alert email
+      expect(mockBatchSend).toHaveBeenCalledTimes(2);
+      const alertCall = mockBatchSend.mock.calls[1][0];
+      expect(alertCall[0].to).toEqual(["admin@ugle.ai"]);
+      expect(alertCall[0].subject).toContain("ACTION REQUIRED");
+      expect(alertCall[0].subject).toContain("ugle-api did NOT accept");
     });
 
-    it("retries once after 2s on 500 error and returns 'Check your inbox for your key.'", async () => {
+    it("retries once after 2s on 500 error, returns 'Check your inbox for your key.', logs alert, and sends admin alert email", async () => {
       const consoleErrorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
       global.fetch = vi
         .fn()
@@ -267,12 +276,18 @@ describe("requestEarlyAccess", () => {
       });
       expect(global.fetch).toHaveBeenCalledTimes(2);
       expect(consoleErrorSpy).toHaveBeenCalledWith(
-        expect.stringContaining("Run `ugle-api trial reissue --email <addr>` first"),
+        expect.stringContaining("ugle-api trial reissue --email david@creative.studio"),
         expect.any(Object),
       );
+      // Called twice: once for initial emails, second for admin alert email
+      expect(mockBatchSend).toHaveBeenCalledTimes(2);
+      const alertCall = mockBatchSend.mock.calls[1][0];
+      expect(alertCall[0].to).toEqual(["admin@ugle.ai"]);
+      expect(alertCall[0].subject).toContain("ACTION REQUIRED");
+      expect(alertCall[0].subject).toContain("Verify trial key");
     });
 
-    it("does not retry 400 or 401 errors", async () => {
+    it("does not retry 400 or 401 errors, logs, and sends admin alert email", async () => {
       const consoleErrorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
       global.fetch = vi.fn().mockResolvedValue({
         status: 400,
@@ -290,6 +305,7 @@ describe("requestEarlyAccess", () => {
         expect.stringContaining("Trial API rejected the request:"),
         400,
       );
+      expect(mockBatchSend).toHaveBeenCalledTimes(2);
     });
 
     it("allows the user to submit the same email multiple times without error", async () => {
@@ -305,6 +321,7 @@ describe("requestEarlyAccess", () => {
       expect(first).toEqual({ success: true, message: "Check your inbox for your key." });
       expect(second).toEqual({ success: true, message: "Check your inbox for your key." });
       expect(global.fetch).toHaveBeenCalledTimes(2);
+      expect(mockBatchSend).toHaveBeenCalledTimes(2);
     });
   });
 
