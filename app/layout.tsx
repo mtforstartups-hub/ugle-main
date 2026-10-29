@@ -108,7 +108,7 @@ const jsonLd = {
       "@type": "SoftwareApplication",
       "@id": `${SITE_URL}/#software`,
       name: "Ugle",
-      operatingSystem: "macOS 12+, Windows 10+ 64-bit",
+      operatingSystem: "macOS 13.4+, Windows 10+ 64-bit",
       applicationCategory: "MultimediaApplication",
       description: HOME_DESCRIPTION,
       url: SITE_URL,

@@ -18,7 +18,16 @@ updates:
           - "minor"
           - "patch"
       dev-dependencies:
-        dependency-type: "development"
+        patterns:
+          - "@cloudflare/workers-types"
+          - "@playwright/test"
+          - "@tailwindcss/postcss"
+          - "eslint"
+          - "eslint-config-next"
+          - "happy-dom"
+          - "tailwindcss"
+          - "tsx"
+          - "typescript"
         update-types:
           - "minor"
           - "patch"

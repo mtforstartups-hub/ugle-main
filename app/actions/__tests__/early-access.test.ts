@@ -501,8 +501,10 @@ describe("requestEarlyAccess", () => {
       expect(mockConfirmEmailClaim).toHaveBeenCalledTimes(1);
     });
 
-    it("still succeeds when confirmation fails", async () => {
-      mockClaimEmail.mockResolvedValueOnce({ durable: true, claimed: true });
+    it("still succeeds and persists a full-TTL claim when confirmation fails", async () => {
+      mockClaimEmail
+        .mockResolvedValueOnce({ durable: true, claimed: true })
+        .mockResolvedValueOnce({ durable: true, claimed: true });
       mockConfirmEmailClaim.mockResolvedValueOnce({
         durable: true,
         confirmed: false,
@@ -511,6 +513,8 @@ describe("requestEarlyAccess", () => {
       const result = await submit(validFormData());
 
       expect(result.success).toBe(true);
+      expect(mockClaimEmail).toHaveBeenCalledTimes(2);
+      expect(mockClaimEmail).toHaveBeenLastCalledWith("david@creative.studio");
     });
 
     it("does not confirm when the claim store was unavailable", async () => {

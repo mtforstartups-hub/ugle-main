@@ -17,10 +17,12 @@ test.describe("Contact Sales Form (/contact)", () => {
     await form.locator("#seats").selectOption("11-50");
     await form.locator("#usecase").fill("Redacting confidential interview transcripts for legal broadcast.");
 
-    // Wait for Turnstile widget to populate token
-    await expect(form.locator('input[name="cf-turnstile-response"]')).not.toHaveValue("", {
-      timeout: 10_000,
-    });
+    // Wait for Turnstile widget to populate token when configured.
+    if (process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY) {
+      await expect(form.locator('input[name="cf-turnstile-response"]')).not.toHaveValue("", {
+        timeout: 10_000,
+      });
+    }
 
     // Submit form
     await form.getByRole("button", { name: /submit inquiry/i }).click();

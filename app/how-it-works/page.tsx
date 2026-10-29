@@ -250,7 +250,7 @@ export default function page() {
                       OS
                     </td>
                     <td className="py-4 px-6 text-ugle-gray">
-                      macOS 12+. Windows 10 64-bit+.
+                      macOS 13.4+. Windows 10 64-bit+.
                     </td>
                   </tr>
                   <tr className="hover:bg-gray-50/50 transition-colors">

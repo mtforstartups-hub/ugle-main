@@ -321,10 +321,20 @@ export async function requestEarlyAccess(
     if (claimHeld) {
       const confirmation = await confirmEmailClaim(normalizedEmail);
       if (!confirmation.confirmed) {
-        console.warn(
-          "[EarlyAccess] Claim confirmation failed - duplicate protection for this email lapses when the provisional claim expires.",
-          { durable: confirmation.durable },
-        );
+        // `/confirm` only promotes a claim that is still live, so the
+        // provisional reservation may have lapsed while the lead was being
+        // captured. Persist a full-TTL claim directly so a later `/claim`
+        // still sees this captured lead instead of accepting a duplicate.
+        // Best-effort: the submission already succeeded, so never change the
+        // response.
+        const reconciled = await claimEmail(normalizedEmail);
+
+        if (!reconciled.durable || !reconciled.claimed) {
+          console.warn(
+            "[EarlyAccess] Claim confirmation failed and could not be reconciled - duplicate protection for this email may lapse when the provisional claim expires.",
+            { durable: confirmation.durable },
+          );
+        }
       }
     }
 

@@ -46,13 +46,11 @@ test.describe("Newsletter signup (Footer)", () => {
       const res = await fetch("https://api.resend.com/emails", {
         headers: { Authorization: `Bearer ${process.env.RESEND_API_KEY}` },
       });
-      if (res.ok) {
-        const body = (await res.json()) as { data?: { to: string[] }[] };
-        if (Array.isArray(body?.data)) {
-          const sent = body.data.find((e) => e.to.includes(testEmail));
-          expect(sent).toBeTruthy();
-        }
-      }
+      expect(res.ok).toBe(true);
+      const body = (await res.json()) as { data?: { to: string[] }[] };
+      expect(Array.isArray(body.data)).toBe(true);
+      const sent = body.data?.find((e) => e.to.includes(testEmail));
+      expect(sent).toBeTruthy();
     }
   });
 
