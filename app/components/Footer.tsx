@@ -29,64 +29,86 @@ export default function Footer() {
             </div>
           </div>
 
-          <div className="md:col-span-3 lg:col-start-8 lg:col-span-2 flex flex-col gap-4 text-sm font-semibold text-gray-400 mt-4 md:mt-0">
-            <Link
-              href="/how-it-works"
-              className="hover:text-white transition-colors"
-            >
-              How it works
-            </Link>
-            <Link
-              href="/use-cases"
-              className="hover:text-white transition-colors"
-            >
-              Use cases
-            </Link>
-            <Link
-              href="/pricing"
-              className="hover:text-white transition-colors"
-            >
-              Pricing
-            </Link>
-            <Link
-              href="/request-demo"
-              className="hover:text-white transition-colors"
-            >
-              Request Demo
-            </Link>
-            <Link
-              href="/download"
-              className="hover:text-white transition-colors text-[#75C043]"
-            >
-              Request Trial
-            </Link>
-          </div>
+          <div className="md:col-span-6 lg:col-start-8 lg:col-span-5 flex flex-col justify-between mt-4 md:mt-0">
+            <div className="grid grid-cols-2 gap-6 sm:gap-8">
+              <div className="flex flex-col gap-4 text-sm font-semibold text-gray-400">
+                <Link
+                  href="/how-it-works"
+                  className="hover:text-white transition-colors"
+                >
+                  How it works
+                </Link>
+                <Link
+                  href="/use-cases"
+                  className="hover:text-white transition-colors"
+                >
+                  Use cases
+                </Link>
+                <Link
+                  href="/pricing"
+                  className="hover:text-white transition-colors"
+                >
+                  Pricing
+                </Link>
+                <Link
+                  href="/request-demo"
+                  className="hover:text-white transition-colors"
+                >
+                  Request Demo
+                </Link>
+                <Link
+                  href="/download"
+                  className="hover:text-white transition-colors text-[#75C043]"
+                >
+                  Request Trial
+                </Link>
+              </div>
 
-          <div className="md:col-span-3 lg:col-span-2 flex flex-col gap-4 text-sm font-semibold text-gray-400 mt-4 md:mt-0">
-            {/* <Link
-              href="/request-trial"
-              className="hover:text-white transition-colors"
-            >
-              Request Trial
-            </Link> */}
-            <Link
-              href="/security"
-              className="hover:text-white transition-colors"
-            >
-              Security
-            </Link>
-            <Link
-              href="/changelog"
-              className="hover:text-white transition-colors"
-            >
-              Changelog
-            </Link>
-            <Link href="/blog" className="hover:text-white transition-colors">
-              Blog
-            </Link>
-            <Link href="/about" className="hover:text-white transition-colors">
-              About Us
-            </Link>
+              <div className="flex flex-col gap-4 text-sm font-semibold text-gray-400">
+                <Link
+                  href="/security"
+                  className="hover:text-white transition-colors"
+                >
+                  Security
+                </Link>
+                <Link
+                  href="/changelog"
+                  className="hover:text-white transition-colors"
+                >
+                  Changelog
+                </Link>
+                <Link
+                  href="/blog"
+                  className="hover:text-white transition-colors"
+                >
+                  Blog
+                </Link>
+                <Link
+                  href="/about"
+                  className="hover:text-white transition-colors"
+                >
+                  About Us
+                </Link>
+              </div>
+            </div>
+
+            <div className="mt-8 relative z-10">
+              <a
+                href="https://www.producthunt.com/products/ugle?utm_source=badge-follow&utm_medium=badge&utm_source=badge-ugle"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-block transition-opacity hover:opacity-90"
+              >
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src="https://api.producthunt.com/widgets/embed-image/v1/follow.svg?product_id=1343217&theme=neutral"
+                  alt="Ugle - Search across local audio/video archives by meaning, locally | Product Hunt"
+                  style={{ width: "250px", height: "54px" }}
+                  width="250"
+                  height="54"
+                />
+              </a>
+            </div>
           </div>
 
           <div className="absolute bottom-0 right-0 z-0 pointer-events-none group">
