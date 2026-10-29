@@ -54,13 +54,15 @@ export default function GetAccessForm() {
   );
   const turnstileRef = useRef<TurnstileInstance>(null);
 
+  const errorMessage = !state.success ? state.error || state.message : null;
+
   // Turnstile tokens are single-use. After a failed submission the token has
   // already been consumed, so refresh it before the user tries again.
   useEffect(() => {
-    if (!isPending && state.error) {
+    if (!isPending && errorMessage) {
       turnstileRef.current?.reset();
     }
-  }, [isPending, state]);
+  }, [isPending, errorMessage]);
 
   return (
     <motion.div
@@ -157,13 +159,13 @@ export default function GetAccessForm() {
             </Suspense>
           </div>
 
-          {state.error && (
+          {errorMessage && (
             <p
               role="alert"
               aria-live="polite"
               className="text-red-500 text-sm font-medium"
             >
-              {state.error}
+              {errorMessage}
             </p>
           )}
 
@@ -213,8 +215,7 @@ export default function GetAccessForm() {
             Request Received
           </h2>
           <p className="text-ugle-gray text-lg max-w-md mx-auto">
-            Thank you! Check your inbox for your trial license key and download
-            link.
+            {state.message}
           </p>
         </motion.div>
       )}
