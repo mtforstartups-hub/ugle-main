@@ -4,10 +4,7 @@ import { useActionState, Suspense, useRef, useEffect } from "react";
 import { Check } from "lucide-react";
 import { motion } from "motion/react";
 import { Turnstile, type TurnstileInstance } from "@marsidev/react-turnstile";
-import {
-  requestEarlyAccess,
-  type ActionState,
-} from "@/app/actions/early-access";
+import { requestTrial, type ActionState } from "@/app/actions/request-trial";
 import { useSearchParams } from "next/navigation";
 import HoneypotField from "@/app/components/HoneypotField";
 
@@ -52,7 +49,7 @@ function PlatformRadios() {
 
 export default function GetAccessForm() {
   const [state, formAction, isPending] = useActionState(
-    requestEarlyAccess,
+    requestTrial,
     initialState,
   );
   const turnstileRef = useRef<TurnstileInstance>(null);
@@ -78,13 +75,13 @@ export default function GetAccessForm() {
           <div className="grid md:grid-cols-2 gap-6">
             <div className="space-y-2">
               <label
-                htmlFor="early-access-first-name"
+                htmlFor="trial-first-name"
                 className="block text-[15px] font-bold text-ugle-slate"
               >
                 First name
               </label>
               <input
-                id="early-access-first-name"
+                id="trial-first-name"
                 type="text"
                 name="firstName"
                 autoComplete="given-name"
@@ -94,13 +91,13 @@ export default function GetAccessForm() {
             </div>
             <div className="space-y-2">
               <label
-                htmlFor="early-access-last-name"
+                htmlFor="trial-last-name"
                 className="block text-[15px] font-bold text-ugle-slate"
               >
                 Last name
               </label>
               <input
-                id="early-access-last-name"
+                id="trial-last-name"
                 type="text"
                 name="lastName"
                 autoComplete="family-name"
@@ -112,13 +109,13 @@ export default function GetAccessForm() {
 
           <div className="space-y-2">
             <label
-              htmlFor="early-access-email"
+              htmlFor="trial-email"
               className="block text-[15px] font-bold text-ugle-slate"
             >
               Email
             </label>
             <input
-              id="early-access-email"
+              id="trial-email"
               type="email"
               name="email"
               autoComplete="email"
@@ -129,13 +126,13 @@ export default function GetAccessForm() {
 
           <div className="space-y-2">
             <label
-              htmlFor="early-access-phone"
+              htmlFor="trial-phone"
               className="block text-[15px] font-bold text-ugle-slate"
             >
               Contact number
             </label>
             <input
-              id="early-access-phone"
+              id="trial-phone"
               type="tel"
               name="phone"
               autoComplete="tel"
@@ -216,8 +213,8 @@ export default function GetAccessForm() {
             Request Received
           </h2>
           <p className="text-ugle-gray text-lg max-w-md mx-auto">
-            Thank you for your interest. We&apos;ll be in touch soon with your
-            early access invitation.
+            Thank you! Check your inbox for your trial license key and download
+            link.
           </p>
         </motion.div>
       )}
