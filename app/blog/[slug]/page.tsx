@@ -23,6 +23,8 @@ const BLOG_POST_DATA: Record<
     description: string;
     meta: string;
     tag: string;
+    tags?: string[];
+    author?: string;
     image: string;
     ogImage?: string;
     ogImageSize?: { width: number; height: number };
@@ -38,6 +40,15 @@ const BLOG_POST_DATA: Record<
       "Ugle is now live on Product Hunt! Discover local-first AI media search that helps journalists, podcasters and editors find moments in audio and video.",
     meta: "2 min read",
     tag: "Product Updates",
+    tags: [
+      "Ugle",
+      "Product Hunt",
+      "Product Launch",
+      "AI Media Search",
+      "Local-First AI",
+      "Video Search",
+    ],
+    author: "Team Ugle",
     image: "/images/blogs/ugle-product-hunt-launch.png",
     ogImage: "/images/blogs/ugle-product-hunt-launch-og-image.jpg",
     ogImageSize: { width: 1200, height: 1200 },
@@ -2183,6 +2194,14 @@ export async function generateMetadata({
     metadata.title = { absolute: blogPost.seoTitle };
   }
 
+  if (blogPost.tags) {
+    metadata.keywords = blogPost.tags;
+  }
+
+  if (blogPost.author) {
+    metadata.authors = [{ name: blogPost.author }];
+  }
+
   return metadata;
 }
 
@@ -2225,10 +2244,11 @@ export default async function page({
     dateModified: blogPost.updatedAt,
     inLanguage: "en-US",
     articleSection: blogPost.tag,
+    ...(blogPost.tags ? { keywords: blogPost.tags.join(", ") } : {}),
     isAccessibleForFree: true,
     author: {
       "@type": "Organization",
-      name: "Ugle",
+      name: blogPost.author ?? "Ugle",
       url: SITE_URL,
     },
     publisher: {
