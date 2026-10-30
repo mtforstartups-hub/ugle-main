@@ -19,15 +19,132 @@ const BLOG_POST_DATA: Record<
   string,
   {
     title: string;
+    seoTitle?: string;
     description: string;
     meta: string;
     tag: string;
+    tags?: string[];
+    author?: string;
     image: string;
+    ogImage?: string;
+    ogImageSize?: { width: number; height: number };
     publishedAt: string;
     updatedAt: string;
     content: React.ReactNode;
   }
 > = {
+  "ugle-product-hunt-launch": {
+    title: "Ugle Is Now Live on Product Hunt!",
+    seoTitle: "Ugle Is Live on Product Hunt | Local-First AI Media Search",
+    description:
+      "Ugle is now live on Product Hunt! Discover local-first AI media search that helps journalists, podcasters and editors find moments in audio and video.",
+    meta: "2 min read",
+    tag: "Product Updates",
+    tags: [
+      "Ugle",
+      "Product Hunt",
+      "Product Launch",
+      "AI Media Search",
+      "Local-First AI",
+      "Video Search",
+    ],
+    author: "Team Ugle",
+    image: "/images/blogs/ugle-product-hunt-launch.png",
+    ogImage: "/images/blogs/ugle-product-hunt-launch-og-image.jpg",
+    ogImageSize: { width: 1200, height: 1200 },
+    publishedAt: "2026-10-30",
+    updatedAt: "2026-10-30",
+    content: (
+      <>
+        <p className="text-[20px] text-ugle-gray leading-[1.55] mb-8">
+          We&apos;re excited to announce that{" "}
+          <span className="font-bold text-[19px]">
+            Ugle has officially launched on Product Hunt!
+          </span>
+        </p>
+        <p>
+          Ugle is a local-first AI media search tool designed to help
+          journalists, podcasters, video editors and researchers find specific
+          moments inside their audio and video recordings.
+        </p>
+        <p>
+          Instead of manually searching through hours of recordings, Ugle lets
+          you search by meaning and jump directly to relevant moments, all while
+          keeping your media on your device.
+        </p>
+
+        <h2>A New Chapter for Ugle</h2>
+        <p>
+          Our Product Hunt launch marks an important milestone in making media
+          search faster, simpler and more accessible.
+        </p>
+        <p>
+          We&apos;re excited to introduce Ugle to a global community of
+          creators, professionals and technology enthusiasts.
+        </p>
+
+        <h2>Discover Ugle on Product Hunt</h2>
+        <p>
+          Our Product Hunt page is now live, and we&apos;d love for you to
+          explore it.
+        </p>
+        <p>
+          Discover what Ugle can do, watch the product demo, join the
+          conversation and share your feedback.
+        </p>
+        <p>
+          <a
+            href="https://www.producthunt.com/products/ugle"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-[#5DA233] font-semibold hover:underline"
+          >
+            Explore Ugle on Product Hunt
+          </a>
+        </p>
+
+        <p>
+          Your feedback and support mean a lot as we continue building Ugle.
+        </p>
+
+        <p className="font-semibold text-ugle-slate">
+          Find your moment. On your machine.
+        </p>
+        <p className=" font-semibold text-ugle-slate">Team Ugle</p>
+
+        <div className="not-prose mt-10 mx-auto w-full rounded-2xl border border-ugle-light/60 bg-white p-5 shadow-sm">
+          <div className="flex items-center gap-3">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="https://ph-files.imgix.net/866c8c0d-f1a0-4871-a002-398784915b7b.png?auto=compress,format&codec=mozjpeg&cs=strip&fit=crop&h=80&w=80"
+              alt="Ugle on Product Hunt"
+              width={64}
+              height={64}
+              loading="lazy"
+              className="h-16 w-16 shrink-0 rounded-lg object-cover"
+            />
+            <div className="min-w-0 flex-1">
+              <h3 className="mt-0 mb-1 border-0 p-0 text-[18px] font-semibold leading-[1.3] text-ugle-slate">
+                Ugle
+              </h3>
+              <p className="m-0 text-[14px] leading-[1.4] text-ugle-gray line-clamp-2">
+                Search across local audio/video archives by meaning, locally
+              </p>
+            </div>
+          </div>
+          <a
+            href="https://www.producthunt.com/products/ugle?embed=true&utm_source=embed&utm_medium=post_embed"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="mt-4 inline-flex items-center gap-1.5 rounded-full bg-[#FF6154] px-4 py-2 text-[15px] font-semibold text-white transition-colors hover:bg-[#E9544A]"
+          >
+            Check it out on Product Hunt
+            <ArrowRight className="h-4 w-4" strokeWidth={2.5} />
+          </a>
+        </div>
+      </>
+    ),
+  },
   "why-local-first": {
     title: "Why we built Ugle local-first",
     description:
@@ -2055,18 +2172,37 @@ export async function generateMetadata({
     };
   }
 
-  return pageMetadata({
-    title: blogPost.title,
+  const seoTitle = blogPost.seoTitle ?? blogPost.title;
+  const socialImage = blogPost.ogImage ?? blogPost.image;
+  const socialImageSize = blogPost.ogImageSize ?? { width: 1200, height: 630 };
+
+  const metadata = pageMetadata({
+    title: seoTitle,
     description: blogPost.description,
     path: `/blog/${slug}`,
     ogType: "article",
     socialImage: {
-      url: blogPost.image,
+      url: socialImage,
       alt: blogPost.title,
-      width: 1200,
-      height: 630,
+      width: socialImageSize.width,
+      height: socialImageSize.height,
     },
   });
+
+  if (blogPost.seoTitle) {
+    // Bypass the layout's "%s | Ugle" template so the SEO title is used verbatim.
+    metadata.title = { absolute: blogPost.seoTitle };
+  }
+
+  if (blogPost.tags) {
+    metadata.keywords = blogPost.tags;
+  }
+
+  if (blogPost.author) {
+    metadata.authors = [{ name: blogPost.author }];
+  }
+
+  return metadata;
 }
 
 function formatDate(dateStr: string) {
@@ -2102,16 +2238,17 @@ export default async function page({
     },
     headline: blogPost.title,
     description: blogPost.description,
-    image: [`${absoluteUrl(blogPost.image)}`],
+    image: [`${absoluteUrl(blogPost.ogImage ?? blogPost.image)}`],
     url: absoluteUrl(`/blog/${slug}`),
     datePublished: blogPost.publishedAt,
     dateModified: blogPost.updatedAt,
     inLanguage: "en-US",
     articleSection: blogPost.tag,
+    ...(blogPost.tags ? { keywords: blogPost.tags.join(", ") } : {}),
     isAccessibleForFree: true,
     author: {
       "@type": "Organization",
-      name: "Ugle",
+      name: blogPost.author ?? "Ugle",
       url: SITE_URL,
     },
     publisher: {

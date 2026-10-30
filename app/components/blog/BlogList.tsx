@@ -10,6 +10,15 @@ const POSTS_PER_PAGE = 5;
 
 const blogItems = [
   {
+    path: "/blog/ugle-product-hunt-launch",
+    slug: "ugle-product-hunt-launch",
+    title: "Ugle Is Now Live on Product Hunt!",
+    desc: "Ugle has officially launched on Product Hunt! Explore our local-first AI media search tool, discover its capabilities and share your feedback.",
+    meta: "2 min read",
+    tag: "Product Updates",
+    image: "/images/blogs/ugle-product-hunt-launch.png",
+  },
+  {
     path: "/blog/why-local-first",
     slug: "why-local-first",
     title: "Why we built Ugle local-first",

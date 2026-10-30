@@ -29,6 +29,7 @@ const STATIC_ROUTES: Record<string, RouteEntry> = {
 
 // Blog post slugs — keep in sync with BLOG_POST_DATA in app/blog/[slug]/page.tsx
 const BLOG_ROUTES: Record<string, RouteEntry> = {
+  "ugle-product-hunt-launch": { lastModified: "2026-10-30", changeFrequency: "monthly", priority: 0.6 },
   "why-local-first": { lastModified: "2026-07-16", changeFrequency: "monthly", priority: 0.6 },
   "cost-of-scrubbing-timelines": { lastModified: "2026-06-25", changeFrequency: "monthly", priority: 0.6 },
   "what-transcription-accuracy-means": { lastModified: "2026-06-25", changeFrequency: "monthly", priority: 0.6 },
