@@ -94,14 +94,14 @@ export default function Footer() {
 
             <div className="mt-8 relative z-10">
               <a
-                href="https://www.producthunt.com/products/ugle?utm_source=badge-follow&utm_medium=badge&utm_source=badge-ugle"
+                href="https://www.producthunt.com/products/ugle?embed=true&utm_source=badge-featured&utm_medium=badge&utm_campaign=badge-ugle"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-block transition-opacity hover:opacity-90"
               >
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
-                  src="https://api.producthunt.com/widgets/embed-image/v1/follow.svg?product_id=1343217&theme=neutral"
+                  src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=1278604&theme=neutral&t=1793338510612"
                   alt="Ugle - Search across local audio/video archives by meaning, locally | Product Hunt"
                   style={{ width: "250px", height: "54px" }}
                   width="250"
