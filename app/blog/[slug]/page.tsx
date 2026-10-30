@@ -112,7 +112,7 @@ const BLOG_POST_DATA: Record<
         </p>
         <p className=" font-semibold text-ugle-slate">Team Ugle</p>
 
-        <div className="not-prose mt-10 mx-auto w-full rounded-2xl border border-ugle-light/60 bg-white p-5 shadow-sm">
+        <div className="not-prose mt-10 w-full max-w-125 rounded-2xl border border-ugle-light/60 bg-white p-5 shadow-sm">
           <div className="flex items-center gap-3">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
