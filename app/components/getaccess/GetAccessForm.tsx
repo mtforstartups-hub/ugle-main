@@ -1,10 +1,11 @@
-﻿"use client";
+"use client";
 
-import { useActionState, useState, useRef, useEffect } from "react";
+import { useActionState, Suspense, useRef, useEffect } from "react";
 import { Check } from "lucide-react";
 import { motion } from "motion/react";
 import { Turnstile, type TurnstileInstance } from "@marsidev/react-turnstile";
 import { requestTrial, type ActionState } from "@/app/actions/request-trial";
+import { useSearchParams } from "next/navigation";
 import HoneypotField from "@/app/components/HoneypotField";
 
 const initialState: ActionState = { success: false, message: "" };
@@ -14,29 +15,10 @@ const inputClass =
 
 const TURNSTILE_SITE_KEY = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
 
-// Reads the stored platform intent (written by download page buttons) or
-// falls back to the user's OS via navigator.userAgent.
-// Returns null on the server so SSR renders no radio pre-checked.
-function detectPlatform(): "macos" | "windows" | null {
-  if (typeof window === "undefined") return null;
-  const stored = sessionStorage.getItem("trial-platform") as
-    "macos" | "windows" | null;
-  if (stored) {
-    sessionStorage.removeItem("trial-platform"); // single-use: clear so back-nav doesn't replay it
-    return stored;
-  }
-  const ua = navigator.userAgent;
-  if (/Mac|iPhone|iPad|iPod/.test(ua)) return "macos";
-  if (/Win/.test(ua)) return "windows";
-  return null;
-}
-
-// Pre-selects the OS radio based on detectPlatform().
-// The user can still change the selection before submitting — this only sets the default.
+// Only this tiny piece reads the search param.
 function PlatformRadios() {
-  // Lazy initializer: runs once on the client, never on the server.
-  // No useEffect needed — avoids cascading re-renders.
-  const [platform] = useState<"macos" | "windows" | null>(detectPlatform);
+  const searchParams = useSearchParams();
+  const platform = searchParams.get("platform");
 
   return (
     <div className="grid grid-cols-2 gap-4">
@@ -165,7 +147,16 @@ export default function GetAccessForm() {
             <label className="block text-[15px] font-bold text-ugle-slate">
               Primary OS
             </label>
-            <PlatformRadios />
+            <Suspense
+              fallback={
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="h-14.5 rounded-[10px] border border-ugle-light/60 animate-pulse bg-[#F8FAF9]" />
+                  <div className="h-14.5 rounded-[10px] border border-ugle-light/60 animate-pulse bg-[#F8FAF9]" />
+                </div>
+              }
+            >
+              <PlatformRadios />
+            </Suspense>
           </div>
 
           {errorMessage && (

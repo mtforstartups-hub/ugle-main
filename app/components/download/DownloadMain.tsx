@@ -25,15 +25,13 @@ export default function DownloadMain() {
               platform="macos"
               variant="filled"
               size="sm"
-              href="/request-trial"
-              onClick={() => sessionStorage.setItem("trial-platform", "macos")}
+              href="/request-trial?platform=macos"
             />
             <DownloadButton
               platform="windows"
               variant="outline"
               size="sm"
-              href="/request-trial"
-              onClick={() => sessionStorage.setItem("trial-platform", "windows")}
+              href="/request-trial?platform=windows"
             />
           </div>
         </motion.div>

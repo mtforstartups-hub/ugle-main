@@ -1,15 +1,7 @@
 name: Staging Smoke Test
 
-# MANUAL TRIGGER ONLY (workflow_dispatch via GitHub Actions UI).
-#
-# The automatic `push`-to-main trigger was removed: these tests submit real
-# forms against the Vercel preview deployment, and all Google Sheets writes
-# and Resend emails happen SERVER-SIDE using the preview deployment's own
-# Vercel environment variables — not the STAGING_* secrets below (those only
-# feed the test process's assertions). Auto-running on every merge risked
-# polluting the production sheet until the preview env is verified.
-# Re-adding `push:` triggers is safe only after confirming the
-# `preview-ugle-cf` deployment points at the TEST spreadsheet.
+# Manual trigger via GitHub Actions UI (workflow_dispatch)
+# OR auto-run on main when email, sheets, or Turnstile form code changes
 on:
   workflow_dispatch:
     inputs:
@@ -25,6 +17,27 @@ on:
           - education
           - all
         default: "newsletter"
+  push:
+    branches: [main]
+    paths:
+      - "app/actions/newsletter.ts"
+      - "app/actions/contact.ts"
+      - "app/actions/demo.ts"
+      - "app/actions/request-trial.ts"
+      - "app/actions/education.ts"
+      - "app/lib/turnstile.ts"
+      - "app/lib/rate-limit.ts"
+      - "app/lib/validation.ts"
+      - "app/lib/honeypot.ts"
+      - "app/lib/sheets/**"
+      - "app/lib/env.ts"
+      - "app/components/forms/FooterNewsletter.tsx"
+      - "app/components/HoneypotField.tsx"
+      - "app/components/ContactForm.tsx"
+      - "app/components/demo/DemoForm.tsx"
+      - "app/components/getaccess/GetAccessForm.tsx"
+      - "app/components/EducationForm.tsx"
+      - "app/components/email-templates/**"
 
 concurrency:
   group: staging-smoke-${{ github.ref }}
