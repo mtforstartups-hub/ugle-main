@@ -1,4 +1,4 @@
-// @vitest-environment happy-dom
+﻿// @vitest-environment happy-dom
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { act } from "react";
 import { createRoot, type Root } from "react-dom/client";
@@ -6,18 +6,13 @@ import GetAccessForm from "../GetAccessForm";
 
 (globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
 
-const { mockAction, mockReset, nav } = vi.hoisted(() => ({
+const { mockAction, mockReset } = vi.hoisted(() => ({
   mockAction: vi.fn(),
   mockReset: vi.fn(),
-  nav: { platform: null as string | null },
 }));
 
 vi.mock("@/app/actions/request-trial", () => ({
   requestTrial: mockAction,
-}));
-
-vi.mock("next/navigation", () => ({
-  useSearchParams: () => new URLSearchParams(nav.platform ? `platform=${nav.platform}` : ""),
 }));
 
 vi.mock("motion/react", async () => {
@@ -102,7 +97,6 @@ function fillValidForm() {
 beforeEach(async () => {
   mockAction.mockReset();
   mockReset.mockClear();
-  nav.platform = null;
   await render();
 });
 
@@ -156,12 +150,12 @@ describe("GetAccessForm", () => {
     expect(formData.get("cf-turnstile-response")).toBe("mock-token");
   });
 
-  it("pre-selects macOS from ?platform=macos", async () => {
+  it("pre-selects macOS via sessionStorage (set by download page)", async () => {
     await act(async () => {
       root.unmount();
     });
     container.remove();
-    nav.platform = "macos";
+    sessionStorage.setItem("trial-platform", "macos");
     await render();
 
     const macos = getForm().querySelector<HTMLInputElement>(
@@ -175,12 +169,12 @@ describe("GetAccessForm", () => {
     expect(windows?.checked).toBe(false);
   });
 
-  it("pre-selects Windows from ?platform=windows", async () => {
+  it("pre-selects Windows via sessionStorage (set by download page)", async () => {
     await act(async () => {
       root.unmount();
     });
     container.remove();
-    nav.platform = "windows";
+    sessionStorage.setItem("trial-platform", "windows");
     await render();
 
     const windows = getForm().querySelector<HTMLInputElement>(
