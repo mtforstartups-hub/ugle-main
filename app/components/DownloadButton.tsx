@@ -23,7 +23,7 @@ interface DownloadButtonProps {
   href?: string;
   /** Render as a <button> element instead of a <Link> */
   asButton?: boolean;
-  /** onClick handler — only used when asButton=true */
+  /** onClick handler — fired for both Link and button variants */
   onClick?: () => void;
   /** Extra Tailwind class overrides */
   className?: string;
@@ -226,6 +226,7 @@ export default function DownloadButton({
       href={resolvedHref}
       className={baseClasses}
       aria-label={`${resolvedSubLabel} ${resolvedLabel}`}
+      onClick={onClick}
     >
       {inner}
     </Link>
