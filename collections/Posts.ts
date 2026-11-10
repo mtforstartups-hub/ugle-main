@@ -3,7 +3,7 @@ import { slug } from "../fields/slug";
 import { contentEditor } from "../lib/payload/editor";
 import { estimateReadingTime } from "../lib/payload/reading-time";
 import { revalidateBlogPaths } from "../lib/payload/revalidate";
-import { previewSecretUrl } from "../lib/payload/preview";
+import { previewSecretPath, previewSecretUrl } from "../lib/payload/preview";
 import { publicOrStaffRead, staffCreate, staffUpdate } from "../lib/payload/access";
 
 export const Posts: CollectionConfig = {
@@ -17,7 +17,7 @@ export const Posts: CollectionConfig = {
     pagination: { defaultLimit: 25 },
     preview: (doc) => (doc?.slug ? previewSecretUrl("posts", String(doc.slug)) : null),
     livePreview: {
-      url: ({ data }) => data?.slug ? `/blog/${data.slug}` : "/blog",
+      url: ({ data }) => previewSecretPath("posts", data?.slug),
     },
   },
   defaultSort: "-publishedAt",

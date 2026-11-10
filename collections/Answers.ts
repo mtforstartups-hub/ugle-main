@@ -2,7 +2,7 @@ import type { CollectionConfig } from "payload";
 import { slug } from "../fields/slug";
 import { contentEditor } from "../lib/payload/editor";
 import { revalidateAnswersPaths } from "../lib/payload/revalidate";
-import { previewSecretUrl } from "../lib/payload/preview";
+import { previewSecretPath, previewSecretUrl } from "../lib/payload/preview";
 import { publicOrStaffRead, staffCreate, staffUpdate } from "../lib/payload/access";
 
 export const Answers: CollectionConfig = {
@@ -16,7 +16,7 @@ export const Answers: CollectionConfig = {
     pagination: { defaultLimit: 25 },
     preview: (doc) => (doc?.slug ? previewSecretUrl("answers", String(doc.slug)) : null),
     livePreview: {
-      url: ({ data }) => data?.slug ? `/answers/${data.slug}` : "/answers",
+      url: ({ data }) => previewSecretPath("answers", data?.slug),
     },
   },
   defaultSort: "-publishedAt",
