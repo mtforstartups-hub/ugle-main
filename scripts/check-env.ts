@@ -18,12 +18,8 @@ async function run() {
     console.warn("⚠️  Google Sheets is not configured — sheet logging disabled.");
   }
   if (!payloadConfig.success) {
-    if (process.env.CONTENT_SOURCE === "legacy") {
-      console.warn("⚠️  Payload is not configured — continuing with legacy content.");
-    } else {
-      console.error("❌ Payload is required but PAYLOAD_SECRET / DATABASE_URI are missing.");
-      process.exit(1);
-    }
+    console.error("❌ Payload is required but PAYLOAD_SECRET / DATABASE_URI are missing.");
+    process.exit(1);
   } else {
     console.log("✅ Payload env configured.");
   }

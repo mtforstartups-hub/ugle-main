@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getPostsPage, getBlogSettings } from "@/lib/payload/queries";
+import { mapPostToListItem } from "@/lib/payload/blog-list";
 import BlogHero from "@/app/components/blog/BlogHero";
 import BlogList from "@/app/components/blog/BlogList";
 import GlobalCTA from "@/app/components/GlobalCTA";
@@ -35,18 +36,7 @@ export default async function page({
   }
 
   // Convert posts to the format BlogList expects
-  const blogItems = postsResult.docs.map((post) => {
-    const heroMedia = post.heroImage && typeof post.heroImage === "object" ? post.heroImage : null;
-    return {
-      path: `/blog/${post.slug}`,
-      slug: post.slug,
-      title: post.title,
-      desc: post.excerpt,
-      meta: `${post.readingTime ?? 1} min read`,
-      tag: post.category && typeof post.category === "object" ? post.category.name : "Blog",
-      image: heroMedia?.url || "/images/blogs/why-local-first.jpg",
-    };
-  });
+  const blogItems = postsResult.docs.map(mapPostToListItem);
 
   return (
     <>

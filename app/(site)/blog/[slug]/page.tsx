@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { draftMode } from "next/headers";
 import { getAllPostSlugs, getPostBySlug, getBlogSettings, getRelatedPosts } from "@/lib/payload/queries";
-import BlogHero from "@/app/components/blog/BlogHero";
 import GlobalCTA from "@/app/components/GlobalCTA";
 import { PostContent } from "@/app/components/blog/PostContent";
 import { pageMetadata } from "@/app/lib/seo";
@@ -119,12 +118,6 @@ export default async function page({ params }: { params: Promise<{ slug: string 
       <BreadcrumbJsonLd items={breadcrumbs} />
       {isPreview && <PreviewOverlay />}
       <div className="max-w-4xl mx-auto px-6 py-24">
-        <BlogHero
-          eyebrow={settings?.heroEyebrow ?? "Blog"}
-          title={settings?.heroTitle ?? "Thoughts & Workflow."}
-          description={settings?.heroDescription ?? "Product thinking. Workflow observations. Opinions on how media professionals work."}
-        />
-
         <article className="prose prose-lg max-w-none text-[#3A3A3A] prose-p:leading-[1.65] prose-headings:text-[#3A3A3A] prose-headings:font-bold prose-headings:tracking-tight prose-a:text-[#5DA233] prose-a:font-semibold prose-a:no-underline hover:prose-a:underline prose-strong:text-[#3A3A3A] prose-blockquote:border-l-[3px] prose-blockquote:border-[#75C043] prose-blockquote:bg-[#F7F7F5] prose-blockquote:py-3 prose-blockquote:px-6 prose-blockquote:not-italic prose-blockquote:rounded-r-lg prose-blockquote:text-[#3A3A3A] prose-blockquote:font-medium prose-blockquote:text-[20px]">
           <header className="mb-12">
             <div className="flex items-center gap-2 mb-4">
