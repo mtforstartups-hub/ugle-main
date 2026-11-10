@@ -25,7 +25,7 @@ function buildPostWhere({
 }: {
   status: StatusFilter;
   q?: string;
-  categoryId?: string;
+  categoryId?: number;
   now: string;
 }): Where {
   const and: Where[] = [];
@@ -111,6 +111,19 @@ export async function Dashboard(props: AdminViewServerProps) {
 
   const access = { overrideAccess: false, user };
 
+  // The filter select submits a category slug, but the relationship query
+  // needs the numeric ID. Resolve it before building the where clause.
+  const categories = await payload.find({
+    collection: "categories",
+    limit: 100,
+    sort: "name",
+    depth: 0,
+    ...access,
+  });
+  const categoryId = categoryParam
+    ? categories.docs.find((category) => category.slug === categoryParam)?.id
+    : undefined;
+
   const [
     postsTotal,
     postsPublished,
@@ -119,7 +132,6 @@ export async function Dashboard(props: AdminViewServerProps) {
     answersTotal,
     answersPublished,
     mediaTotal,
-    categories,
     posts,
     answers,
   ] = await Promise.all([
@@ -160,13 +172,6 @@ export async function Dashboard(props: AdminViewServerProps) {
     }),
     payload.count({ collection: "media", ...access }),
     payload.find({
-      collection: "categories",
-      limit: 100,
-      sort: "name",
-      depth: 0,
-      ...access,
-    }),
-    payload.find({
       collection: "posts",
       limit: 25,
       sort: "-updatedAt",
@@ -174,7 +179,7 @@ export async function Dashboard(props: AdminViewServerProps) {
       // Autosave stores unpublished edits in the versions table. Without this
       // the table shows drafts with empty title/category/author columns.
       draft: true,
-      where: buildPostWhere({ status, q, categoryId: categoryParam, now }),
+      where: buildPostWhere({ status, q, categoryId, now }),
       ...access,
     }),
     payload.find({
