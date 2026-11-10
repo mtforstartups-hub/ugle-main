@@ -333,7 +333,7 @@ export interface Post {
    */
   featured?: boolean | null;
   /**
-   * Max 3. Falls back to same-category posts.
+   * Max 3. Only the posts you pick here appear in the Related posts section.
    */
   relatedPosts?: (number | Post)[] | null;
   /**

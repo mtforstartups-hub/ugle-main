@@ -38,6 +38,18 @@ export const Media: CollectionConfig = {
   },
   fields: [
     {
+      // Merged into the upload collection's built-in `filesize` field so the
+      // list view shows a readable size instead of raw bytes.
+      name: "filesize",
+      type: "number",
+      label: "File Size",
+      admin: {
+        components: {
+          Cell: "/components/admin/FileSizeCell#FileSizeCell",
+        },
+      },
+    },
+    {
       name: "alt",
       type: "text",
       required: true,

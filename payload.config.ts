@@ -23,14 +23,39 @@ const dirname = path.dirname(filename);
 export default buildConfig({
   admin: {
     user: Users.slug,
+    avatar: {
+      Component: "/components/admin/UserAvatar#UserAvatar",
+    },
     components: {
+      graphics: {
+        Icon: "/components/admin/UgleIcon#UgleIcon",
+        Logo: "/components/admin/UgleLogo#UgleLogo",
+      },
       views: {
         dashboard: {
           Component: "/components/admin/Dashboard#Dashboard",
         },
       },
     },
-    meta: { titleSuffix: "— Ugle CMS" },
+    // Keep the admin branded as Ugle. Payload's defaults otherwise advertise
+    // the framework in the page title, favicon and Open Graph metadata.
+    meta: {
+      titleSuffix: "— Ugle CMS",
+      description: "Ugle CMS — the content workspace for ugle.ai.",
+      defaultOGImageType: "off",
+      icons: { icon: "/ugle-icon.png" },
+      openGraph: {
+        title: "Ugle CMS",
+        siteName: "Ugle CMS",
+        description: "Ugle CMS — the content workspace for ugle.ai.",
+        images: [{ url: "/ugle-icon.png", width: 512, height: 512, alt: "Ugle" }],
+      },
+      twitter: {
+        card: "summary",
+        title: "Ugle CMS",
+        description: "Ugle CMS — the content workspace for ugle.ai.",
+      },
+    },
     livePreview: {
       breakpoints: [
         { label: "Mobile", name: "mobile", width: 375, height: 667 },
@@ -42,6 +67,17 @@ export default buildConfig({
   editor: lexicalEditor(),
   collections: [Users, Media, Categories, Authors, Posts, Answers],
   globals: [BlogSettings, AnswersSettings],
+  // Drop the last framework-branded string from the admin UI (the account
+  // preferences heading).
+  i18n: {
+    translations: {
+      en: {
+        general: {
+          payloadSettings: "Preferences",
+        },
+      },
+    },
+  },
   secret: process.env.PAYLOAD_SECRET || "",
   serverURL: process.env.NEXT_PUBLIC_SERVER_URL,
   csrf: [process.env.NEXT_PUBLIC_SERVER_URL || ""].filter(Boolean),

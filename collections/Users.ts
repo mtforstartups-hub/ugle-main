@@ -12,7 +12,7 @@ export const Users: CollectionConfig = {
   },
   admin: {
     useAsTitle: "email",
-    defaultColumns: ["email", "name", "role", "createdAt"],
+    defaultColumns: ["avatar", "email", "name", "role", "createdAt"],
     group: "Admin",
     components: {
       // Prevent access to user management for editors
@@ -54,7 +54,12 @@ export const Users: CollectionConfig = {
       type: "upload",
       relationTo: "media",
       required: false,
-      admin: { position: "sidebar" },
+      admin: {
+        position: "sidebar",
+        components: {
+          Cell: "/components/admin/AvatarCell#AvatarCell",
+        },
+      },
     },
   ],
 };
