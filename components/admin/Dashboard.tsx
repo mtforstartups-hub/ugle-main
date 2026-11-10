@@ -123,28 +123,38 @@ export async function Dashboard(props: AdminViewServerProps) {
     posts,
     answers,
   ] = await Promise.all([
-    payload.count({ collection: "posts", ...access }),
-    payload.count({
+    // Counts use find({ limit: 0 }) instead of count() so they read the same
+    // draft-aware data as the tables below; count() has no draft option.
+    payload.find({ collection: "posts", limit: 0, draft: true, ...access }),
+    payload.find({
       collection: "posts",
+      limit: 0,
+      draft: true,
       where: { _status: { equals: "published" } },
       ...access,
     }),
-    payload.count({
+    payload.find({
       collection: "posts",
+      limit: 0,
+      draft: true,
       where: { _status: { equals: "draft" } },
       ...access,
     }),
-    payload.count({
+    payload.find({
       collection: "posts",
+      limit: 0,
+      draft: true,
       where: {
         _status: { equals: "draft" },
         publishedAt: { greater_than: now },
       },
       ...access,
     }),
-    payload.count({ collection: "answers", ...access }),
-    payload.count({
+    payload.find({ collection: "answers", limit: 0, draft: true, ...access }),
+    payload.find({
       collection: "answers",
+      limit: 0,
+      draft: true,
       where: { _status: { equals: "published" } },
       ...access,
     }),
@@ -161,6 +171,9 @@ export async function Dashboard(props: AdminViewServerProps) {
       limit: 25,
       sort: "-updatedAt",
       depth: 1,
+      // Autosave stores unpublished edits in the versions table. Without this
+      // the table shows drafts with empty title/category/author columns.
+      draft: true,
       where: buildPostWhere({ status, q, categoryId: categoryParam, now }),
       ...access,
     }),
@@ -169,6 +182,7 @@ export async function Dashboard(props: AdminViewServerProps) {
       limit: 25,
       sort: "-updatedAt",
       depth: 1,
+      draft: true,
       ...access,
     }),
   ]);
