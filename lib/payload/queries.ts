@@ -88,55 +88,34 @@ export async function getPostBySlug(slug: string): Promise<Post | null> {
   return (result.docs[0] as Post | undefined) ?? null;
 }
 
-export async function getRelatedPosts(post: Post, limit = 3) {
+export async function getRelatedPosts(post: Post, limit = 3): Promise<Post[]> {
+  const selected = Array.isArray(post.relatedPosts) ? post.relatedPosts.slice(0, limit) : [];
+
+  // Related posts are editor-curated. If nothing was selected there is no
+  // section to render; never fall back to automatic suggestions.
+  if (selected.length === 0) return [];
+
+  const populated = selected.filter((item): item is Post => typeof item === "object");
+  if (populated.length === selected.length) return populated;
+
+  // Older rows (or shallow queries) can still hold raw IDs. Resolve those and
+  // keep the order the editor picked.
+  const ids = selected.filter((item): item is number => typeof item === "number");
+  if (ids.length === 0) return populated;
+
   const payload = await getPayloadClient();
-  const manual = Array.isArray(post.relatedPosts)
-    ? post.relatedPosts.filter((item): item is Post => typeof item === "object")
-    : [];
+  const result = await payload.find({
+    collection: "posts",
+    where: { id: { in: ids } },
+    limit: ids.length,
+    depth: 1,
+    pagination: false,
+  });
 
-  if (manual.length >= limit) return manual.slice(0, limit);
-
-  const excludeIds = [post.id, ...manual.map((item) => item.id)];
-  const remaining = limit - manual.length;
-
-  const categoryId =
-    post.category && typeof post.category === "object" ? post.category.id : post.category;
-
-  // Prefer other posts in the same category, then fill any shortfall with the
-  // most recent published posts from other categories. Without the fallback a
-  // newly created post whose category has no other entries showed no related
-  // posts at all.
-  const sameCategory = categoryId
-    ? await payload.find({
-        collection: "posts",
-        where: {
-          _status: { equals: "published" },
-          id: { not_in: excludeIds },
-          category: { equals: categoryId },
-        },
-        sort: "-publishedAt",
-        limit: remaining,
-        depth: 1,
-      })
-    : null;
-
-  const collected = sameCategory?.docs ?? [];
-
-  if (collected.length < remaining) {
-    const fallback = await payload.find({
-      collection: "posts",
-      where: {
-        _status: { equals: "published" },
-        id: { not_in: [...excludeIds, ...collected.map((item) => item.id)] },
-      },
-      sort: "-publishedAt",
-      limit: remaining - collected.length,
-      depth: 1,
-    });
-    collected.push(...fallback.docs);
-  }
-
-  return [...manual, ...collected].slice(0, limit);
+  const byId = new Map(result.docs.map((doc) => [doc.id, doc]));
+  return selected
+    .map((item) => (typeof item === "object" ? item : byId.get(item)))
+    .filter((item): item is Post => Boolean(item));
 }
 
 export async function getAnswersPage({

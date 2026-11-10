@@ -129,9 +129,10 @@ export const Posts: CollectionConfig = {
       type: "relationship",
       relationTo: "posts",
       hasMany: true,
-      maxDepth: 0,
       required: false,
-      admin: { description: "Max 3. Falls back to same-category posts." },
+      admin: {
+        description: "Max 3. Only the posts you pick here appear in the Related posts section.",
+      },
     },
     {
       name: "relatedAnswers",
