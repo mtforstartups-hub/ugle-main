@@ -54,7 +54,7 @@ export async function getPostsPage({
     page,
     depth: 2,
     draft,
-    overrideAccess: !draft,
+    overrideAccess: draft,
   });
 }
 
@@ -82,7 +82,7 @@ export async function getPostBySlug(slug: string): Promise<Post | null> {
     limit: 1,
     depth: 3,
     draft,
-    overrideAccess: !draft,
+    overrideAccess: draft,
   });
 
   return (result.docs[0] as Post | undefined) ?? null;
@@ -144,7 +144,7 @@ export async function getAnswersPage({
     page,
     depth: 2,
     draft,
-    overrideAccess: !draft,
+    overrideAccess: draft,
   });
 }
 
@@ -221,7 +221,7 @@ export async function getAnswerBySlug(slug: string): Promise<Answer | null> {
     limit: 1,
     depth: 3,
     draft,
-    overrideAccess: !draft,
+    overrideAccess: draft,
   });
 
   return (result.docs[0] as Answer | undefined) ?? null;
