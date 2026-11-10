@@ -48,6 +48,10 @@ export const Posts: CollectionConfig = {
     ],
     afterChange: [
       async ({ doc, previousDoc }) => {
+        // Payload creates an empty draft the first time the create view
+        // renders. Calling revalidatePath during that render is unsupported
+        // in Next.js, and an empty draft has no public paths to refresh.
+        if (!doc.slug && !previousDoc?.slug) return doc;
         await revalidateBlogPaths(doc.slug, previousDoc?.slug);
         return doc;
       },
