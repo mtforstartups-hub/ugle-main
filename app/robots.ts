@@ -6,7 +6,7 @@ export default function robots(): MetadataRoute.Robots {
     rules: {
       userAgent: "*",
       allow: "/",
-      disallow: ["/api/", "/dev/"],
+    disallow: ["/api/", "/admin", "/graphql", "/dev/"],
     },
     sitemap: `${SITE_URL}/sitemap.xml`,
     host: "ugle.ai",
