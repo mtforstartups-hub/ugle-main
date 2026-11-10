@@ -96,22 +96,47 @@ export async function getRelatedPosts(post: Post, limit = 3) {
 
   if (manual.length >= limit) return manual.slice(0, limit);
 
+  const excludeIds = [post.id, ...manual.map((item) => item.id)];
+  const remaining = limit - manual.length;
+
   const categoryId =
     post.category && typeof post.category === "object" ? post.category.id : post.category;
 
-  const result = await payload.find({
-    collection: "posts",
-    where: {
-      _status: { equals: "published" },
-      id: { not_in: [post.id, ...manual.map((item) => item.id)] },
-      ...(categoryId ? { category: { equals: categoryId } } : {}),
-    },
-    sort: "-publishedAt",
-    limit: limit - manual.length,
-    depth: 1,
-  });
+  // Prefer other posts in the same category, then fill any shortfall with the
+  // most recent published posts from other categories. Without the fallback a
+  // newly created post whose category has no other entries showed no related
+  // posts at all.
+  const sameCategory = categoryId
+    ? await payload.find({
+        collection: "posts",
+        where: {
+          _status: { equals: "published" },
+          id: { not_in: excludeIds },
+          category: { equals: categoryId },
+        },
+        sort: "-publishedAt",
+        limit: remaining,
+        depth: 1,
+      })
+    : null;
 
-  return [...manual, ...result.docs].slice(0, limit);
+  const collected = sameCategory?.docs ?? [];
+
+  if (collected.length < remaining) {
+    const fallback = await payload.find({
+      collection: "posts",
+      where: {
+        _status: { equals: "published" },
+        id: { not_in: [...excludeIds, ...collected.map((item) => item.id)] },
+      },
+      sort: "-publishedAt",
+      limit: remaining - collected.length,
+      depth: 1,
+    });
+    collected.push(...fallback.docs);
+  }
+
+  return [...manual, ...collected].slice(0, limit);
 }
 
 export async function getAnswersPage({
@@ -235,22 +260,45 @@ export async function getRelatedAnswers(answer: Answer, limit = 3) {
 
   if (manual.length >= limit) return manual.slice(0, limit);
 
+  const excludeIds = [answer.id, ...manual.map((item) => item.id)];
+  const remaining = limit - manual.length;
+
   const categoryId =
     answer.category && typeof answer.category === "object" ? answer.category.id : answer.category;
 
-  const result = await payload.find({
-    collection: "answers",
-    where: {
-      _status: { equals: "published" },
-      id: { not_in: [answer.id, ...manual.map((item) => item.id)] },
-      ...(categoryId ? { category: { equals: categoryId } } : {}),
-    },
-    sort: "order",
-    limit: limit - manual.length,
-    depth: 1,
-  });
+  // Same fallback as getRelatedPosts: prefer the category, then fill with
+  // recent published answers so new entries always surface related content.
+  const sameCategory = categoryId
+    ? await payload.find({
+        collection: "answers",
+        where: {
+          _status: { equals: "published" },
+          id: { not_in: excludeIds },
+          category: { equals: categoryId },
+        },
+        sort: "order",
+        limit: remaining,
+        depth: 1,
+      })
+    : null;
 
-  return [...manual, ...result.docs].slice(0, limit);
+  const collected = sameCategory?.docs ?? [];
+
+  if (collected.length < remaining) {
+    const fallback = await payload.find({
+      collection: "answers",
+      where: {
+        _status: { equals: "published" },
+        id: { not_in: [...excludeIds, ...collected.map((item) => item.id)] },
+      },
+      sort: "order",
+      limit: remaining - collected.length,
+      depth: 1,
+    });
+    collected.push(...fallback.docs);
+  }
+
+  return [...manual, ...collected].slice(0, limit);
 }
 
 export function mediaFrom(value: Media | number | null | undefined): Media | null {

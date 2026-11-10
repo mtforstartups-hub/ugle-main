@@ -4,6 +4,7 @@ import { draftMode } from "next/headers";
 import { getAllPostSlugs, getPostBySlug, getBlogSettings, getRelatedPosts } from "@/lib/payload/queries";
 import GlobalCTA from "@/app/components/GlobalCTA";
 import { PostContent } from "@/app/components/blog/PostContent";
+import SocialShare from "@/app/components/blog/SocialShare";
 import { pageMetadata } from "@/app/lib/seo";
 import Image from "next/image";
 import BreadcrumbJsonLd from "@/app/components/Seo/BreadcrumbJsonLd";
@@ -161,6 +162,8 @@ export default async function page({ params }: { params: Promise<{ slug: string 
             <PostContent content={post.content} />
           </div>
         </article>
+
+        <SocialShare title={post.title} url={absoluteUrl(`/blog/${slug}`)} />
 
         {/* Related Posts */}
         {relatedPosts.length > 0 && (
