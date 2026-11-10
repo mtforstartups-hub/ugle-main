@@ -15,7 +15,7 @@ import { PostContent } from "@/app/components/blog/PostContent";
 import GlobalCTA from "@/app/components/GlobalCTA";
 import BreadcrumbJsonLd from "@/app/components/Seo/BreadcrumbJsonLd";
 import { AnswerCard } from "@/app/components/answers/AnswerList";
-import { RefreshRouteOnSaveWrapper } from "@/app/components/payload/RefreshRouteOnSaveWrapper";
+import { PreviewOverlay } from "@/app/components/payload/PreviewOverlay";
 
 export async function generateStaticParams() {
   const slugs = await getAllAnswerSlugs();
@@ -114,34 +114,8 @@ export default async function AnswerPage({
         dangerouslySetInnerHTML={{ __html: serializeJsonLd(faqJsonLd) }}
       />
       <BreadcrumbJsonLd items={breadcrumbs} />
-      {isPreview && (
-        <div
-          style={{
-            position: "fixed",
-            top: 0,
-            left: 0,
-            right: 0,
-            background: "#75C043",
-            color: "#1C1C1C",
-            padding: "8px 16px",
-            textAlign: "center",
-            fontWeight: 700,
-            fontSize: 13,
-            zIndex: 9999,
-            boxShadow: "0 2px 8px rgba(0,0,0,0.15)",
-          }}
-        >
-          🔍 Live Preview Mode — Changes refresh automatically.{" "}
-          <a
-            href="/api/exit-preview"
-            style={{ color: "#1C1C1C", textDecoration: "underline", marginLeft: 12 }}
-          >
-            Exit preview
-          </a>
-        </div>
-      )}
-      {isPreview && <RefreshRouteOnSaveWrapper serverURL={process.env.NEXT_PUBLIC_SERVER_URL} />}
-      <div className="max-w-4xl mx-auto px-6 py-24" style={{ paddingTop: isPreview ? "80px" : "6rem" }}>
+      {isPreview && <PreviewOverlay />}
+      <div className="max-w-4xl mx-auto px-6 py-24">
         <nav aria-label="Breadcrumb" className="mb-10">
           <ol className="flex flex-wrap items-center gap-2 text-[13px] font-mono text-ugle-gray/70">
             <li>

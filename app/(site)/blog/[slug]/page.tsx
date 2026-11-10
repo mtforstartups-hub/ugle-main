@@ -8,7 +8,7 @@ import { PostContent } from "@/app/components/blog/PostContent";
 import { pageMetadata } from "@/app/lib/seo";
 import Image from "next/image";
 import BreadcrumbJsonLd from "@/app/components/Seo/BreadcrumbJsonLd";
-import { RefreshRouteOnSaveWrapper } from "@/app/components/payload/RefreshRouteOnSaveWrapper";
+import { PreviewOverlay } from "@/app/components/payload/PreviewOverlay";
 import {
   SITE_URL,
   absoluteUrl,
@@ -117,34 +117,8 @@ export default async function page({ params }: { params: Promise<{ slug: string 
         dangerouslySetInnerHTML={{ __html: serializeJsonLd(jsonLd) }}
       />
       <BreadcrumbJsonLd items={breadcrumbs} />
-      {isPreview && (
-        <div
-          style={{
-            position: "fixed",
-            top: 0,
-            left: 0,
-            right: 0,
-            background: "#75C043",
-            color: "#1C1C1C",
-            padding: "8px 16px",
-            textAlign: "center",
-            fontWeight: 700,
-            fontSize: 13,
-            zIndex: 9999,
-            boxShadow: "0 2px 8px rgba(0,0,0,0.15)",
-          }}
-        >
-          🔍 Live Preview Mode — Changes refresh automatically.{" "}
-          <a
-            href="/api/exit-preview"
-            style={{ color: "#1C1C1C", textDecoration: "underline", marginLeft: 12 }}
-          >
-            Exit preview
-          </a>
-        </div>
-      )}
-      {isPreview && <RefreshRouteOnSaveWrapper serverURL={process.env.NEXT_PUBLIC_SERVER_URL} />}
-      <div className="max-w-4xl mx-auto px-6 py-24" style={{ paddingTop: isPreview ? "80px" : "6rem" }}>
+      {isPreview && <PreviewOverlay />}
+      <div className="max-w-4xl mx-auto px-6 py-24">
         <BlogHero
           eyebrow={settings?.heroEyebrow ?? "Blog"}
           title={settings?.heroTitle ?? "Thoughts & Workflow."}
@@ -215,15 +189,17 @@ export default async function page({ params }: { params: Promise<{ slug: string 
             </div>
           </section>
         )}
-
-        {/* CTA */}
-        <section className="w-full border-t border-ugle-light/60 bg-[#F8FAF9] py-16 md:py-20 mt-16">
-          <GlobalCTA
-            title="Take control of your media."
-            subtitle="Get 15 days trial and see for yourself."
-          />
-        </section>
       </div>
+
+      {/* Full-width CTA band between the article and the footer */}
+      <section className="w-full border-t border-ugle-light/60 bg-[#F8FAF9] py-16 md:py-20">
+        <GlobalCTA
+          title={settings?.cta?.title ?? "Take control of your media."}
+          subtitle={settings?.cta?.body ?? "Get 15 days trial and see for yourself."}
+          ctaText={settings?.cta?.buttonLabel ?? undefined}
+          ctaLink={settings?.cta?.buttonHref ?? undefined}
+        />
+      </section>
     </>
   );
 }
