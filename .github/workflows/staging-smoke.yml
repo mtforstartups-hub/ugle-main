@@ -38,6 +38,11 @@ on:
       - "app/components/getaccess/GetAccessForm.tsx"
       - "app/components/EducationForm.tsx"
       - "app/components/email-templates/**"
+      - "collections/**"
+      - "globals/**"
+      - "lib/payload/**"
+      - "app/(site)/blog/**"
+      - "app/(site)/answers/**"
 
 concurrency:
   group: staging-smoke-${{ github.ref }}
@@ -57,6 +62,15 @@ jobs:
       GOOGLE_SPREADSHEET_ID: ${{ secrets.STAGING_GOOGLE_SPREADSHEET_ID }}
       GOOGLE_CLIENT_EMAIL: ${{ secrets.STAGING_GOOGLE_CLIENT_EMAIL }}
       GOOGLE_PRIVATE_KEY: ${{ secrets.STAGING_GOOGLE_PRIVATE_KEY }}
+      # Payload / CMS runtime configuration for the staging deployment.
+      # The smoke tests themselves are read-only, but the CMS-backed pages
+      # they visit need these secrets in the deployed environment.
+      DATABASE_URI: ${{ secrets.STAGING_DATABASE_URI }}
+      PAYLOAD_SECRET: ${{ secrets.STAGING_PAYLOAD_SECRET }}
+      PREVIEW_SECRET: ${{ secrets.STAGING_PREVIEW_SECRET }}
+      CRON_SECRET: ${{ secrets.STAGING_CRON_SECRET }}
+      BLOB_READ_WRITE_TOKEN: ${{ secrets.STAGING_BLOB_READ_WRITE_TOKEN }}
+      NEXT_PUBLIC_SERVER_URL: "https://preview-ugle-cf.vercel.app"
     steps:
       - uses: actions/checkout@v7
 

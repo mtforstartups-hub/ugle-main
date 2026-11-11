@@ -1,3 +1,5 @@
+import { readFile } from "node:fs/promises";
+import path from "node:path";
 import { getPayload } from "payload";
 import { JSDOM } from "jsdom";
 import {
@@ -219,6 +221,116 @@ async function seed() {
       },
       overrideAccess: true,
     });
+  }
+
+  // 2c. Demo post so a fresh database (and CI) always has at least one
+  // published article on /blog. Idempotent by slug.
+  const demoSlug = "welcome-to-the-ugle-blog";
+  const existingDemoPost = await payload.find({
+    collection: "posts",
+    where: { slug: { equals: demoSlug } },
+    limit: 1,
+    draft: true,
+    overrideAccess: true,
+  });
+
+  if (existingDemoPost.totalDocs === 0) {
+    const postsCollection = payload.config.collections.find(
+      (collection) => collection.slug === "posts",
+    );
+    const postContentField = postsCollection?.fields.find(
+      (field) => "name" in field && field.name === "content",
+    );
+    if (!postContentField) throw new Error("posts.content field not found");
+
+    const postEditorConfig = editorConfigFactory.fromField({
+      field: postContentField as never,
+    }) as SanitizedServerEditorConfig;
+
+    // Reuse the brand OG image as the hero so the demo post renders with a
+    // real upload instead of a placeholder URL.
+    let demoMedia = await payload.find({
+      collection: "media",
+      where: { filename: { equals: "UgleOGImage.png" } },
+      limit: 1,
+      overrideAccess: true,
+    });
+
+    if (demoMedia.totalDocs === 0) {
+      const image = await readFile(
+        path.join(process.cwd(), "public", "UgleOGImage.png"),
+      );
+      const uploaded = await payload.create({
+        collection: "media",
+        data: { alt: "Ugle — local-first media search" },
+        file: {
+          data: image,
+          mimetype: "image/png",
+          name: "UgleOGImage.png",
+          size: image.length,
+        },
+        overrideAccess: true,
+      });
+      demoMedia = { ...demoMedia, docs: [uploaded] };
+    }
+
+    const demoCategory = await payload.find({
+      collection: "categories",
+      where: { slug: { equals: "product-philosophy" } },
+      limit: 1,
+      overrideAccess: true,
+    });
+    const demoAuthor = await payload.find({
+      collection: "authors",
+      where: { slug: { equals: "ugle-team" } },
+      limit: 1,
+      overrideAccess: true,
+    });
+
+    const categoryId = demoCategory.docs[0]?.id;
+    const authorId = demoAuthor.docs[0]?.id;
+    const mediaId = demoMedia.docs[0]?.id;
+    if (!categoryId || !authorId || !mediaId) {
+      throw new Error("Demo post is missing a category, author or media document");
+    }
+
+    const demoContent = convertHTMLToLexical({
+      editorConfig: postEditorConfig,
+      html: `
+        <p>Ugle is built on a simple idea: the media you work with should stay yours. This blog is where we write about local-first software, editorial workflow and the craft of working with audio and video.</p>
+        <h2>What you will find here</h2>
+        <ul>
+          <li>Product thinking and the decisions behind Ugle.</li>
+          <li>Workflow notes from journalists, podcasters and researchers.</li>
+          <li>Comparisons and practical guides for media professionals.</li>
+        </ul>
+        <h2>Why local-first</h2>
+        <p>Search, transcription and indexing run on your machine. Your recordings are not uploaded to a Ugle server as part of normal use, which means sensitive interviews and unreleased footage never leave your device.</p>
+        <blockquote><p>Fast search should not require handing your archive to someone else.</p></blockquote>
+        <p>If you want to go deeper, the <a href="/answers">Answers</a> section covers privacy, transcription accuracy and pricing in detail.</p>
+      `,
+      JSDOM: JSDOM as never,
+    });
+
+    await payload.create({
+      collection: "posts",
+      data: {
+        title: "Welcome to the Ugle blog",
+        slug: demoSlug,
+        excerpt:
+          "Product thinking, workflow notes and local-first media search. Here is what we write about and why your recordings stay on your machine.",
+        heroImage: mediaId,
+        content: demoContent as never,
+        category: categoryId,
+        author: authorId,
+        publishedAt: new Date().toISOString(),
+        featured: true,
+        _status: "published",
+      },
+      overrideAccess: true,
+    });
+
+    console.log(`Created demo post: ${demoSlug}`);
   }
 
   // 3. Globals — blog-settings + answers-settings
