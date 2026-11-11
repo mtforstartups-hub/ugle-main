@@ -1,7 +1,8 @@
 name: Staging Smoke Test
 
-# Manual trigger via GitHub Actions UI (workflow_dispatch)
-# OR auto-run on main when email, sheets, or Turnstile form code changes
+# Manual only: run from the GitHub Actions UI (workflow_dispatch).
+# Nothing here triggers on push, pull request or a schedule — the smoke test
+# sends real form submissions and emails, so it must be an explicit choice.
 on:
   workflow_dispatch:
     inputs:
@@ -17,32 +18,6 @@ on:
           - education
           - all
         default: "newsletter"
-  push:
-    branches: [main]
-    paths:
-      - "app/actions/newsletter.ts"
-      - "app/actions/contact.ts"
-      - "app/actions/demo.ts"
-      - "app/actions/request-trial.ts"
-      - "app/actions/education.ts"
-      - "app/lib/turnstile.ts"
-      - "app/lib/rate-limit.ts"
-      - "app/lib/validation.ts"
-      - "app/lib/honeypot.ts"
-      - "app/lib/sheets/**"
-      - "app/lib/env.ts"
-      - "app/components/forms/FooterNewsletter.tsx"
-      - "app/components/HoneypotField.tsx"
-      - "app/components/ContactForm.tsx"
-      - "app/components/demo/DemoForm.tsx"
-      - "app/components/getaccess/GetAccessForm.tsx"
-      - "app/components/EducationForm.tsx"
-      - "app/components/email-templates/**"
-      - "collections/**"
-      - "globals/**"
-      - "lib/payload/**"
-      - "app/(site)/blog/**"
-      - "app/(site)/answers/**"
 
 concurrency:
   group: staging-smoke-${{ github.ref }}
