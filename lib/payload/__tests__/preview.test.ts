@@ -50,6 +50,16 @@ describe("preview helpers", () => {
     it("keeps the route relative so preview works on any deployment origin", () => {
       expect(previewSecretPath("answers", "q")).not.toContain("https://");
     });
+
+    it("round-trips a base64-style secret with +, / and = characters", () => {
+      const secret = "2l+2kLT+DO3iC/cN8iD2kh9cj6X0AbbI7VJ/3tz49QltywrceO2Cm4V35/aNks4d=";
+      process.env.PREVIEW_SECRET = secret;
+
+      const path = previewSecretPath("posts", "hello-world");
+      const params = new URL(path, "https://ugle.ai").searchParams;
+
+      expect(params.get("secret")).toBe(secret);
+    });
   });
 
   describe("previewSecretUrl", () => {

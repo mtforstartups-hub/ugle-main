@@ -12,8 +12,17 @@ export function previewUrl(collection: "posts" | "answers", slug?: string | null
  */
 export function previewSecretPath(collection: "posts" | "answers", slug?: string | null) {
   const path = previewUrl(collection, slug);
-  const secret = process.env.PREVIEW_SECRET || "";
-  return `/api/preview?collection=${collection}&slug=${slug || ""}&secret=${secret}&path=${encodeURIComponent(path)}`;
+  // Build the query with URLSearchParams so the secret survives the round trip.
+  // Secrets are often base64, and characters like `+`, `/` and `=` change
+  // meaning in a query string (`+` decodes to a space), which made the route
+  // reject valid secrets with "Invalid preview secret".
+  const query = new URLSearchParams({
+    collection,
+    slug: slug || "",
+    secret: process.env.PREVIEW_SECRET || "",
+    path,
+  });
+  return `/api/preview?${query.toString()}`;
 }
 
 export function previewSecretUrl(collection: "posts" | "answers", slug?: string | null) {
