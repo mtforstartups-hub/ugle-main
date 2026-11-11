@@ -413,8 +413,8 @@ export function NewsletterWelcomeEmail({ email }: NewsletterWelcomeEmailProps) {
                         You&apos;ve joined a growing community of media
                         professionals who believe search should be instant,
                         local, and private. We&apos;ll keep you updated on new
-                        features, early access opportunities, and tips to master
-                        your workflow.
+                        features, product previews, and tips to master your
+                        workflow.
                       </p>
 
                       {/* Divider */}
@@ -441,7 +441,7 @@ export function NewsletterWelcomeEmail({ email }: NewsletterWelcomeEmailProps) {
                         What to expect
                       </p>
 
-                      {/* Feature: Early access */}
+                      {/* Feature: Trial */}
                       <table
                         cellPadding={0}
                         cellSpacing={0}
@@ -479,7 +479,7 @@ export function NewsletterWelcomeEmail({ email }: NewsletterWelcomeEmailProps) {
                                   marginBottom: "2px",
                                 }}
                               >
-                                Early access
+                                Preview updates
                               </span>
                               <span
                                 style={{

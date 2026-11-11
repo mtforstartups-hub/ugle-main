@@ -33,7 +33,7 @@ export default defineConfig({
     ? undefined
     : {
         command:
-          process.env.CI || fs.existsSync(".next")
+          process.env.CI || fs.existsSync(".next/BUILD_ID")
             ? "bun run start"
             : "bun run build && bun run start",
         url: "http://localhost:3000",

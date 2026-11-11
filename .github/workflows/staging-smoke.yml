@@ -23,7 +23,7 @@ on:
       - "app/actions/newsletter.ts"
       - "app/actions/contact.ts"
       - "app/actions/demo.ts"
-      - "app/actions/early-access.ts"
+      - "app/actions/request-trial.ts"
       - "app/actions/education.ts"
       - "app/lib/turnstile.ts"
       - "app/lib/rate-limit.ts"

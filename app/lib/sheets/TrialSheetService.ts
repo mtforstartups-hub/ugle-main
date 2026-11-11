@@ -1,6 +1,6 @@
 import { GoogleSheetsService } from "./GoogleSheetsService";
 
-export interface EarlyAccessRow {
+export interface TrialRow {
   firstName: string;
   lastName: string;
   email: string;
@@ -12,15 +12,15 @@ export interface EarlyAccessRow {
 /** Column C, matching the order used by `append`. */
 const EMAIL_COLUMN = "C";
 
-export class EarlyAccessSheetService extends GoogleSheetsService {
+export class TrialSheetService extends GoogleSheetsService {
   // Must match the exact tab name in your Google Spreadsheet
   protected readonly sheetName = "EarlyAccess";
 
   /**
-   * Appends an early access row with columns:
+   * Appends an request trial row with columns:
    * [First Name, Last Name, Email, Phone, OS, Submitted At]
    */
-  async append(data: EarlyAccessRow): Promise<void> {
+  async append(data: TrialRow): Promise<void> {
     await this.appendRow([
       data.firstName,
       data.lastName,

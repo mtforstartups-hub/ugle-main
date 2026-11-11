@@ -20,6 +20,21 @@ function getTagClass(tag: string, customColor?: string) {
   return tagColorMap[key] || "text-ugle-gray";
 }
 
+function renderFormattedText(text: string) {
+  if (!text.includes("**")) return text;
+  const parts = text.split(/(\*\*.*?\*\*)/g);
+  return parts.map((part, index) => {
+    if (part.startsWith("**") && part.endsWith("**")) {
+      return (
+        <strong key={index} className="font-semibold text-ugle-slate">
+          {part.slice(2, -2)}
+        </strong>
+      );
+    }
+    return part;
+  });
+}
+
 function formatTag(tag: string) {
   return tag.startsWith("[") ? tag : `[${tag}]`;
 }
@@ -58,7 +73,7 @@ export default function ChangelogMain() {
                   {formatTag(item.t)}
                 </span>
                 <span className="mt-1 sm:mt-0 leading-relaxed">
-                  {item.text}
+                  {renderFormattedText(item.text)}
                 </span>
               </li>
             ))}

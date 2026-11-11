@@ -16,8 +16,7 @@ export default function GetAccessHero() {
         Start searching your archive.
       </h1>
       <p className="text-[18px] md:text-[21px] text-ugle-gray leading-[1.55]">
-        Join the early access program. We are rolling out invites weekly to
-        ensure stability and performance.
+        Start your 15-day free trial.
       </p>
     </motion.div>
   );
