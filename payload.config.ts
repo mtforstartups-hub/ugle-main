@@ -89,17 +89,19 @@ export default buildConfig({
   sharp,
   typescript: { outputFile: path.resolve(dirname, "payload-types.ts") },
   plugins: [
-    // Vercel Blob in production. Without a token (local dev) Payload falls
-    // back to the local disk so uploads keep working.
-    ...(process.env.BLOB_READ_WRITE_TOKEN
-      ? [
-          vercelBlobStorage({
-            collections: { media: true },
-            token: process.env.BLOB_READ_WRITE_TOKEN,
-            clientUploads: true,
-          }),
-        ]
-      : []),
+    // Vercel Blob in production. Without a token (local dev) the plugin is
+    // disabled and Payload keeps files on the local disk, but `alwaysInsertFields`
+    // keeps its hidden fields (`_objectKey`, `prefix`) in the schema so the
+    // database shape is identical in every environment. Without it, the schema
+    // only matches production and the build fails on a missing `_objectkey`
+    // column.
+    vercelBlobStorage({
+      collections: { media: true },
+      token: process.env.BLOB_READ_WRITE_TOKEN,
+      clientUploads: true,
+      enabled: Boolean(process.env.BLOB_READ_WRITE_TOKEN),
+      alwaysInsertFields: true,
+    }),
     seoPlugin({
       collections: ["posts", "answers"],
       uploadsCollection: "media",
