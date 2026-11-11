@@ -33,6 +33,7 @@ import { PreviewComponent as PreviewComponent_a8a977ebc872c5d5ea7ee689724c0860 }
 import { UserAvatar as UserAvatar_47861655001cbf48e6259b36cb95a68a } from '../../../components/admin/UserAvatar'
 import { UgleIcon as UgleIcon_364af990456a48c533423372c401d7fa } from '../../../components/admin/UgleIcon'
 import { UgleLogo as UgleLogo_d3472f0da70920c886fc62fe22c60098 } from '../../../components/admin/UgleLogo'
+import { SanitizeBlobFilenames as SanitizeBlobFilenames_63a216043b1b7fe294f5d1a3af2ef6a5 } from '../../../components/admin/SanitizeBlobFilenames'
 import { Dashboard as Dashboard_16b88e9b8c48e393fa86591406efd08f } from '../../../components/admin/Dashboard'
 import { CollectionCards as CollectionCards_f9c02e79a4aed9a3924487c0cd4cafb1 } from '@payloadcms/next/rsc'
 import { VercelBlobClientUploadHandler as VercelBlobClientUploadHandler_16c82c5e25f430251a3e3ba57219ff4e } from '@payloadcms/storage-vercel-blob/client'
@@ -74,6 +75,7 @@ export const importMap = {
   "/components/admin/UserAvatar#UserAvatar": UserAvatar_47861655001cbf48e6259b36cb95a68a,
   "/components/admin/UgleIcon#UgleIcon": UgleIcon_364af990456a48c533423372c401d7fa,
   "/components/admin/UgleLogo#UgleLogo": UgleLogo_d3472f0da70920c886fc62fe22c60098,
+  "/components/admin/SanitizeBlobFilenames#SanitizeBlobFilenames": SanitizeBlobFilenames_63a216043b1b7fe294f5d1a3af2ef6a5,
   "/components/admin/Dashboard#Dashboard": Dashboard_16b88e9b8c48e393fa86591406efd08f,
   "@payloadcms/next/rsc#CollectionCards": CollectionCards_f9c02e79a4aed9a3924487c0cd4cafb1,
   "@payloadcms/storage-vercel-blob/client#VercelBlobClientUploadHandler": VercelBlobClientUploadHandler_16c82c5e25f430251a3e3ba57219ff4e

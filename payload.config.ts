@@ -27,6 +27,14 @@ export default buildConfig({
       Component: "/components/admin/UserAvatar#UserAvatar",
     },
     components: {
+      providers: [
+        // Renames uploads to URL-safe filenames before Vercel Blob signs the
+        // client upload token (see components/admin/SanitizeBlobFilenames.tsx).
+        {
+          path: "/components/admin/SanitizeBlobFilenames#SanitizeBlobFilenames",
+          clientProps: { collectionSlug: "media" },
+        },
+      ],
       graphics: {
         Icon: "/components/admin/UgleIcon#UgleIcon",
         Logo: "/components/admin/UgleLogo#UgleLogo",

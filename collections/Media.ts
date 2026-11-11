@@ -1,5 +1,6 @@
 import { APIError } from "payload";
 import type { CollectionConfig } from "payload";
+import { sanitizeFilename } from "../lib/media/filename";
 import { revalidateMediaPaths } from "../lib/payload/revalidate";
 
 /**
@@ -34,6 +35,16 @@ export const Media: CollectionConfig = {
     delete: ({ req: { user } }) => Boolean(user?.role === "admin" || user),
   },
   hooks: {
+    beforeOperation: [
+      ({ req }) => {
+        // Client uploads rename the file in the browser; this covers server-side
+        // uploads (local disk in dev, bulk uploads, API calls) so object keys and
+        // filenames are always URL-safe.
+        if (req.file?.name) {
+          req.file.name = sanitizeFilename(req.file.name, req.file.mimetype);
+        }
+      },
+    ],
     beforeValidate: [
       ({ data }) => {
         const filesize = (data as { filesize?: number } | undefined)?.filesize;
