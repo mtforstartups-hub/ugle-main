@@ -51,13 +51,21 @@ export async function generateMetadata({
       }
     : undefined;
 
-  return pageMetadata({
+  const metadata = pageMetadata({
     title: answer.meta?.title ?? answer.question,
     description: answer.meta?.description ?? answer.shortAnswer,
     path: `/answers/${slug}`,
     ogType: "article",
     socialImage: metaImage,
   });
+
+  // Drafts and preview renders must never be indexed.
+  const dm = await draftMode();
+  if (answer._status !== "published" || dm.isEnabled) {
+    return { ...metadata, robots: { index: false, follow: false } };
+  }
+
+  return metadata;
 }
 
 export default async function AnswerPage({

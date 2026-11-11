@@ -15,8 +15,6 @@ import {
   serializeJsonLd,
 } from "@/app/lib/seo";
 
-const POSTS_PER_PAGE = 5;
-
 export async function generateStaticParams() {
   const slugs = await getAllPostSlugs();
   return slugs.map((slug) => ({ slug }));
@@ -38,7 +36,6 @@ export async function generateMetadata({
     };
   }
 
-  const settings = await getBlogSettings();
   const heroMedia = post.heroImage && typeof post.heroImage === "object" ? post.heroImage : null;
   const metaImageMedia = post.meta?.image && typeof post.meta.image === "object" ? post.meta.image : null;
   const metaImage = metaImageMedia?.url
@@ -47,13 +44,21 @@ export async function generateMetadata({
     ? { url: heroMedia.url, alt: post.title, width: heroMedia.width ?? 1200, height: heroMedia.height ?? 630 }
     : undefined;
 
-  return pageMetadata({
+  const metadata = pageMetadata({
     title: post.meta?.title ?? post.title,
     description: post.meta?.description ?? post.excerpt,
     path: `/blog/${slug}`,
     ogType: "article",
     socialImage: metaImage,
   });
+
+  // Drafts and preview renders must never be indexed.
+  const dm = await draftMode();
+  if (post._status !== "published" || dm.isEnabled) {
+    return { ...metadata, robots: { index: false, follow: false } };
+  }
+
+  return metadata;
 }
 
 export default async function page({ params }: { params: Promise<{ slug: string }> }) {

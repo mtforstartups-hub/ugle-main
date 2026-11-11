@@ -4,7 +4,7 @@ import { contentEditor } from "../lib/payload/editor";
 import { estimateReadingTime } from "../lib/payload/reading-time";
 import { revalidateBlogPaths } from "../lib/payload/revalidate";
 import { previewSecretPath, previewSecretUrl } from "../lib/payload/preview";
-import { publicOrStaffRead, staffCreate, staffUpdate } from "../lib/payload/access";
+import { publicOrStaffRead, staffCreate, staffTrashOrAdminDelete, staffUpdate } from "../lib/payload/access";
 
 export const Posts: CollectionConfig = {
   slug: "posts",
@@ -30,7 +30,7 @@ export const Posts: CollectionConfig = {
     read: publicOrStaffRead,
     create: staffCreate,
     update: staffUpdate,
-    delete: ({ req: { user } }) => Boolean(user?.role === "admin" || user),
+    delete: staffTrashOrAdminDelete,
   },
   hooks: {
     beforeValidate: [

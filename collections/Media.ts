@@ -1,5 +1,14 @@
+import { APIError } from "payload";
 import type { CollectionConfig } from "payload";
 import { revalidateMediaPaths } from "../lib/payload/revalidate";
+
+/**
+ * Payload 3 does not expose a per-collection upload size limit, so enforce it
+ * in a hook. Vercel's server-side upload limit is 4.5 MB; client uploads
+ * bypass it, but a hard ceiling stops multi-gigabyte files from entering the
+ * CMS (and the blob store) by accident.
+ */
+const MAX_FILE_SIZE = 10 * 1024 * 1024;
 
 export const Media: CollectionConfig = {
   slug: "media",
@@ -25,6 +34,15 @@ export const Media: CollectionConfig = {
     delete: ({ req: { user } }) => Boolean(user?.role === "admin" || user),
   },
   hooks: {
+    beforeValidate: [
+      ({ data }) => {
+        const filesize = (data as { filesize?: number } | undefined)?.filesize;
+        if (typeof filesize === "number" && filesize > MAX_FILE_SIZE) {
+          throw new APIError("Images must be 10 MB or smaller.", 400);
+        }
+        return data;
+      },
+    ],
     afterChange: [
       () => {
         revalidateMediaPaths();

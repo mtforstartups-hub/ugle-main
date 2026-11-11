@@ -3,7 +3,7 @@ import { slug } from "../fields/slug";
 import { contentEditor } from "../lib/payload/editor";
 import { revalidateAnswersPaths } from "../lib/payload/revalidate";
 import { previewSecretPath, previewSecretUrl } from "../lib/payload/preview";
-import { publicOrStaffRead, staffCreate, staffUpdate } from "../lib/payload/access";
+import { publicOrStaffRead, staffCreate, staffTrashOrAdminDelete, staffUpdate } from "../lib/payload/access";
 
 export const Answers: CollectionConfig = {
   slug: "answers",
@@ -29,7 +29,7 @@ export const Answers: CollectionConfig = {
     read: publicOrStaffRead,
     create: staffCreate,
     update: staffUpdate,
-    delete: ({ req: { user } }) => Boolean(user?.role === "admin" || user),
+    delete: staffTrashOrAdminDelete,
   },
   hooks: {
     beforeValidate: [
