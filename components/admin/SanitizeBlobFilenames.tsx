@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { Fragment, useEffect } from "react";
 import { useUploadHandlers } from "@payloadcms/ui";
 import type { UploadCollectionSlug } from "payload";
 
@@ -22,10 +22,15 @@ const wrappedHandlers = new WeakSet<UploadHandler>();
  * disagree, and Vercel answers with a 400 that the browser reports as a CORS
  * error. Rename the file to a URL-safe name before the storage plugin's
  * handler runs, so any file an editor picks uploads cleanly.
+ *
+ * This is registered as an admin provider, which Payload wraps around the whole
+ * admin UI, so it must render `children` — returning null blanks every screen.
  */
 export function SanitizeBlobFilenames({
+  children,
   collectionSlug,
 }: {
+  children?: React.ReactNode;
   collectionSlug: UploadCollectionSlug;
 }) {
   const { getUploadHandler, setUploadHandler } = useUploadHandlers();
@@ -57,5 +62,5 @@ export function SanitizeBlobFilenames({
     return () => clearTimeout(timer);
   }, [collectionSlug, getUploadHandler, setUploadHandler]);
 
-  return null;
+  return <Fragment>{children}</Fragment>;
 }
