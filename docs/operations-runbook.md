@@ -94,7 +94,10 @@ Useful commands:
 
 1. **Provision Postgres** (Vercel Postgres/Neon or equivalent). Enable
    point-in-time recovery if available.
-2. **Provision a Vercel Blob store** and copy its read/write token.
+2. **Provision a Vercel Blob store with PUBLIC access** and copy its
+   read/write token. The CMS uploads with `access: 'public'` and pages embed
+   the blob URL directly, so a private store cannot serve media. Access mode is
+   fixed at creation — a private store has to be replaced, not reconfigured.
 3. **Set all environment variables** in Vercel for Production (and Preview).
    Set `NEXT_PUBLIC_SERVER_URL` to the final public origin.
 4. **Run migrations** against the production database:
@@ -262,6 +265,7 @@ staging secrets they expect.
 | Build or admin hangs connecting to Postgres | Database unreachable / wrong `DATABASE_URI` | Check the connection string and network access. |
 | `relation "..." does not exist` in production | Migrations not run | Run `bun run migrate` before deploying. |
 | Media uploads 404 after deploy | Blob token missing or wrong store | Set `BLOB_READ_WRITE_TOKEN` and redeploy. |
+| Upload fails with a CORS error on `vercel.com/api/blob` (400) | The Blob store is **private**; the API rejects `access: 'public'` and that error carries no CORS header | Create a **public** Blob store (access mode is fixed at creation), update `BLOB_READ_WRITE_TOKEN` for every environment, redeploy. |
 | Preview link returns 401/400 | Wrong `PREVIEW_SECRET`, or the path does not belong to the document | Check the secret; use the **Preview** button rather than editing the URL. |
 | Admin UI shows stale branding or copy | Payload i18n/import map is memoized | Restart the server; run `bun run generate:importmap` after component changes. |
 | A list column is missing | Payload persists columns per user | Reset columns from the list view's column selector. |
