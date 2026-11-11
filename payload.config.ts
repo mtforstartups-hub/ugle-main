@@ -104,7 +104,13 @@ export default buildConfig({
     // only matches production and the build fails on a missing `_objectkey`
     // column.
     vercelBlobStorage({
-      collections: { media: true },
+      // Serve media straight from the Blob CDN. The default (`false`) routes
+      // every file through `/api/media/file/...`, i.e. a Vercel Function that
+      // fetches the blob and streams it back: slow, uncached at the edge, and
+      // it also produces absolute same-origin URLs that `next/image` rejects
+      // unless the deployment origin is whitelisted. Media is public content,
+      // so Payload's file access control adds nothing here.
+      collections: { media: { disablePayloadAccessControl: true } },
       token: process.env.BLOB_READ_WRITE_TOKEN,
       clientUploads: true,
       enabled: Boolean(process.env.BLOB_READ_WRITE_TOKEN),

@@ -1,5 +1,6 @@
 import { draftMode } from "next/headers";
 import type { Where } from "payload";
+import { cache } from "react";
 
 import type { Answer, BlogSetting, Media, Post } from "@/payload-types";
 import { getPayloadClient } from "./getPayload";
@@ -12,23 +13,26 @@ async function isDraftMode(): Promise<boolean> {
 export const DEFAULT_POSTS_PER_PAGE = 5;
 export const DEFAULT_ANSWERS_PER_PAGE = 10;
 
-export async function getBlogSettings(): Promise<BlogSetting | null> {
+// `cache` dedupes within a single request: pages call these from both
+// `generateMetadata` and the page component, which would otherwise hit the
+// database twice for the same document.
+export const getBlogSettings = cache(async (): Promise<BlogSetting | null> => {
   const payload = await getPayloadClient();
   try {
     return await payload.findGlobal({ slug: "blog-settings", depth: 1 });
   } catch {
     return null;
   }
-}
+});
 
-export async function getAnswersSettings() {
+export const getAnswersSettings = cache(async () => {
   const payload = await getPayloadClient();
   try {
     return await payload.findGlobal({ slug: "answers-settings", depth: 1 });
   } catch {
     return null;
   }
-}
+});
 
 export async function getPostsPage({
   page = 1,
@@ -70,7 +74,7 @@ export async function getAllPostSlugs() {
   return result.docs.map((post) => post.slug).filter(Boolean) as string[];
 }
 
-export async function getPostBySlug(slug: string): Promise<Post | null> {
+export const getPostBySlug = cache(async (slug: string): Promise<Post | null> => {
   const payload = await getPayloadClient();
   const draft = await isDraftMode();
 
@@ -86,7 +90,7 @@ export async function getPostBySlug(slug: string): Promise<Post | null> {
   });
 
   return (result.docs[0] as Post | undefined) ?? null;
-}
+});
 
 export async function getRelatedPosts(post: Post, limit = 3): Promise<Post[]> {
   const selected = Array.isArray(post.relatedPosts) ? post.relatedPosts.slice(0, limit) : [];
@@ -213,7 +217,7 @@ export async function getAllAnswerSlugs() {
   return result.docs.map((answer) => answer.slug).filter(Boolean) as string[];
 }
 
-export async function getAnswerBySlug(slug: string): Promise<Answer | null> {
+export const getAnswerBySlug = cache(async (slug: string): Promise<Answer | null> => {
   const payload = await getPayloadClient();
   const draft = await isDraftMode();
 
@@ -229,7 +233,7 @@ export async function getAnswerBySlug(slug: string): Promise<Answer | null> {
   });
 
   return (result.docs[0] as Answer | undefined) ?? null;
-}
+});
 
 export async function getRelatedAnswers(answer: Answer, limit = 3) {
   const payload = await getPayloadClient();
