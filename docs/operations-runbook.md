@@ -105,13 +105,28 @@ Useful commands:
    DATABASE_URI=... PAYLOAD_SECRET=... bun run migrate
    ```
    `payload.config.ts` disables schema push in production, so this step is
-   mandatory.
+   mandatory. Use Neon's **unpooled** (direct) connection string for this
+   command: migrations take locks and run DDL, which PgBouncer does not handle
+   reliably. The deployed app itself uses the pooled string at runtime.
 5. **Seed** the first admin, categories, authors, answers and demo content:
    ```bash
    DATABASE_URI=... PAYLOAD_SECRET=... \
    SEED_ADMIN_EMAIL=... SEED_ADMIN_PASSWORD=... bun run seed
    ```
    The seed is idempotent (matched by slug/email/filename).
+5b. **Import the legacy blog posts** (one-off; the script lives in the
+   untracked `scripts/migrate-legacy-posts/` folder). Run it with
+   `NODE_ENV=production` so Payload does not try to push the schema, and with
+   the Blob token so hero images are uploaded instead of written to disk:
+   ```bash
+   NODE_ENV=production \
+   DATABASE_URI=... PAYLOAD_SECRET=... BLOB_READ_WRITE_TOKEN=... \
+   bun --bun scripts/migrate-legacy-posts/import.ts
+   ```
+   It creates the 17 published posts (including the Product Hunt launch post),
+   uploads their hero images and points the blog's featured post at
+   `why-local-first`. Existing slugs are skipped, so re-running is safe; pass
+   `--force` to overwrite them from the captured JSON.
 6. **Build and deploy** the current commit to Vercel. Confirm the build log
    shows the environment check passing.
 7. **Smoke test**:
