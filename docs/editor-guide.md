@@ -83,7 +83,9 @@ excerpt/short answer and hero image.
 - To take a published document down, open it and choose **Unpublish** (or set
   the status back to Draft). Its public URL then returns 404.
 - **Schedule publish** is available from the publish menu if you want a post to
-  go live at a future time.
+  go live at a future time. Scheduled items are released by a background job
+  that runs once a day, so a post can appear up to about a day after the time
+  you pick. If the exact date matters, schedule it at least two days ahead.
 
 ## Writing an answer
 

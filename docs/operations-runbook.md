@@ -37,6 +37,23 @@ Browser ──► Vercel / Next.js ──► Payload Local API ──► Postgre
 Generate secrets with a password manager or `openssl rand -base64 48`. Never
 commit them; `.env.local` is gitignored.
 
+## Scheduled publishing
+
+Posts and answers scheduled from the publish menu are released by Payload's
+jobs queue, triggered by Vercel Cron (`vercel.json` → `/api/payload-jobs/run`).
+
+- The schedule is **once a day at 03:00 UTC** because Vercel Hobby plans only
+  allow daily cron jobs. A scheduled item goes live at the next daily run, so
+  it can appear up to ~24 hours after the time set in the admin panel.
+- Hobby cron invocations may start up to an hour after the scheduled time, so
+  treat 03:00 UTC as a window rather than an exact minute.
+- On a Pro plan, change the schedule to `*/5 * * * *` and redeploy to get
+  near-real-time publishing; no code changes are needed.
+- The endpoint is protected by `CRON_SECRET`: Vercel sends
+  `Authorization: Bearer $CRON_SECRET` automatically. If scheduled items stop
+  publishing, check the cron entry in the Vercel dashboard and that the secret
+  matches.
+
 ## Local development
 
 ```bash
@@ -249,4 +266,4 @@ staging secrets they expect.
 | Admin UI shows stale branding or copy | Payload i18n/import map is memoized | Restart the server; run `bun run generate:importmap` after component changes. |
 | A list column is missing | Payload persists columns per user | Reset columns from the list view's column selector. |
 | Draft is not on the public site | It is not published | Publish it; drafts are only visible in Preview. |
-| Scheduled post did not publish | Cron job not running or `CRON_SECRET` mismatch | Check the scheduler and the bearer token. |
+| Scheduled post did not publish | Waiting for the next daily cron run, cron not running, or `CRON_SECRET` mismatch | Check the cron entry in the Vercel dashboard and the bearer token; see [Scheduled publishing](#scheduled-publishing). |
