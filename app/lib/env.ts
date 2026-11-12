@@ -38,7 +38,7 @@ const sheetsSchema = z.object({
 
 const payloadSchema = z.object({
   PAYLOAD_SECRET: z.string().min(16),
-  DATABASE_URI: z.string().min(10),
+  DATABASE_URL: z.string().min(10),
 });
 
 export const turnstileConfig = turnstileSchema.safeParse(process.env);
@@ -68,7 +68,7 @@ if (!sheetsConfig.success) {
 }
 if (!payloadConfig.success) {
   console.warn(
-    "[env] Payload is not configured (PAYLOAD_SECRET / DATABASE_URI missing) — CMS will not start in production.",
+    "[env] Payload is not configured (PAYLOAD_SECRET / DATABASE_URL missing) — CMS will not start in production.",
     payloadConfig.error.issues,
   );
 }

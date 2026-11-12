@@ -18,7 +18,7 @@ async function run() {
     console.warn("⚠️  Google Sheets is not configured — sheet logging disabled.");
   }
   if (!payloadConfig.success) {
-    console.error("❌ Payload is required but PAYLOAD_SECRET / DATABASE_URI are missing.");
+    console.error("❌ Payload is required but PAYLOAD_SECRET / DATABASE_URL are missing.");
     process.exit(1);
   } else {
     console.log("✅ Payload env configured.");

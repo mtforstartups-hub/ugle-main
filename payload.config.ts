@@ -20,6 +20,17 @@ import { AnswersSettings } from "./globals/AnswersSettings";
 const filename = fileURLToPath(import.meta.url);
 const dirname = path.dirname(filename);
 
+// Payload must never start without an explicit connection string. `pg` treats
+// an empty `connectionString` as "unset" and silently falls back to the libpq
+// `PG*` variables, which the Neon integration also injects — so a missing
+// DATABASE_URL would quietly connect to whatever PG* points at.
+const databaseUrl = process.env.DATABASE_URL;
+if (!databaseUrl) {
+  throw new Error(
+    "DATABASE_URL is not set. Payload needs a Postgres connection string and will not fall back to libpq defaults.",
+  );
+}
+
 export default buildConfig({
   admin: {
     user: Users.slug,
@@ -91,7 +102,7 @@ export default buildConfig({
   csrf: [process.env.NEXT_PUBLIC_SERVER_URL || ""].filter(Boolean),
   cors: [process.env.NEXT_PUBLIC_SERVER_URL || ""].filter(Boolean),
   db: postgresAdapter({
-    pool: { connectionString: process.env.DATABASE_URI || "" },
+    pool: { connectionString: databaseUrl },
     push: process.env.NODE_ENV !== "production",
   }),
   sharp,

@@ -40,7 +40,8 @@ jobs:
       # Payload / CMS runtime configuration for the staging deployment.
       # The smoke tests themselves are read-only, but the CMS-backed pages
       # they visit need these secrets in the deployed environment.
-      DATABASE_URI: ${{ secrets.STAGING_DATABASE_URI }}
+      # `STAGING_DATABASE_URL` must exist in the repo secrets for this workflow.
+      DATABASE_URL: ${{ secrets.STAGING_DATABASE_URL }}
       PAYLOAD_SECRET: ${{ secrets.STAGING_PAYLOAD_SECRET }}
       PREVIEW_SECRET: ${{ secrets.STAGING_PREVIEW_SECRET }}
       CRON_SECRET: ${{ secrets.STAGING_CRON_SECRET }}

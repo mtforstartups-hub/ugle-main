@@ -25,7 +25,8 @@ Browser ──► Vercel / Next.js ──► Payload Local API ──► Postgre
 
 | Variable | Required | Purpose |
 |----------|----------|---------|
-| `DATABASE_URI` | Yes | Postgres connection string. |
+| `DATABASE_URL` | Yes | Pooled Postgres connection string (injected by the Neon integration). |
+| `DATABASE_URL_UNPOOLED` | Migrations | Direct connection string; use it for `bun run migrate` and `pg_dump`. |
 | `PAYLOAD_SECRET` | Yes | Signs Payload auth tokens. Rotating it logs everyone out. |
 | `NEXT_PUBLIC_SERVER_URL` | Yes | Public origin, used for CSRF/CORS, absolute URLs and preview links. |
 | `PREVIEW_SECRET` | Yes | Shared secret for `/api/preview`. Preview is disabled if unset. |
@@ -102,7 +103,7 @@ Useful commands:
    Set `NEXT_PUBLIC_SERVER_URL` to the final public origin.
 4. **Run migrations** against the production database:
    ```bash
-   DATABASE_URI=... PAYLOAD_SECRET=... bun run migrate
+   DATABASE_URL_UNPOOLED=... PAYLOAD_SECRET=... bun run migrate
    ```
    `payload.config.ts` disables schema push in production, so this step is
    mandatory. Use Neon's **unpooled** (direct) connection string for this
@@ -110,7 +111,7 @@ Useful commands:
    reliably. The deployed app itself uses the pooled string at runtime.
 5. **Seed** the first admin, categories, authors, answers and demo content:
    ```bash
-   DATABASE_URI=... PAYLOAD_SECRET=... \
+   DATABASE_URL=... PAYLOAD_SECRET=... \
    SEED_ADMIN_EMAIL=... SEED_ADMIN_PASSWORD=... bun run seed
    ```
    The seed is idempotent (matched by slug/email/filename).
@@ -120,7 +121,7 @@ Useful commands:
    the Blob token so hero images are uploaded instead of written to disk:
    ```bash
    NODE_ENV=production \
-   DATABASE_URI=... PAYLOAD_SECRET=... BLOB_READ_WRITE_TOKEN=... \
+   DATABASE_URL=... PAYLOAD_SECRET=... BLOB_READ_WRITE_TOKEN=... \
    bun --bun scripts/migrate-legacy-posts/import.ts
    ```
    It creates the 17 published posts (including the Product Hunt launch post),
@@ -150,7 +151,7 @@ Useful commands:
 - **Application regression:** promote the previous Vercel deployment. The
   database is unchanged, so content keeps working.
 - **Schema/data incident:** stop writes, restore the most recent dump into a
-  fresh database, point `DATABASE_URI` at it and redeploy. Migrations are
+  fresh database, point `DATABASE_URL` at it and redeploy. Migrations are
   forward-only; do not attempt to run `down` on production without a tested
   plan.
 - **Bad content change:** unpublish or restore the document version from the
@@ -161,7 +162,7 @@ Useful commands:
 Take a compressed custom-format dump:
 
 ```bash
-pg_dump -Fc "$DATABASE_URI" -f ugle-$(date +%F).dump
+pg_dump -Fc "$DATABASE_URL_UNPOOLED" -f ugle-$(date +%F).dump
 ```
 
 Restore into a separate database first, never over the live one:
@@ -200,7 +201,7 @@ not contain the files.
 | `PAYLOAD_SECRET` | Generate a new value, update Vercel, redeploy. | All admin sessions are invalidated; users sign in again. |
 | `PREVIEW_SECRET` | Generate, update Vercel, redeploy. | Existing preview links stop working; new ones work. |
 | `CRON_SECRET` | Generate, update Vercel and the scheduler, redeploy. | Scheduled publishes fail until both sides match. |
-| `DATABASE_URI` credentials | Rotate in the database provider, update Vercel, redeploy. | Brief downtime during redeploy. |
+| `DATABASE_URL` credentials | Rotate in the database provider, update Vercel, redeploy. | Brief downtime during redeploy. |
 | `BLOB_READ_WRITE_TOKEN` | Create a new token in Vercel Blob, update the env var, redeploy. | New uploads use the new token; existing files stay readable. |
 
 Rotate any secret that was pasted into a ticket, chat or log. After rotating,
@@ -276,8 +277,8 @@ staging secrets they expect.
 
 | Symptom | Likely cause | Fix |
 |---------|--------------|-----|
-| Build fails with `PAYLOAD_SECRET / DATABASE_URI are missing` | `prebuild` env check | Set both variables in the build environment. |
-| Build or admin hangs connecting to Postgres | Database unreachable / wrong `DATABASE_URI` | Check the connection string and network access. |
+| Build fails with `PAYLOAD_SECRET / DATABASE_URL are missing` | `prebuild` env check | Set both variables in the build environment. |
+| Build or admin hangs connecting to Postgres | Database unreachable / wrong `DATABASE_URL` | Check the connection string and network access. |
 | `relation "..." does not exist` in production | Migrations not run | Run `bun run migrate` before deploying. |
 | Media uploads 404 after deploy | Blob token missing or wrong store | Set `BLOB_READ_WRITE_TOKEN` and redeploy. |
 | Upload fails with a CORS error on `vercel.com/api/blob` (400) | The Blob store is **private**; the API rejects `access: 'public'` and that error carries no CORS header | Create a **public** Blob store (access mode is fixed at creation), update `BLOB_READ_WRITE_TOKEN` for every environment, redeploy. |

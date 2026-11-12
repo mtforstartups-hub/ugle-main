@@ -6,8 +6,8 @@
  */
 (process.env as Record<string, string | undefined>).NODE_ENV = "test";
 
-process.env.DATABASE_URI =
-  process.env.TEST_DATABASE_URI ??
+process.env.DATABASE_URL =
+  process.env.TEST_DATABASE_URL ??
   "postgres://ugle:ugle@localhost:5432/ugle_test";
 
 process.env.PAYLOAD_SECRET ||= "integration-test-secret";

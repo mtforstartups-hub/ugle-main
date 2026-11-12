@@ -7,22 +7,22 @@ import { Client } from "pg";
  * pushes the schema itself (`db.push` is enabled outside production), so the
  * database can stay empty between runs.
  */
-const TEST_DATABASE_URI =
-  process.env.TEST_DATABASE_URI ??
+const TEST_DATABASE_URL =
+  process.env.TEST_DATABASE_URL ??
   "postgres://ugle:ugle@localhost:5432/ugle_test";
 
 async function main() {
-  const target = new URL(TEST_DATABASE_URI);
+  const target = new URL(TEST_DATABASE_URL);
   const databaseName = target.pathname.replace(/^\//, "");
 
   if (!databaseName) {
     throw new Error(
-      `TEST_DATABASE_URI is missing a database name: ${TEST_DATABASE_URI}`,
+      `TEST_DATABASE_URL is missing a database name: ${TEST_DATABASE_URL}`,
     );
   }
 
   // Connect through the maintenance database, which always exists.
-  const maintenance = new URL(TEST_DATABASE_URI);
+  const maintenance = new URL(TEST_DATABASE_URL);
   maintenance.pathname = "/postgres";
 
   const client = new Client({ connectionString: maintenance.toString() });
