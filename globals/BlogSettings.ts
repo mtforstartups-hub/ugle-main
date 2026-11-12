@@ -1,13 +1,17 @@
 import type { GlobalConfig } from "payload";
+import { adminOnly } from "../lib/payload/access";
 import { ctaField } from "../fields/cta";
 
 export const BlogSettings: GlobalConfig = {
   slug: "blog-settings",
   label: "Blog settings",
-  admin: { group: "Settings" },
+  admin: {
+    group: "Settings",
+    hidden: ({ user }) => user?.role !== "admin",
+  },
   access: {
     read: () => true,
-    update: ({ req: { user } }) => Boolean(user),
+    update: adminOnly,
   },
   fields: [
     { name: "heroEyebrow", type: "text", defaultValue: "Blog" },

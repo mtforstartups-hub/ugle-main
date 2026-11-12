@@ -1,5 +1,6 @@
 import { APIError } from "payload";
 import type { CollectionConfig } from "payload";
+import { adminOnly } from "../lib/payload/access";
 import { sanitizeFilename } from "../lib/media/filename";
 import { revalidateMediaPaths } from "../lib/payload/revalidate";
 
@@ -32,7 +33,7 @@ export const Media: CollectionConfig = {
     read: () => true,
     create: ({ req: { user } }) => Boolean(user),
     update: ({ req: { user } }) => Boolean(user),
-    delete: ({ req: { user } }) => Boolean(user?.role === "admin" || user),
+    delete: adminOnly,
   },
   hooks: {
     beforeOperation: [

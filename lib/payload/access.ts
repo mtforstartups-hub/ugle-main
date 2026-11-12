@@ -1,4 +1,4 @@
-import type { Access } from "payload";
+import type { Access, AccessArgs } from "payload";
 
 /**
  * Public read: published only. Staff: everything.
@@ -10,8 +10,17 @@ export const publicOrStaffRead: Access = ({ req: { user } }) => {
 
 export const staffCreate: Access = ({ req: { user } }) => Boolean(user);
 export const staffUpdate: Access = ({ req: { user } }) => Boolean(user);
-export const adminDelete: Access = ({ req: { user } }) =>
+export const adminOnly: Access = ({ req: { user } }) =>
   Boolean(user?.role === "admin");
+export const adminDelete: Access = adminOnly;
+
+/**
+ * Payload asks the auth collection's `access.admin` whether a user may enter
+ * `/admin` at all. Both roles sign in; the panel then hides admin-only
+ * collections and globals from editors.
+ */
+export const staffAdminAccess = ({ req: { user } }: AccessArgs): boolean =>
+  Boolean(user?.role === "admin" || user?.role === "editor");
 
 /**
  * Collections with `trash: true` run soft deletes through the update

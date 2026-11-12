@@ -3,7 +3,9 @@ import type { AccessArgs } from "payload";
 
 import {
   adminDelete,
+  adminOnly,
   publicOrStaffRead,
+  staffAdminAccess,
   staffCreate,
   staffTrashOrAdminDelete,
   staffUpdate,
@@ -44,11 +46,28 @@ describe("payload access control", () => {
     });
   });
 
-  describe("adminDelete", () => {
+  describe("adminDelete / adminOnly", () => {
     it("is admin-only", () => {
       expect(adminDelete(asArgs())).toBe(false);
       expect(adminDelete(asArgs(editor))).toBe(false);
       expect(adminDelete(asArgs(admin))).toBe(true);
+    });
+
+    it("keeps settings and media deletion away from editors", () => {
+      expect(adminOnly(asArgs())).toBe(false);
+      expect(adminOnly(asArgs(editor))).toBe(false);
+      expect(adminOnly(asArgs(admin))).toBe(true);
+    });
+  });
+
+  describe("staffAdminAccess", () => {
+    it("lets both roles sign in to the admin panel", () => {
+      expect(staffAdminAccess(asArgs(editor))).toBe(true);
+      expect(staffAdminAccess(asArgs(admin))).toBe(true);
+    });
+
+    it("keeps anonymous visitors out", () => {
+      expect(staffAdminAccess(asArgs())).toBe(false);
     });
   });
 

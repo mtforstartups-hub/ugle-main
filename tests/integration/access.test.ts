@@ -168,6 +168,39 @@ describe("role restrictions", () => {
     ).rejects.toThrow();
   });
 
+  it("lets editors into the admin panel but not into admin-only surfaces", async () => {
+    const collection = (slug: string) =>
+      fixtures.payload.config.collections.find((entry) => entry.slug === slug);
+    const findGlobal = (slug: string) =>
+      fixtures.payload.config.globals.find((entry) => entry.slug === slug);
+
+    const adminPanelAccess = collection("users")?.access?.admin;
+    expect(adminPanelAccess?.({ req: { user: editor } } as never)).toBe(true);
+    expect(adminPanelAccess?.({ req: { user: admin } } as never)).toBe(true);
+    expect(adminPanelAccess?.({ req: { user: null } } as never)).toBe(false);
+
+    const deleteMedia = collection("media")?.access?.delete;
+    expect(deleteMedia?.({ req: { user: editor } } as never)).toBe(false);
+    expect(deleteMedia?.({ req: { user: admin } } as never)).toBe(true);
+
+    for (const slug of ["blog-settings", "answers-settings"]) {
+      const update = findGlobal(slug)?.access?.update;
+      expect(update?.({ req: { user: editor } } as never)).toBe(false);
+      expect(update?.({ req: { user: admin } } as never)).toBe(true);
+    }
+  });
+
+  it("rejects editor updates to the blog settings", async () => {
+    await expect(
+      fixtures.payload.updateGlobal({
+        slug: "blog-settings",
+        data: { heroTitle: "Editor override" },
+        overrideAccess: false,
+        user: editor,
+      }),
+    ).rejects.toThrow();
+  });
+
   it("lets editors trash posts but not delete them permanently", async () => {
     const post = await fixtures.payload.create({
       collection: "posts",

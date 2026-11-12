@@ -1,4 +1,5 @@
 import type { Access, CollectionConfig } from "payload";
+import { staffAdminAccess } from "../lib/payload/access";
 
 const isAdmin: Access = ({ req: { user } }) => Boolean(user && user.role === "admin");
 
@@ -14,14 +15,20 @@ export const Users: CollectionConfig = {
     useAsTitle: "email",
     defaultColumns: ["avatar", "email", "name", "role", "createdAt"],
     group: "Admin",
+    // Editors manage content; the account view is reachable from the avatar menu.
+    hidden: ({ user }) => user?.role !== "admin",
     components: {
       // Prevent access to user management for editors
     },
   },
   access: {
-    admin: ({ req: { user } }) => Boolean(user?.role === "admin"),
-    create: ({ req: { user } }) => Boolean(user?.role === "admin"),
-    read: ({ req: { user } }) => Boolean(user),
+    admin: staffAdminAccess,
+    create: isAdmin,
+    read: ({ req: { user } }) => {
+      if (!user) return false;
+      if (user.role === "admin") return true;
+      return { id: { equals: user.id } };
+    },
     update: ({ req: { user } }) => {
       if (!user) return false;
       if (user.role === "admin") return true;
