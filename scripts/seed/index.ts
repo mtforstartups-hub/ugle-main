@@ -9,8 +9,20 @@ import {
 } from "@payloadcms/richtext-lexical";
 import config from "@payload-config";
 
+/**
+ * `SEED_MINIMAL=1` creates only what the dashboard needs — the author and the
+ * first admin — so a preview or production database can be filled with the real
+ * imported content instead of the demo answers, demo post and default globals.
+ * The legacy import creates the categories it actually uses.
+ */
+const MINIMAL = /^(1|true)$/i.test(process.env.SEED_MINIMAL ?? "");
+
 async function seed() {
   const payload = await getPayload({ config: await config });
+
+  if (MINIMAL) {
+    console.log("Minimal seed: creating the author and first admin only.");
+  }
 
   // 1. Categories (six existing tags)
   const categories = [
@@ -26,7 +38,7 @@ async function seed() {
     { name: "Technical", slug: "technical", description: "Technical deep-dives." },
   ];
 
-  for (const cat of categories) {
+  for (const cat of MINIMAL ? [] : categories) {
     const existing = await payload.find({
       collection: "categories",
       where: { slug: { equals: cat.slug } },
@@ -63,7 +75,8 @@ async function seed() {
     });
   }
 
-  // 2b. Starter answers
+  // 2b. Starter answers — skipped in minimal mode; add real answers from the
+  // dashboard instead.
   const answersCollection = payload.config.collections.find(
     (collection) => collection.slug === "answers",
   );
@@ -86,7 +99,7 @@ async function seed() {
     order: number;
     keywords: string[];
     answerHtml: string;
-  }[] = [
+  }[] = MINIMAL ? [] : [
     {
       question: "Does Ugle upload my recordings?",
       slug: "does-ugle-upload-my-recordings",
@@ -234,7 +247,7 @@ async function seed() {
     overrideAccess: true,
   });
 
-  if (existingDemoPost.totalDocs === 0) {
+  if (!MINIMAL && existingDemoPost.totalDocs === 0) {
     const postsCollection = payload.config.collections.find(
       (collection) => collection.slug === "posts",
     );
@@ -333,27 +346,31 @@ async function seed() {
     console.log(`Created demo post: ${demoSlug}`);
   }
 
-  // 3. Globals — blog-settings + answers-settings
-  await payload.updateGlobal({
-    slug: "blog-settings",
-    data: {
-      heroEyebrow: "Blog",
-      heroTitle: "Thoughts & Workflow.",
-      heroDescription: "Product thinking. Workflow observations. Opinions on how media professionals work.",
-      postsPerPage: 5,
-    },
-    overrideAccess: true,
-  });
+  // 3. Globals — blog-settings + answers-settings. Skipped in minimal mode so
+  // a re-run never resets copy edited in the admin. Unset globals fall back to
+  // the field defaults on read.
+  if (!MINIMAL) {
+    await payload.updateGlobal({
+      slug: "blog-settings",
+      data: {
+        heroEyebrow: "Blog",
+        heroTitle: "Thoughts & Workflow.",
+        heroDescription: "Product thinking. Workflow observations. Opinions on how media professionals work.",
+        postsPerPage: 5,
+      },
+      overrideAccess: true,
+    });
 
-  await payload.updateGlobal({
-    slug: "answers-settings",
-    data: {
-      heroEyebrow: "Answers",
-      heroTitle: "Product questions, answered.",
-      heroDescription: "Direct answers about Ugle — privacy, search, transcription, pricing and platforms.",
-    },
-    overrideAccess: true,
-  });
+    await payload.updateGlobal({
+      slug: "answers-settings",
+      data: {
+        heroEyebrow: "Answers",
+        heroTitle: "Product questions, answered.",
+        heroDescription: "Direct answers about Ugle — privacy, search, transcription, pricing and platforms.",
+      },
+      overrideAccess: true,
+    });
+  }
 
   // 4. First admin user (idempotent by email)
   const email = process.env.SEED_ADMIN_EMAIL || "admin@ugle.ai";

@@ -33,6 +33,7 @@ Browser ──► Vercel / Next.js ──► Payload Local API ──► Postgre
 | `CRON_SECRET` | Yes | Bearer token for scheduled-publish jobs. |
 | `BLOB_READ_WRITE_TOKEN` | Production | Enables Vercel Blob storage. Unset = local disk. |
 | `SEED_ADMIN_EMAIL` / `SEED_ADMIN_PASSWORD` | Seed only | First admin account created by `bun run seed`. |
+| `SEED_MINIMAL` | Seed only | `1` creates just the author and admin — use it for preview and production. |
 | `TURNSTILE_*`, `RESEND_*`, `GOOGLE_*` | Existing | Contact/newsletter/sheets features, unrelated to the CMS. |
 
 Generate secrets with a password manager or `openssl rand -base64 48`. Never
@@ -103,18 +104,24 @@ Useful commands:
    Set `NEXT_PUBLIC_SERVER_URL` to the final public origin.
 4. **Run migrations** against the production database:
    ```bash
-   DATABASE_URL_UNPOOLED=... PAYLOAD_SECRET=... bun run migrate
+   NODE_ENV=production DATABASE_URL=<direct/unpooled> PAYLOAD_SECRET=... bun run migrate
    ```
    `payload.config.ts` disables schema push in production, so this step is
-   mandatory. Use Neon's **unpooled** (direct) connection string for this
-   command: migrations take locks and run DDL, which PgBouncer does not handle
-   reliably. The deployed app itself uses the pooled string at runtime.
-5. **Seed** the first admin, categories, authors, answers and demo content:
+   mandatory. Point `DATABASE_URL` at Neon's **unpooled** (direct) connection
+   string for this one command: migrations take locks and run DDL, which
+   PgBouncer does not handle reliably. (The config only reads `DATABASE_URL`;
+   `DATABASE_URL_UNPOOLED` is what the Neon integration exposes for you to copy
+   from.) The deployed app itself uses the pooled string at runtime.
+5. **Seed the first admin and the author**:
    ```bash
    DATABASE_URL=... PAYLOAD_SECRET=... \
-   SEED_ADMIN_EMAIL=... SEED_ADMIN_PASSWORD=... bun run seed
+   SEED_ADMIN_EMAIL=... SEED_ADMIN_PASSWORD=... SEED_MINIMAL=1 bun run seed
    ```
-   The seed is idempotent (matched by slug/email/filename).
+   `SEED_MINIMAL=1` creates only the author (`ugle-team`) and the first admin.
+   Without it the seed also adds five starter answers, a demo post and writes
+   the Blog/Answers settings, which is what CI and local demos want but not what
+   a launch database should contain. The seed is idempotent (matched by
+   slug/email/filename).
 5b. **Import the legacy blog posts** (one-off; the script lives in the
    untracked `scripts/migrate-legacy-posts/` folder). Run it with
    `NODE_ENV=production` so Payload does not try to push the schema, and with
@@ -125,9 +132,12 @@ Useful commands:
    bun --bun scripts/migrate-legacy-posts/import.ts
    ```
    It creates the 17 published posts (including the Product Hunt launch post),
-   uploads their hero images and points the blog's featured post at
-   `why-local-first`. Existing slugs are skipped, so re-running is safe; pass
-   `--force` to overwrite them from the captured JSON.
+   uploads their hero images, and creates the six categories those posts use.
+   Featured posts are **not** set by the import — curate them in the dashboard
+   after launch. Existing slugs are skipped, so re-running is safe; pass
+   `--force` to overwrite them from the captured JSON. Related posts were never
+   part of the legacy site, so there is nothing to import; pick them in the
+   dashboard when needed.
 6. **Build and deploy** the current commit to Vercel. Confirm the build log
    shows the environment check passing.
 7. **Smoke test**:
