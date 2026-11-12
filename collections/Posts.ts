@@ -122,7 +122,11 @@ export const Posts: CollectionConfig = {
       type: "checkbox",
       required: false,
       defaultValue: false,
-      admin: { position: "sidebar", description: "Controls homepage / featured placement" },
+      admin: {
+        position: "sidebar",
+        description:
+          "Shows the post in the blog's Editor's picks shelf (up to 4, newest first). Featured posts are hidden from the main feed.",
+      },
     },
     {
       name: "relatedPosts",

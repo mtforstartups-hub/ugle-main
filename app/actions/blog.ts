@@ -1,6 +1,6 @@
 "use server";
 
-import { getPostsPage } from "@/lib/payload/queries";
+import { getPostsPage, DEFAULT_POSTS_PER_PAGE } from "@/lib/payload/queries";
 import { mapPostToListItem } from "@/lib/payload/blog-list";
 
 export async function loadMorePosts({
@@ -12,7 +12,10 @@ export async function loadMorePosts({
 }) {
   const result = await getPostsPage({
     page,
+    limit: DEFAULT_POSTS_PER_PAGE,
     categorySlug: category,
+    // Mirrors the page: featured posts live in the band, not the feed.
+    excludeFeatured: !category,
   });
 
   return {

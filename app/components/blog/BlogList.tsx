@@ -15,6 +15,15 @@ interface BlogListProps {
   category?: string;
 }
 
+/**
+ * The first two posts of the first page form a 60/40 lead row. Everything
+ * after that — the rest of the page and every "Load more" batch — is a 50/50
+ * grid, so the rhythm never breaks mid-row.
+ */
+const LEAD_COUNT = 2;
+
+type CardVariant = "lead" | "narrow" | "standard";
+
 export default function BlogList({
   items: initialItems,
   currentPage,
@@ -28,6 +37,9 @@ export default function BlogList({
   const [error, setError] = useState<string | null>(null);
 
   const hasMore = page < totalPages;
+  const showLead = currentPage === 1;
+  const lead = showLead ? items.slice(0, LEAD_COUNT) : [];
+  const rest = showLead ? items.slice(LEAD_COUNT) : items;
 
   function loadMore() {
     if (isPending || !hasMore) return;
@@ -45,81 +57,57 @@ export default function BlogList({
   }
 
   return (
-    <div className="flex flex-col gap-10">
-      <div className="grid grid-cols-1 gap-8">
-        {items.map((post, i) => (
-          <motion.div
-            key={post.slug}
-            initial={{ opacity: 0, y: 24 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{
-              delay: (i % 5) * 0.06,
-              duration: 0.4,
-              ease: [0.22, 1, 0.36, 1],
-            }}
-          >
-            <Link
-              href={post.path}
-              className="group flex flex-col md:flex-row gap-0 rounded-2xl border border-ugle-light/60 overflow-hidden bg-white shadow-sm hover:shadow-md transition-all duration-300"
+    <div className="flex flex-col gap-10 md:gap-12">
+      {items.length === 0 ? (
+        <p className="rounded-2xl border border-dashed border-ugle-light bg-white/60 px-6 py-16 text-center text-ugle-gray">
+          No posts published yet. Check back soon.
+        </p>
+      ) : (
+        <>
+          {lead.length > 0 && (
+            <div
+              className={`grid gap-5 md:gap-6 ${
+                lead.length === 2 ? "md:grid-cols-[3fr_2fr]" : ""
+              }`}
             >
-              {/* Image panel */}
-              <div className="relative w-full md:w-[42%] shrink-0 aspect-video md:aspect-auto overflow-hidden bg-[#F0F2F0]">
-                <Image
-                  src={post.image}
-                  alt={post.title}
-                  fill
-                  className="object-cover object-top group-hover:scale-[1.03] transition-transform duration-500"
-                  sizes="(max-width: 768px) 100vw, 400px"
+              {lead.map((post, i) => (
+                <PostCard
+                  key={post.slug}
+                  post={post}
+                  index={i}
+                  variant={i === 0 ? "lead" : "narrow"}
                 />
-                {/* subtle gradient overlay at image bottom on mobile */}
-                <div className="absolute inset-x-0 bottom-0 h-12 bg-linear-to-t from-white/20 to-transparent md:hidden" />
-              </div>
+              ))}
+            </div>
+          )}
 
-              {/* Text panel */}
-              <div className="flex flex-col justify-between p-7 md:p-9 flex-1">
-                <div>
-                  {/* Tag + reading time */}
-                  <div className="flex items-center gap-2 mb-4">
-                    <span className="inline-block bg-[#75C043]/10 text-[#5DA233] text-[11.5px] font-mono font-bold uppercase tracking-wider px-2.5 py-1 rounded-full">
-                      {post.tag}
-                    </span>
-                    <span className="text-[13px] font-mono text-ugle-gray/70">
-                      {post.meta}
-                    </span>
-                  </div>
-
-                  {/* Title */}
-                  <h2 className="text-[22px] md:text-[26px] font-bold mb-3 text-ugle-slate group-hover:text-[#5DA233] transition-colors leading-tight">
-                    {post.title}
-                  </h2>
-
-                  {/* Excerpt */}
-                  <p className="text-[15.5px] text-ugle-gray leading-[1.65] line-clamp-3">
-                    {post.desc}
-                  </p>
-                </div>
-
-                {/* Read more */}
-                <div className="flex items-center text-[#5DA233] font-bold text-[14px] mt-6 group-hover:translate-x-1 transition-transform">
-                  Read post{" "}
-                  <ArrowRight className="w-4 h-4 ml-1.5" strokeWidth={2.5} />
-                </div>
-              </div>
-            </Link>
-          </motion.div>
-        ))}
-      </div>
+          {rest.length > 0 && (
+            <div className="grid grid-cols-1 gap-5 md:grid-cols-2 md:gap-6">
+              {rest.map((post, i) => (
+                <PostCard
+                  key={post.slug}
+                  post={post}
+                  index={i + lead.length}
+                  variant="standard"
+                />
+              ))}
+            </div>
+          )}
+        </>
+      )}
 
       {/* Load more */}
       {hasMore && (
-        <div className="flex flex-col items-center gap-3 pt-2">
+        <div className="flex flex-col items-center gap-3">
           <button
             type="button"
             onClick={loadMore}
             disabled={isPending}
-            className="inline-flex items-center justify-center gap-2 rounded-full bg-[#75C043] px-8 py-3 text-[15px] font-bold text-white shadow-sm transition-colors hover:bg-[#5DA233] disabled:cursor-not-allowed disabled:opacity-70"
+            className="inline-flex items-center justify-center gap-2 rounded-full bg-[#75C043] px-8 py-3 text-[15px] font-bold text-white transition-colors hover:bg-[#5DA233] disabled:cursor-not-allowed disabled:opacity-70"
           >
-            {isPending && <Loader2 className="h-4 w-4 animate-spin" strokeWidth={2.5} />}
+            {isPending && (
+              <Loader2 className="h-4 w-4 animate-spin" strokeWidth={2.5} />
+            )}
             {isPending ? "Loading…" : "Load more posts"}
           </button>
           {error && (
@@ -131,7 +119,7 @@ export default function BlogList({
       )}
 
       {!hasMore && items.length > 0 && (
-        <p className="pt-2 text-center text-[13px] font-mono text-ugle-gray/60">
+        <p className="text-center font-mono text-[12px] text-ugle-gray/60">
           You&apos;ve reached the end.
         </p>
       )}
@@ -148,5 +136,113 @@ export default function BlogList({
         </ul>
       </nav>
     </div>
+  );
+}
+
+const imageAspect: Record<CardVariant, string> = {
+  // The narrow lead card gets a taller crop so both lead images end on the
+  // same line and the two text blocks start at the same height.
+  lead: "aspect-[16/9]",
+  narrow: "aspect-[16/9] md:aspect-[6/5]",
+  standard: "aspect-[16/10]",
+};
+
+const imageSizes: Record<CardVariant, string> = {
+  lead: "(max-width: 768px) 100vw, 60vw",
+  narrow: "(max-width: 768px) 100vw, 40vw",
+  standard: "(max-width: 768px) 100vw, 50vw",
+};
+
+const titleSize: Record<CardVariant, string> = {
+  lead: "text-[24px] md:text-[30px]",
+  narrow: "text-[21px] md:text-[23px]",
+  standard: "text-[19px] md:text-[21px]",
+};
+
+function PostCard({
+  post,
+  variant,
+  index,
+}: {
+  post: BlogListItem;
+  variant: CardVariant;
+  index: number;
+}) {
+  const isLead = variant !== "standard";
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 16 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{
+        delay: Math.min(index, 5) * 0.04,
+        duration: 0.35,
+        ease: [0.22, 1, 0.36, 1],
+      }}
+      className="h-full"
+    >
+      <Link
+        href={post.path}
+        className="group flex h-full flex-col overflow-hidden rounded-2xl border border-ugle-light bg-[#F7F9F6] transition-colors duration-300 hover:border-[#75C043]/60"
+      >
+        <div
+          className={`relative w-full overflow-hidden bg-[#F1F4EF] ${imageAspect[variant]}`}
+        >
+          {post.image ? (
+            <Image
+              src={post.image}
+              alt=""
+              fill
+              sizes={imageSizes[variant]}
+              priority={index === 0}
+              className="object-cover object-top transition-transform duration-500 group-hover:scale-[1.03]"
+            />
+          ) : (
+            <div className="absolute inset-0 bg-[#EDF1EA]" />
+          )}
+        </div>
+
+        <div
+          className={`flex flex-1 flex-col ${isLead ? "p-6 md:p-7" : "p-5 md:p-6"}`}
+        >
+          <span className="font-mono text-[10.5px] font-bold uppercase tracking-[0.14em] text-[#5DA233]">
+            {post.tag}
+          </span>
+
+          <h2
+            className={`mt-2 font-bold leading-[1.2] text-ugle-slate transition-colors group-hover:text-[#5DA233] ${
+              titleSize[variant]
+            }`}
+          >
+            <span className="line-clamp-2">{post.title}</span>
+          </h2>
+
+          {post.desc && (
+            <p
+              className={`mt-2.5 text-ugle-gray ${
+                isLead
+                  ? "line-clamp-3 text-[15.5px] leading-[1.65]"
+                  : "line-clamp-2 text-[15px] leading-[1.6]"
+              }`}
+            >
+              {post.desc}
+            </p>
+          )}
+
+          <div className="mt-auto flex items-center justify-between gap-4 pt-5">
+            <span className="inline-flex items-center gap-1.5 text-[14px] font-bold text-[#5DA233]">
+              Read post
+              <ArrowRight
+                className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1"
+                strokeWidth={2.5}
+              />
+            </span>
+            <span className="font-mono text-[11.5px] text-ugle-gray/60">
+              {post.meta}
+            </span>
+          </div>
+        </div>
+      </Link>
+    </motion.div>
   );
 }

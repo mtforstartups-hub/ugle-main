@@ -10,7 +10,7 @@ async function isDraftMode(): Promise<boolean> {
   return Boolean(dm.isEnabled);
 }
 
-export const DEFAULT_POSTS_PER_PAGE = 5;
+export const DEFAULT_POSTS_PER_PAGE = 4;
 export const DEFAULT_ANSWERS_PER_PAGE = 10;
 
 // `cache` dedupes within a single request: pages call these from both
@@ -38,10 +38,12 @@ export async function getPostsPage({
   page = 1,
   limit = DEFAULT_POSTS_PER_PAGE,
   categorySlug,
+  excludeFeatured,
 }: {
   page?: number;
   limit?: number;
   categorySlug?: string;
+  excludeFeatured?: boolean;
 }) {
   const payload = await getPayloadClient();
   const draft = await isDraftMode();
@@ -49,6 +51,7 @@ export async function getPostsPage({
   const where: Where = {};
   if (!draft) where._status = { equals: "published" };
   if (categorySlug) where["category.slug"] = { equals: categorySlug };
+  if (excludeFeatured) where.featured = { not_equals: true };
 
   return payload.find({
     collection: "posts",
@@ -60,6 +63,22 @@ export async function getPostsPage({
     draft,
     overrideAccess: draft,
   });
+}
+
+/**
+ * Posts marked `featured` in the CMS, newest first. The listing shows these in
+ * the editor's-picks band above the grid and hides them from the feed.
+ */
+export async function getFeaturedPosts(limit = 4): Promise<Post[]> {
+  const payload = await getPayloadClient();
+  const result = await payload.find({
+    collection: "posts",
+    where: { _status: { equals: "published" }, featured: { equals: true } },
+    sort: "-publishedAt",
+    limit,
+    depth: 2,
+  });
+  return result.docs as Post[];
 }
 
 export async function getAllPostSlugs() {
@@ -74,37 +93,45 @@ export async function getAllPostSlugs() {
   return result.docs.map((post) => post.slug).filter(Boolean) as string[];
 }
 
-export const getPostBySlug = cache(async (slug: string): Promise<Post | null> => {
-  const payload = await getPayloadClient();
-  const draft = await isDraftMode();
+export const getPostBySlug = cache(
+  async (slug: string): Promise<Post | null> => {
+    const payload = await getPayloadClient();
+    const draft = await isDraftMode();
 
-  const result = await payload.find({
-    collection: "posts",
-    where: draft
-      ? { slug: { equals: slug } }
-      : { slug: { equals: slug }, _status: { equals: "published" } },
-    limit: 1,
-    depth: 3,
-    draft,
-    overrideAccess: draft,
-  });
+    const result = await payload.find({
+      collection: "posts",
+      where: draft
+        ? { slug: { equals: slug } }
+        : { slug: { equals: slug }, _status: { equals: "published" } },
+      limit: 1,
+      depth: 3,
+      draft,
+      overrideAccess: draft,
+    });
 
-  return (result.docs[0] as Post | undefined) ?? null;
-});
+    return (result.docs[0] as Post | undefined) ?? null;
+  },
+);
 
 export async function getRelatedPosts(post: Post, limit = 3): Promise<Post[]> {
-  const selected = Array.isArray(post.relatedPosts) ? post.relatedPosts.slice(0, limit) : [];
+  const selected = Array.isArray(post.relatedPosts)
+    ? post.relatedPosts.slice(0, limit)
+    : [];
 
   // Related posts are editor-curated. If nothing was selected there is no
   // section to render; never fall back to automatic suggestions.
   if (selected.length === 0) return [];
 
-  const populated = selected.filter((item): item is Post => typeof item === "object");
+  const populated = selected.filter(
+    (item): item is Post => typeof item === "object",
+  );
   if (populated.length === selected.length) return populated;
 
   // Older rows (or shallow queries) can still hold raw IDs. Resolve those and
   // keep the order the editor picked.
-  const ids = selected.filter((item): item is number => typeof item === "number");
+  const ids = selected.filter(
+    (item): item is number => typeof item === "number",
+  );
   if (ids.length === 0) return populated;
 
   const payload = await getPayloadClient();
@@ -182,14 +209,18 @@ export async function getAnswerCategories() {
 
 export async function getRelatedPostsForAnswer(answer: Answer, limit = 3) {
   const manual = Array.isArray(answer.relatedPosts)
-    ? answer.relatedPosts.filter((item): item is Post => typeof item === "object")
+    ? answer.relatedPosts.filter(
+        (item): item is Post => typeof item === "object",
+      )
     : [];
 
   if (manual.length >= limit) return manual.slice(0, limit);
 
   const payload = await getPayloadClient();
   const categoryId =
-    answer.category && typeof answer.category === "object" ? answer.category.id : answer.category;
+    answer.category && typeof answer.category === "object"
+      ? answer.category.id
+      : answer.category;
 
   const result = await payload.find({
     collection: "posts",
@@ -217,28 +248,32 @@ export async function getAllAnswerSlugs() {
   return result.docs.map((answer) => answer.slug).filter(Boolean) as string[];
 }
 
-export const getAnswerBySlug = cache(async (slug: string): Promise<Answer | null> => {
-  const payload = await getPayloadClient();
-  const draft = await isDraftMode();
+export const getAnswerBySlug = cache(
+  async (slug: string): Promise<Answer | null> => {
+    const payload = await getPayloadClient();
+    const draft = await isDraftMode();
 
-  const result = await payload.find({
-    collection: "answers",
-    where: draft
-      ? { slug: { equals: slug } }
-      : { slug: { equals: slug }, _status: { equals: "published" } },
-    limit: 1,
-    depth: 3,
-    draft,
-    overrideAccess: draft,
-  });
+    const result = await payload.find({
+      collection: "answers",
+      where: draft
+        ? { slug: { equals: slug } }
+        : { slug: { equals: slug }, _status: { equals: "published" } },
+      limit: 1,
+      depth: 3,
+      draft,
+      overrideAccess: draft,
+    });
 
-  return (result.docs[0] as Answer | undefined) ?? null;
-});
+    return (result.docs[0] as Answer | undefined) ?? null;
+  },
+);
 
 export async function getRelatedAnswers(answer: Answer, limit = 3) {
   const payload = await getPayloadClient();
   const manual = Array.isArray(answer.relatedAnswers)
-    ? answer.relatedAnswers.filter((item): item is Answer => typeof item === "object")
+    ? answer.relatedAnswers.filter(
+        (item): item is Answer => typeof item === "object",
+      )
     : [];
 
   if (manual.length >= limit) return manual.slice(0, limit);
@@ -247,7 +282,9 @@ export async function getRelatedAnswers(answer: Answer, limit = 3) {
   const remaining = limit - manual.length;
 
   const categoryId =
-    answer.category && typeof answer.category === "object" ? answer.category.id : answer.category;
+    answer.category && typeof answer.category === "object"
+      ? answer.category.id
+      : answer.category;
 
   // Same fallback as getRelatedPosts: prefer the category, then fill with
   // recent published answers so new entries always surface related content.
@@ -284,6 +321,8 @@ export async function getRelatedAnswers(answer: Answer, limit = 3) {
   return [...manual, ...collected].slice(0, limit);
 }
 
-export function mediaFrom(value: Media | number | null | undefined): Media | null {
+export function mediaFrom(
+  value: Media | number | null | undefined,
+): Media | null {
   return value && typeof value === "object" ? value : null;
 }

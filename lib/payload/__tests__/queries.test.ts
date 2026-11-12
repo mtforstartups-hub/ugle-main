@@ -18,6 +18,7 @@ vi.mock("../getPayload", () => ({
 import {
   getAnswerBySlug,
   getAnswersPage,
+  getFeaturedPosts,
   getPostBySlug,
   getPostsPage,
   getRelatedPosts,
@@ -123,6 +124,40 @@ describe("payload queries", () => {
           },
         })
       );
+    });
+
+    it("excludes featured posts when asked", async () => {
+      await getPostsPage({ excludeFeatured: true });
+
+      expect(mocks.find).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: {
+            _status: { equals: "published" },
+            featured: { not_equals: true },
+          },
+        })
+      );
+    });
+  });
+
+  describe("getFeaturedPosts", () => {
+    it("selects published featured posts, newest first", async () => {
+      mocks.find.mockResolvedValueOnce({ docs: [post(1), post(2)] });
+
+      const result = await getFeaturedPosts(2);
+
+      expect(mocks.find).toHaveBeenCalledWith(
+        expect.objectContaining({
+          collection: "posts",
+          where: {
+            _status: { equals: "published" },
+            featured: { equals: true },
+          },
+          sort: "-publishedAt",
+          limit: 2,
+        })
+      );
+      expect(result).toHaveLength(2);
     });
   });
 
