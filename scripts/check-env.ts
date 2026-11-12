@@ -4,7 +4,7 @@ import { loadEnvConfig } from "@next/env";
 loadEnvConfig(process.cwd());
 
 async function run() {
-  const { turnstileConfig, resendConfig, sheetsConfig } = await import(
+  const { turnstileConfig, resendConfig, sheetsConfig, payloadConfig } = await import(
     "../app/lib/env"
   );
 
@@ -17,8 +17,14 @@ async function run() {
   if (!sheetsConfig.success) {
     console.warn("⚠️  Google Sheets is not configured — sheet logging disabled.");
   }
+  if (!payloadConfig.success) {
+    console.error("❌ Payload is required but PAYLOAD_SECRET / DATABASE_URL are missing.");
+    process.exit(1);
+  } else {
+    console.log("✅ Payload env configured.");
+  }
 
-  console.log("✅ Environment check complete — build will proceed regardless.");
+  console.log("✅ Environment check complete.");
 }
 
 run();

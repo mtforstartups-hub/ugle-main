@@ -37,6 +37,9 @@ export function canonicalFor(path: string): { canonical: string } {
 }
 
 export function absoluteUrl(path: string): string {
+  // Media stored in Vercel Blob (and Payload in dev) already returns an
+  // absolute URL. Do not prefix those with the site origin.
+  if (/^https?:\/\//i.test(path)) return path;
   return `${SITE_URL}${path === "/" ? "" : path}`;
 }
 

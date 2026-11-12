@@ -19,6 +19,7 @@ const menuItems = [
     ],
   },
   { id: 3, title: "Pricing", slug: "/pricing", subItems: [] },
+  { id: 4, title: "Answers", slug: "/answers", subItems: [] },
 ];
 
 export default function Header() {

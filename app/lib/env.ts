@@ -36,9 +36,15 @@ const sheetsSchema = z.object({
   GOOGLE_SPREADSHEET_ID: z.string().min(5),
 });
 
+const payloadSchema = z.object({
+  PAYLOAD_SECRET: z.string().min(16),
+  DATABASE_URL: z.string().min(10),
+});
+
 export const turnstileConfig = turnstileSchema.safeParse(process.env);
 export const resendConfig = resendSchema.safeParse(process.env);
 export const sheetsConfig = sheetsSchema.safeParse(process.env);
+export const payloadConfig = payloadSchema.safeParse(process.env);
 export const trialApiConfig = trialApiSchema.safeParse(process.env);
 
 // Startup warnings — visible in logs immediately, never crash anything.
@@ -58,5 +64,11 @@ if (!sheetsConfig.success) {
   console.error(
     "[env] Google Sheets is not configured correctly — sheet logging disabled.",
     sheetsConfig.error.issues,
+  );
+}
+if (!payloadConfig.success) {
+  console.warn(
+    "[env] Payload is not configured (PAYLOAD_SECRET / DATABASE_URL missing) — CMS will not start in production.",
+    payloadConfig.error.issues,
   );
 }
