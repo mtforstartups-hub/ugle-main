@@ -11,9 +11,10 @@ test.describe("public CMS pages", () => {
 
     await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
 
+    // Cards in the feed use h2; Editor's picks shelf cards use h3.
     const cards = page
       .locator('a[href^="/blog/"]')
-      .filter({ has: page.locator("h2") });
+      .filter({ has: page.locator("h2, h3") });
     await expect(cards.first()).toBeVisible();
 
     const loadMore = page.getByRole("button", { name: "Load more posts" });
@@ -34,7 +35,7 @@ test.describe("public CMS pages", () => {
 
     const firstPost = page
       .locator('a[href^="/blog/"]')
-      .filter({ has: page.locator("h2") })
+      .filter({ has: page.locator("h2, h3") })
       .first();
     await expect(firstPost).toBeVisible();
 

@@ -337,7 +337,9 @@ async function seed() {
         category: categoryId,
         author: authorId,
         publishedAt: new Date().toISOString(),
-        featured: true,
+        // Not featured: featured posts leave the feed for the Editor's picks
+        // shelf, and a demo database should still show a post in the feed.
+        featured: false,
         _status: "published",
       },
       overrideAccess: true,
