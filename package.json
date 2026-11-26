@@ -38,7 +38,7 @@
     "@payloadcms/richtext-lexical": "3.93.0",
     "@payloadcms/storage-vercel-blob": "3.93.0",
     "@payloadcms/ui": "3.93.0",
-    "@react-email/render": "^2.0.10",
+    "@react-email/render": "^2.3.1",
     "@tailwindcss/typography": "^0.5.20",
     "@types/mdx": "^2.0.14",
     "disposable-domains": "^2.0.6",
