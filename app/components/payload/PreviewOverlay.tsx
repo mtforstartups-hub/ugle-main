@@ -23,7 +23,9 @@ export function PreviewOverlay() {
           zIndex: 9999,
         }}
       >
-        🔍 Live Preview Mode — Changes refresh automatically.{" "}
+        Live Preview Mode — Changes refresh automatically.{" "}
+        {/* Full page navigation on purpose: this route disables draft mode and redirects. */}
+        {/* eslint-disable-next-line @next/next/no-html-link-for-pages */}
         <a
           href="/api/exit-preview"
           style={{ color: "#1C1C1C", textDecoration: "underline", marginLeft: 12 }}
