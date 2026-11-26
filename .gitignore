@@ -12,10 +12,14 @@
 
 # testing
 /coverage
+/.playwright-mcp/
 
 # next.js
 /.next/
 /out/
+
+# payload local uploads (production uses Vercel Blob)
+/media
 
 # production
 /build
@@ -30,8 +34,10 @@ yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
 
-# env files (can opt-in for committing if needed)
-.env*
+# env files (examples are committed)
+.env
+.env.*
+!.env.example
 
 # vercel
 .vercel

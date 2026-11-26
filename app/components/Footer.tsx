@@ -84,6 +84,12 @@ export default function Footer() {
                   Blog
                 </Link>
                 <Link
+                  href="/answers"
+                  className="hover:text-white transition-colors"
+                >
+                  Answers
+                </Link>
+                <Link
                   href="/about"
                   className="hover:text-white transition-colors"
                 >

@@ -20,6 +20,14 @@ Ugle is a local-first search application for media professionals, newsrooms, jou
 - [Podcast Producers](https://ugle.ai/use-cases/podcasts): Search across full back-catalogues of episodes without re-listening.
 - [Journalists](https://ugle.ai/use-cases/journalists): Confidential, searchable archives of source interviews and recordings.
 
+## Answers
+
+- [Does Ugle upload my recordings?](https://ugle.ai/answers/does-ugle-upload-my-recordings): No. Ugle indexes and searches your media on your own machine.
+- [What languages does Ugle support?](https://ugle.ai/answers/what-languages-does-ugle-support): Over 90 languages on-device, including English, Spanish, French, German, Hindi, Arabic, Mandarin and more.
+- [How accurate is Ugle transcription?](https://ugle.ai/answers/how-accurate-is-ugle-transcription): Roughly 95% word accuracy on clear recordings; varies by audio quality, accent, language and overlapping speakers.
+- [Can I search across multiple recordings at once?](https://ugle.ai/answers/search-across-multiple-recordings): Yes. One searchable index across your whole library; results grouped by recording and ranked by relevance.
+- [Is there a free trial?](https://ugle.ai/answers/is-there-a-free-trial): 15-day trial covers core local-first workflow — no per-minute transcription fees.
+
 ## Key Articles
 
 - [Why We Built Ugle Local-First](https://ugle.ai/blog/why-local-first): The rationale for on-device processing and journalistic source protection.

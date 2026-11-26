@@ -67,6 +67,16 @@ function detectRegion(request: NextRequest): DetectionResult {
 }
 
 export function proxy(request: NextRequest) {
+  // Exclude Payload admin + API — never run region logic there.
+  const pathname = request.nextUrl.pathname;
+  if (pathname.startsWith("/admin") || pathname.startsWith("/api/payload")) {
+    const response = NextResponse.next();
+    if (pathname.startsWith("/admin")) {
+      response.headers.set("X-Robots-Tag", "noindex, nofollow");
+    }
+    return response;
+  }
+
   // Dodo appends the buyer's email to the redirect URL. Strip the query string
   // before the success page renders so the address is not retained in the
   // address bar or exposed to the page.
@@ -122,7 +132,7 @@ export function proxy(request: NextRequest) {
 
 export const config = {
   matcher: [
-    // Run on all paths except static files, API routes, and Next.js internals
-    "/((?!api|_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
+    // Run on all paths except static files, API routes, admin, and Next.js internals
+    "/((?!api|admin|_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
   ],
 };
