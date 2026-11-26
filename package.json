@@ -57,8 +57,8 @@
     "zod": "^4.4.3"
   },
   "devDependencies": {
-    "@cloudflare/workers-types": "^5.20261028.1",
-    "@playwright/test": "^1.61.1",
+    "@cloudflare/workers-types": "^5.20261123.1",
+    "@playwright/test": "^1.65.1",
     "@tailwindcss/postcss": "^4",
     "@types/jsdom": "^30.0.0",
     "@types/node": "^20",
@@ -66,12 +66,12 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9",
-    "eslint-config-next": "16.3.8",
+    "eslint-config-next": "16.4.6",
     "happy-dom": "20.14.5",
     "jsdom": "^31.0.0",
     "pg": "^8.23.1",
     "tailwindcss": "^4",
-    "tsx": "^4.23.0",
+    "tsx": "^4.23.15",
     "typescript": "^5"
   },
   "ignoreScripts": [
