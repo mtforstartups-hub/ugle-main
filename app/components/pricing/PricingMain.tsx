@@ -31,7 +31,7 @@ function Feature({ text, dark = false }: { text: string; dark?: boolean }) {
   );
 }
 
-// ── Individual pricing panel ──────────────────────────────────────────────────
+// ── Individual pricing panel (CRO-01 3-Card Grid) ─────────────────────────────
 function IndividualsPanel({
   isAnnual,
   priceConfig,
@@ -51,118 +51,312 @@ function IndividualsPanel({
     isAnnual ? priceConfig.origAnnual : priceConfig.origMonthly,
     priceConfig,
   );
-  const period = isAnnual ? "per user, per year" : "per user, per month";
-  const updatesNote = isAnnual
-    ? "Updates included for 12 months"
-    : "Updates included while subscribed";
+  const savings = fmt(
+    Math.max(0, priceConfig.origAnnual - priceConfig.annual),
+    priceConfig,
+  );
 
   return (
-    <div className="max-w-2xl mx-auto mb-32">
-      {/* Card — light style matching other panels */}
-      <div className="bg-white border border-ugle-light/60 rounded-2xl shadow-sm overflow-hidden">
-        {/* Header band */}
-        <div className="bg-ugle-slate px-8 py-7">
-          <div className="font-mono text-xs tracking-[0.14em] uppercase text-[#75C043] mb-2">
-            Personal subscription
+    <div className="mb-14 md:mb-16">
+      <div className="flex justify-center mb-6">
+        <ProductHuntRatingBadge className="scale-90" />
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 items-stretch">
+        {/* Card 1: Ungated 15-Day Free Trial */}
+        <div className="bg-white border border-ugle-light/60 rounded-2xl shadow-sm overflow-hidden flex flex-col">
+          <div className="bg-[#F8FAF9] border-b border-ugle-light/60 px-6 py-5 lg:min-h-[138px] flex flex-col justify-center">
+            <div className="font-mono text-xs tracking-[0.14em] uppercase text-[#5DA233] font-semibold mb-1.5">
+              15-Day Free Trial
+            </div>
+            <h2 className="text-[22px] font-extrabold text-ugle-slate tracking-tight">
+              Ungated Trial
+            </h2>
+            <p className="text-[13.5px] text-ugle-gray mt-1">
+              Full v1.0.1 access. Zero friction.
+            </p>
           </div>
-          <h2 className="text-[26px] font-extrabold text-white tracking-tight leading-tight">
-            Private individuals buying with their own funds
-          </h2>
+
+          <div className="px-6 py-6 flex-1 flex flex-col">
+            <div className="space-y-2.5 flex-1">
+              <Feature text="No credit card required" />
+              <Feature text="No account or sign-up required" />
+              <Feature text="No file count or hour limits" />
+              <Feature text="30ms local search (99.4% recall)" />
+              <Feature text="All NLE exports (EDL, XML, FCPXML, CSV, MP3/MP4/ZIP)" />
+              <Feature text="SRT, VTT, TXT & Markdown transcripts" />
+              <Feature text="Read-only searchable index kept after Day 15" />
+            </div>
+
+            <div className="border-t border-ugle-light/60 pt-5 mt-6 space-y-4">
+              <div className="lg:min-h-[76px] flex flex-col justify-end">
+                <div className="text-[12px] text-ugle-gray mb-1">
+                  15-day evaluation
+                </div>
+                <div className="text-[30px] font-extrabold text-ugle-slate tracking-tight leading-none">
+                  {fmt(0, priceConfig)}
+                </div>
+                <div className="text-[11.5px] text-ugle-gray/70 mt-1.5">
+                  macOS 13.4+ &amp; Windows 10 64-bit+ (~192 MB)
+                </div>
+              </div>
+              <Link
+                href="/download"
+                className="w-full inline-flex items-center justify-center px-5 py-3 bg-white border-2 border-ugle-slate text-ugle-slate font-bold text-sm rounded-[10px] hover:bg-ugle-slate hover:text-white transition-colors text-center"
+              >
+                Download Free Trial (~192 MB)
+              </Link>
+            </div>
+          </div>
         </div>
 
-        {/* Body */}
-        <div className="px-8 py-7 space-y-5">
-          <div className="space-y-3">
-            <Feature text="2 personal machines (same owner)" />
-            <Feature text="0% metering · Unlimited library size" />
-            <Link
-              href="/blog/languages-supported"
-              className="flex items-start gap-2.5 text-[13.5px] font-medium text-ugle-green"
-            >
-              <Check
-                className={`size-3.5 shrink-0 mt-0.5 text-[#5DA233]`}
-                strokeWidth={2.5}
-              />
-              <span>99+ languages + Indic Flex</span>
-            </Link>
-            <Feature text="EDL / XML / FCPXML / Approval CSV export" />
-            <Feature text={updatesNote} />
+        {/* Card 2: Annual Personal Licence (Most Popular) */}
+        <div className="bg-white border-2 border-[#75C043] rounded-2xl shadow-md overflow-hidden flex flex-col">
+          <div className="bg-ugle-slate px-6 py-5 lg:min-h-[138px] flex flex-col justify-center">
+            <div className="flex items-center justify-between gap-2 mb-1.5">
+              <span className="font-mono text-xs tracking-[0.14em] uppercase text-[#75C043] font-semibold">
+                Most Popular
+              </span>
+              <span className="text-[11px] font-mono uppercase tracking-wider bg-[#75C043]/20 text-[#75C043] px-2.5 py-0.5 rounded-full">
+                Flat Annual
+              </span>
+            </div>
+            <h2 className="text-[22px] font-extrabold text-white tracking-tight">
+              Annual Personal Licence
+            </h2>
+            <p className="text-[13.5px] text-white/75 mt-1">
+              Save {savings} off the{" "}
+              <span className="line-through">{origPrice}/yr</span> standard list
+              price.
+            </p>
           </div>
 
-          <div className="border-t border-ugle-light/60 pt-5 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
-            <div>
-              <div className="text-[13px] text-ugle-gray mb-0.5">{period}</div>
-              <div className="flex items-baseline gap-2">
-                <span className="line-through text-ugle-gray/40 text-sm">
-                  {origPrice}
-                </span>
-                <div className="text-[32px] font-extrabold text-ugle-slate tracking-tight leading-none">
-                  {price}
-                </div>
-                <span className="text-sm font-medium text-ugle-gray/80">
-                  {region === "IN" ? "+ GST" : "+ local tax"}
-                </span>
-              </div>
-              {region !== "IN" && (
-                <p className="text-[12px] text-ugle-gray/60 leading-relaxed mt-1.5">
-                  Your final price, including tax, is shown at checkout.
-                </p>
-              )}
-              {isAnnual && (
-                <div className="text-[12px] text-ugle-gray/55 mt-0.5">
-                  loyalty renewal rate · save ~15%
-                </div>
-              )}
+          <div className="px-6 py-6 flex-1 flex flex-col">
+            <div className="space-y-2.5 flex-1">
+              <Feature text="0% metering — unlimited hours & files" />
+              <Feature text="Covers 2 personal machines per user" />
+              <Feature text="15% loyalty renewal discount" />
+              <Feature text="Whisper Large v3 Turbo + Metal GPU BGE-M3" />
+              <Link
+                href="/blog/languages-supported"
+                className="flex items-start gap-2.5 text-[13.5px] font-medium text-ugle-green"
+              >
+                <Check
+                  className="size-3.5 shrink-0 mt-0.5 text-[#5DA233]"
+                  strokeWidth={2.5}
+                />
+                <span>99+ languages + 701 MB Indic Flex pack</span>
+              </Link>
+              <Feature text="AES-256 local index · Zero telemetry" />
+              <Feature text="Jamf PKG & Windows MSI installers" />
+              <Feature text="VAT/GST invoicing via Dodo Payments (MoR)" />
             </div>
-            <div className="flex flex-col items-start sm:items-end gap-3">
-              <ProductHuntRatingBadge className="scale-70 origin-left sm:origin-right" />
+
+            <div className="border-t border-ugle-light/60 pt-5 mt-6 space-y-4">
+              <div className="lg:min-h-[76px] flex flex-col justify-end">
+                <div className="text-[12px] text-ugle-gray mb-1">
+                  per user, per year
+                </div>
+                <div className="flex items-baseline gap-2">
+                  <span className="line-through text-ugle-gray/40 text-sm">
+                    {origPrice}
+                  </span>
+                  <div className="text-[30px] font-extrabold text-ugle-slate tracking-tight leading-none">
+                    {price}
+                  </div>
+                  <span className="text-xs font-medium text-ugle-gray/80">
+                    {region === "IN" ? "+ GST" : "+ local tax"}
+                  </span>
+                </div>
+                <div className="text-[11.5px] text-ugle-gray/70 mt-1.5">
+                  {region !== "IN" && checkoutUrl
+                    ? "Tax shown at checkout · Billed via Dodo Payments"
+                    : "Final price including tax shown at checkout"}
+                </div>
+              </div>
+
               {checkoutUrl ? (
                 <a
                   href={checkoutUrl}
                   rel="noopener"
-                  className="inline-flex items-center justify-center px-7 py-3 bg-ugle-slate text-white font-bold text-[14px] rounded-[10px] hover:bg-[#222] transition-colors whitespace-nowrap"
+                  className="w-full inline-flex items-center justify-center px-5 py-3 bg-ugle-green hover:bg-[#86d950] text-white font-bold text-sm rounded-[10px] shadow-sm transition-colors text-center"
                 >
-                  {isAnnual ? "Buy Annual Licence" : "Buy Monthly Licence"}
+                  Get Annual Licence — {price}/yr
                 </a>
               ) : (
                 <Link
                   href="/request-trial"
-                  className="inline-flex items-center justify-center px-7 py-3 bg-ugle-slate text-white font-bold text-[14px] rounded-[10px] hover:bg-[#222] transition-colors whitespace-nowrap"
+                  className="w-full inline-flex items-center justify-center px-5 py-3 bg-ugle-green hover:bg-[#86d950] text-white font-bold text-sm rounded-[10px] shadow-sm transition-colors text-center"
                 >
-                  {isAnnual ? "Buy Annual Licence" : "Buy Monthly Licence"}
+                  Get Annual Licence — {price}/yr
                 </Link>
               )}
-              {region !== "IN" && checkoutUrl && (
-                <p className="text-[11.5px] text-ugle-gray/60 leading-relaxed max-w-70 sm:text-right">
-                  International purchases are sold by Dodo Payments, our
-                  reseller and merchant of record.
-                </p>
-              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Card 3: Education & Non-Commercial Licence */}
+        <div className="bg-white border border-ugle-light/60 rounded-2xl shadow-sm overflow-hidden flex flex-col">
+          <div className="bg-[#F8FAF9] border-b border-ugle-light/60 px-6 py-5 lg:min-h-[138px] flex flex-col justify-center">
+            <div className="font-mono text-xs tracking-[0.14em] uppercase text-[#5DA233] font-semibold mb-1.5">
+              Academic &amp; Non-Commercial
+            </div>
+            <h2 className="text-[22px] font-extrabold text-ugle-slate tracking-tight">
+              Education &amp; Non-Commercial
+            </h2>
+            <p className="text-[13.5px] text-ugle-gray mt-1">
+              For students, educators, researchers &amp; non-commercial creators.
+            </p>
+          </div>
+
+          <div className="px-6 py-6 flex-1 flex flex-col">
+            <div className="space-y-2.5 flex-1">
+              <Feature text="100% free — full local-first indexing & search" />
+              <Feature text="99+ languages + 701 MB Indic Flex pack" />
+              <Feature text="Zero cloud uploads & AES-256 encryption" />
+              <Feature text="All transcript exports (SRT, VTT, TXT, MD)" />
+              <Feature text="Full NLE clip workflows (EDL, XML, FCPXML, CSV)" />
+              <Feature text="Jamf PKG & Windows MSI lab deployment" />
+              <Feature text="Accredited edu verification or non-commercial use" />
+            </div>
+
+            <div className="border-t border-ugle-light/60 pt-5 mt-6 space-y-4">
+              <div className="lg:min-h-[76px] flex flex-col justify-end">
+                <div className="text-[12px] text-ugle-gray mb-1">
+                  approved academic &amp; non-commercial
+                </div>
+                <div className="text-[30px] font-extrabold text-ugle-slate tracking-tight leading-none">
+                  100% Free
+                </div>
+                <div className="text-[11.5px] text-ugle-gray/70 mt-1.5">
+                  processed within 2 business days
+                </div>
+              </div>
+              <Link
+                href="/education"
+                className="w-full inline-flex items-center justify-center px-5 py-3 bg-ugle-slate text-white font-bold text-sm rounded-[10px] hover:bg-[#222] transition-colors text-center"
+              >
+                Apply for Free Licence
+              </Link>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Loyalty note — below the card */}
-      {isAnnual && (
-        <div className="mt-4 flex items-center gap-3 bg-[#F0F9EA] border border-[#75C043]/30 rounded-xl px-5 py-4">
-          <span className="text-[#5DA233] text-lg mt-0.5">&#10022;</span>
-          <div>
-            <p className="text-sm font-semibold text-ugle-slate">
-              15% Loyalty discount on every renewal
-            </p>
-            {/* <p className="text-[13px] text-ugle-gray mt-0.5">
-              Prices shown reflect the loyalty rate for returning subscribers.
-              First-time price:{" "}
-              <span className="font-semibold">
-                {fmt(priceConfig.origAnnual, priceConfig)}/year
-              </span>{" "}
-              + tax.
-            </p> */}
-          </div>
-        </div>
-      )}
+      {/* Loyalty note */}
+      <div className="mt-6 flex items-center justify-center gap-3 bg-[#F0F9EA] border border-[#75C043]/30 rounded-xl px-5 py-3 max-w-2xl mx-auto">
+        <span className="text-[#5DA233] text-base">&#10022;</span>
+        <p className="text-sm font-semibold text-ugle-slate">
+          15% Loyalty discount on every renewal — annual stays flat with 0%
+          metering.
+        </p>
+      </div>
     </div>
+  );
+}
+
+const COMPARISON_ROWS = [
+  {
+    dimension: "Pricing Model",
+    ugle: "$225/user/year flat annual ($300 standard list); 15% loyalty renewal discount; 0% metering",
+    cloud:
+      "Per-minute or per-hour transcription fees + recurring monthly platform subscriptions",
+  },
+  {
+    dimension: "Heavy Archive Cost (100–500 hrs/yr)",
+    ugle: "$225/year total ($0 incremental cost per indexed hour)",
+    cloud:
+      "Escalating per-minute bills ($150–$750+ per project) + cloud storage overages",
+  },
+  {
+    dimension: "Trial Experience",
+    ugle: "Ungated 15-day trial: no credit card, no account, no file/hour limit; read-only index kept after Day 15",
+    cloud:
+      "Gated 30-to-60-minute trial caps requiring credit card authorization",
+  },
+  {
+    dimension: "Privacy & NDA Compliance",
+    ugle: "100% local AES-256 hardware-derived index; zero cloud uploads, zero telemetry",
+    cloud:
+      "Media uploaded to cloud servers; third-party AI sub-processor data retention risks",
+  },
+  {
+    dimension: "Indexing Speed",
+    ugle: "~22 hrs/hr on M4 Pro Mac; 100h in 6–8h on Base Mac mini; first file searchable in ~30s",
+    cloud:
+      "Bottlenecked by internet upload bandwidth; multi-hour cloud processing queues",
+  },
+  {
+    dimension: "Search Engine & Recall",
+    ugle: "30ms hybrid search (Whisper Large v3 Turbo + Metal GPU BGE-M3 at 60.2 texts/s); 99.4% recall; 89% Top-1",
+    cloud: "Basic cloud keyword search with web interface network latency",
+  },
+  {
+    dimension: "Indic & Multilingual Accuracy",
+    ugle: "90–95% across 99+ languages; optional 701 MB Indic pack (Bodhan AI / AI4Bharat) for 9 Indian languages",
+    cloud:
+      "Inconsistent transliteration, missing scripts, and paid add-on language tiers",
+  },
+  {
+    dimension: "NLE & Producer Exports",
+    ugle: "Multi-File Clip Lists -> EDL, Premiere XML (#/? relinked), FCPXML, Producer CSV, 200ms pad MP3/MP4/ZIP",
+    cloud:
+      "Text or basic SRT export only; manual timeline relinking required",
+  },
+  {
+    dimension: "Machine & IT Deployment",
+    ugle: "2 personal machines per licence; native Jamf PKG / Windows MSI; billed via Dodo Payments MoR",
+    cloud: "Web browser account seats locked to individual user logins",
+  },
+];
+
+function PricingComparisonTable() {
+  return (
+    <section className="mb-14 md:mb-16">
+      <div className="text-center mb-8">
+        <div className="font-mono text-xs tracking-[0.14em] uppercase text-[#5DA233] font-semibold mb-2">
+          Side-by-Side Comparison
+        </div>
+        <h2 className="text-2xl md:text-4xl font-extrabold text-ugle-slate tracking-tight">
+          UGLE.AI v1.0.1 vs. Cloud Metering Tools
+        </h2>
+      </div>
+      <div className="bg-white border border-ugle-light/60 rounded-2xl shadow-sm overflow-x-auto">
+        <table className="w-full text-left border-collapse min-w-[680px]">
+          <thead>
+            <tr className="bg-ugle-slate text-white">
+              <th className="py-4 px-5 text-xs font-mono uppercase tracking-wider w-1/4">
+                Feature / Dimension
+              </th>
+              <th className="py-4 px-5 text-xs font-mono uppercase tracking-wider text-[#75C043] w-[37.5%]">
+                UGLE.AI v1.0.1 (Local-First Flat Annual)
+              </th>
+              <th className="py-4 px-5 text-xs font-mono uppercase tracking-wider text-white/75 w-[37.5%]">
+                Typical Cloud Metering Tools (Per-Hour / Per-Minute)
+              </th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-ugle-light/50 text-sm">
+            {COMPARISON_ROWS.map((row) => (
+              <tr
+                key={row.dimension}
+                className="hover:bg-[#F8FAF9]/70 transition-colors"
+              >
+                <td className="py-4 px-5 font-semibold text-ugle-slate align-top">
+                  {row.dimension}
+                </td>
+                <td className="py-4 px-5 text-ugle-slate font-medium align-top bg-[#F0F9EA]/40">
+                  {row.ugle}
+                </td>
+                <td className="py-4 px-5 text-ugle-gray align-top">
+                  {row.cloud}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </section>
   );
 }
 
@@ -410,7 +604,7 @@ export default function PricingMain({
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4, delay: 0.1 }}
-        className="mb-10 flex flex-col items-center"
+        className="mb-8 flex flex-col items-center"
       >
         {/* Desktop */}
         <div className="hidden sm:inline-flex border border-ugle-light rounded-lg p-1 gap-0.5">
@@ -465,7 +659,7 @@ export default function PricingMain({
           initial={{ opacity: 0, y: 6 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.3 }}
-          className="mb-12 flex justify-center"
+          className="mb-8 flex justify-center"
         >
           <div className="inline-flex border border-ugle-light rounded-lg p-1 gap-0.5">
             <button
@@ -517,6 +711,8 @@ export default function PricingMain({
           />
         )}
       </motion.div>
+
+      <PricingComparisonTable />
     </>
   );
 }

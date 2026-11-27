@@ -1,7 +1,7 @@
 import Image from "next/image";
 import { Star } from "lucide-react";
 
-const PRODUCT_HUNT_REVIEWS = [
+export const PRODUCT_HUNT_REVIEWS = [
   {
     name: "Ranbijay Singh Deo",
     avatar:
