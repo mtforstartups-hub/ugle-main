@@ -22,7 +22,7 @@ const PRICING_FAQS = [
   },
   {
     q: "Is there a loyalty discount?",
-    a: "Yes. Individual subscribers receive a 15% loyalty discount on every subsequent renewal — annual drops from $199 to $169/year, monthly from $25 to $20/month.",
+    a: "Yes. Annual licence holders receive a 15% loyalty discount on every subsequent renewal—bringing the standard annual licence down to $225/year (from $300/year standard pricing, plus applicable local tax). Your final price including tax is shown transparently at checkout via Dodo Payments.",
   },
   {
     q: "Educational or non-commercial pricing?",

@@ -16,24 +16,30 @@ export default function DownloadMain() {
           <h1 className="text-5xl md:text-7xl font-bold tracking-tight mb-6 text-white leading-tight">
             Download Ugle.
           </h1>
-          <p className="text-2xl text-white/70 mb-16 font-light">
-            15-day free trial. No credit card required.
+          <p className="text-xl md:text-2xl text-white/80 mb-8 font-light leading-relaxed">
+            Instant Ungated 15-Day Free Trial — No Credit Card, No File Limit.
+            Your local index stays searchable in read-only mode after Day 15.
           </p>
 
-          <div className="flex flex-col sm:flex-row gap-4 mb-18">
+          <div className="flex flex-col sm:flex-row gap-4 mb-4">
             <DownloadButton
               platform="macos"
               variant="filled"
               size="sm"
+              subLabel="Download for"
               href="/request-trial?platform=macos"
             />
             <DownloadButton
               platform="windows"
               variant="outline"
               size="sm"
+              subLabel="Download for"
               href="/request-trial?platform=windows"
             />
           </div>
+          <p className="text-xs font-mono text-white/50 mb-14">
+            macOS 13.4+ · Windows 10 64-bit+ · ~192 MB installer
+          </p>
         </motion.div>
 
         <motion.div

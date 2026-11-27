@@ -86,29 +86,38 @@ export default function SecurityMain() {
               </tr>
               <tr className="hover:bg-gray-50/50 transition-colors">
                 <td className="py-4 px-6 font-medium text-ugle-slate border-l-2 border-transparent">
-                  Licence activation
+                  First-launch model download
                 </td>
                 <td className="py-4 px-6 text-ugle-gray">
-                  Email address + device ID sent once at activation. No content
-                  data.
+                  Optional one-time download of local Whisper / BGE-M3 models
+                  (or pre-bundled offline for air-gapped installs).
                 </td>
               </tr>
               <tr className="hover:bg-gray-50/50 transition-colors">
                 <td className="py-4 px-6 font-medium text-ugle-slate border-l-2 border-transparent">
-                  Update checks
+                  Licence activation &amp; renewal
                 </td>
                 <td className="py-4 px-6 text-ugle-gray">
-                  Version numbers only. Optional — can be disabled. No
-                  content/usage data.
+                  Email address + hardware device ID sent at activation or
+                  renewal. No content data.
                 </td>
               </tr>
               <tr className="hover:bg-gray-50/50 transition-colors">
                 <td className="py-4 px-6 font-medium text-ugle-slate border-l-2 border-transparent">
-                  Crash reports
+                  Optional update checks
                 </td>
                 <td className="py-4 px-6 text-ugle-gray">
-                  Opt-in only at time of crash. Technical diagnostics only. No
-                  file content.
+                  Notify-only version check. Optional — can be disabled. No
+                  content or usage data.
+                </td>
+              </tr>
+              <tr className="hover:bg-gray-50/50 transition-colors">
+                <td className="py-4 px-6 font-medium text-ugle-slate border-l-2 border-transparent">
+                  Scrubbed support logs
+                </td>
+                <td className="py-4 px-6 text-ugle-gray">
+                  Opt-in only when you export diagnostics for support. File
+                  paths and content are scrubbed.
                 </td>
               </tr>
             </tbody>
@@ -125,7 +134,7 @@ export default function SecurityMain() {
           {[
             {
               q: "Firewall exceptions needed?",
-              a: "No. Outbound: licence validation, update checks (optional), opt-in crash reports. No content traffic.",
+              a: "No. At most 4 optional outbound touchpoints: first-launch model download, licence activation, licence renewal, and optional notify-only update checks (plus scrubbed support logs only if you opt in). Zero media or search traffic.",
             },
             {
               q: "Air-gapped deployment?",

@@ -6,28 +6,28 @@ import Image from "next/image";
 
 const heroStats = [
   {
-    metric: "Private",
-    value: "100%",
+    metric: "Indexing Speed",
+    value: "22 hrs/hr",
     context:
-      "Every frame stays on your machine. Nothing ever reaches a server.",
+      "On Apple M4 Pro. 100% local Whisper Large v3 Turbo + Metal GPU BGE-M3.",
+  },
+  {
+    metric: "Search Recall",
+    value: "99.4%",
+    context:
+      "89% Top-1 best-match accuracy in 30ms. Confidence Bubbles & Replace All built in.",
+  },
+  {
+    metric: "NLE Exports",
+    value: "EDL/XML",
+    context:
+      "Native Resolve EDL, Premiere XML, Final Cut FCPXML, and Producer Approval CSV.",
   },
   {
     metric: "Metering",
     value: "0%",
     context:
       "No AI tokens. No per-search fees. No usage-based fees. One annual licence.",
-  },
-  {
-    metric: "Uptime",
-    value: "100%",
-    context:
-      "No rate limits, no outages, no server to crash. It runs when you do.",
-  },
-  {
-    metric: "Setup",
-    value: "0%",
-    context:
-      "Connects to your video platforms out of the box. Nothing to configure.",
   },
 ];
 
@@ -64,10 +64,10 @@ export default function Hero() {
           >
             <span className="inline-block">
               Find Your{" "}
-              <span className="whitespace-nowrap">
+              <span className="whitespace-nowrap inline-flex items-baseline">
                 M
                 {/* Relative wrapper keeps 'o' in the flow as the exact layout spacer */}
-                <span className="relative inline-block w-[0.68em] h-auto">
+                <span className="relative inline-block w-[0.64em] mx-[-0.02em] h-auto">
                   <span className="text-transparent select-none">o</span>
                   <Image
                     src="/ugle-icon.png"
@@ -87,11 +87,23 @@ export default function Hero() {
           </motion.h1>
           <motion.p
             variants={itemVariants}
-            className="text-base sm:text-xl md:text-2xl text-ugle-gray leading-relaxed max-w-2xl font-medium"
+            className="text-base sm:text-lg md:text-xl text-ugle-gray leading-relaxed max-w-2xl font-medium"
           >
             Ugle indexes every word spoken in your archive. Search by meaning in
-            30ms. Nothing leaves your device.
+            30ms, refine with Confidence Bubbles &amp; Replace All, and export
+            to Resolve EDL, Premiere XML, FCPXML, or Approval CSV.
           </motion.p>
+          <motion.div
+            variants={itemVariants}
+            className="flex flex-wrap items-center justify-center gap-2 text-xs font-mono text-ugle-gray"
+          >
+            <span className="px-3 py-1 rounded-full bg-white border border-ugle-light/70">
+              macOS 13.4+
+            </span>
+            <span className="px-3 py-1 rounded-full bg-white border border-ugle-light/70">
+              Windows 10 64-bit+
+            </span>
+          </motion.div>
         </div>
 
         <motion.div
@@ -102,7 +114,7 @@ export default function Hero() {
             href="/download"
             className="bg-ugle-green hover:bg-[#86d950] transition-colors text-white font-bold py-4 px-10 rounded-xl shadow-lg hover:shadow-xl text-base md:text-lg text-center flex items-center justify-center gap-3 w-full sm:w-auto"
           >
-            Request Trial
+            Start 15-Day Free Trial
           </Link>
           <Link
             href="/how-it-works"
@@ -124,7 +136,7 @@ function HeroStats() {
   const [activeIdx, setActiveIdx] = useState<number | null>(null);
 
   return (
-    <div className="pt-8 md:pt-12 pb-8 md:pb-0 border-t border-ugle-light/60 grid grid-cols-2 md:grid-cols-4 gap-18 md:gap-0 w-full max-w-4xl mx-auto text-center">
+    <div className="pt-8 md:pt-12 pb-8 md:pb-0 border-t border-ugle-light/60 grid grid-cols-2 md:grid-cols-4 gap-24 md:gap-0 w-full max-w-4xl mx-auto text-center">
       {heroStats.map((s, idx) => (
         <div
           key={idx}
@@ -136,7 +148,7 @@ function HeroStats() {
           <div className="font-mono text-sm text-ugle-gray/60 uppercase tracking-widest mb-1 transition-colors group-hover:text-ugle-green/70">
             {s.metric}
           </div>
-          <div className="font-mono text-3xl md:text-4xl font-bold text-ugle-slate transition-colors group-hover:text-ugle-green">
+          <div className="font-mono text-2xl md:text-3xl font-bold text-ugle-slate transition-colors group-hover:text-ugle-green">
             {s.value}
           </div>
           <AnimatePresence>

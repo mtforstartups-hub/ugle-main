@@ -4,6 +4,7 @@ import { useState } from "react";
 import { motion } from "motion/react";
 import { Check, Mail } from "lucide-react";
 import Link from "next/link";
+import { ProductHuntRatingBadge } from "@/app/components/ProductHuntProof";
 import type { PriceConfig, Region } from "../../lib/priceConfig";
 
 function fmt(amount: number, cfg: PriceConfig): string {
@@ -72,8 +73,8 @@ function IndividualsPanel({
         {/* Body */}
         <div className="px-8 py-7 space-y-5">
           <div className="space-y-3">
-            <Feature text="1 personal licence" />
-            <Feature text="Unlimited library size" />
+            <Feature text="2 personal machines (same owner)" />
+            <Feature text="0% metering · Unlimited library size" />
             <Link
               href="/blog/languages-supported"
               className="flex items-start gap-2.5 text-[13.5px] font-medium text-ugle-green"
@@ -82,13 +83,13 @@ function IndividualsPanel({
                 className={`size-3.5 shrink-0 mt-0.5 text-[#5DA233]`}
                 strokeWidth={2.5}
               />
-              <span>90+ languages</span>
+              <span>99+ languages + Indic Flex</span>
             </Link>
-            <Feature text="Clip export included" />
+            <Feature text="EDL / XML / FCPXML / Approval CSV export" />
             <Feature text={updatesNote} />
           </div>
 
-          <div className="border-t border-ugle-light/60 pt-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div className="border-t border-ugle-light/60 pt-5 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
             <div>
               <div className="text-[13px] text-ugle-gray mb-0.5">{period}</div>
               <div className="flex items-baseline gap-2">
@@ -113,7 +114,8 @@ function IndividualsPanel({
                 </div>
               )}
             </div>
-            <div className="flex flex-col items-start sm:items-end gap-2">
+            <div className="flex flex-col items-start sm:items-end gap-3">
+              <ProductHuntRatingBadge className="scale-70 origin-left sm:origin-right" />
               {checkoutUrl ? (
                 <a
                   href={checkoutUrl}
