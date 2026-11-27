@@ -17,7 +17,7 @@ export default function GoogleConsentManager({
       */}
       <Script
         id="google-consent-mode-init"
-        strategy="beforeInteractive"
+        strategy="afterInteractive"
         dangerouslySetInnerHTML={{
           __html: `
             window.dataLayer = window.dataLayer || [];

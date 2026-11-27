@@ -1,5 +1,3 @@
-"use client";
-
 import Link from "next/link";
 import Image from "next/image";
 import {
@@ -9,7 +7,6 @@ import {
   Newspaper,
   ShieldCheck,
 } from "lucide-react";
-import { motion } from "motion/react";
 import CTAButton from "../CTAButton";
 
 const useCaseList = [
@@ -93,12 +90,7 @@ export default function Workflow() {
           ))}
         </div> */}
 
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1, duration: 0.5 }}
-          className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10 md:mb-14"
-        >
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10 md:mb-14">
           {useCaseList.map((c, idx) => (
             <Link
               key={idx}
@@ -120,7 +112,7 @@ export default function Workflow() {
               </div>
             </Link>
           ))}
-        </motion.div>
+        </div>
 
         {/* Privacy statement */}
         <div className="mb-16 p-8 md:p-14 bg-[#1C1C1C] rounded-3xl text-white flex flex-col md:flex-row items-start md:items-center justify-between gap-10 shadow-2xl relative overflow-hidden">
@@ -144,7 +136,6 @@ export default function Workflow() {
               alt="Ugle Mark"
               width={140}
               height={140}
-              priority
               className="rotate-12 opacity-80 group-hover:rotate-[-4deg] group-hover:opacity-100 group-hover:scale-110 transition-all duration-500 ease-out drop-shadow-[0_0_30px_rgba(117,192,67,0.35)] group-hover:drop-shadow-[0_0_48px_rgba(117,192,67,0.65)]"
             />
           </div>

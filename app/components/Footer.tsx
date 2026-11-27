@@ -112,6 +112,8 @@ export default function Footer() {
                   style={{ width: "250px", height: "54px" }}
                   width="250"
                   height="54"
+                  loading="lazy"
+                  decoding="async"
                 />
               </a>
             </div>

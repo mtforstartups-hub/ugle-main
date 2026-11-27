@@ -24,11 +24,6 @@ const manrope = Manrope({
 const sfMono = localFont({
   src: [
     {
-      path: "../fonts/sf-mono/sf-mono-light.woff2",
-      weight: "300",
-      style: "normal",
-    },
-    {
       path: "../fonts/sf-mono/sf-mono-regular.woff2",
       weight: "400",
       style: "normal",
@@ -49,6 +44,8 @@ const sfMono = localFont({
       style: "normal",
     },
   ],
+  display: "swap",
+  preload: false,
   variable: "--font-mono",
 });
 
@@ -135,7 +132,6 @@ export default function RootLayout({
       className={`${manrope.variable} ${sfMono.variable} h-full antialiased`}
     >
       <head>
-        <link rel="preconnect" href="https://challenges.cloudflare.com" />
         <GoogleConsentManager gtmId="GTM-53P7CN9X" />
       </head>
       <body className="min-h-full flex flex-col">

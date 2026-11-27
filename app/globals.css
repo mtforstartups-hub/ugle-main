@@ -16,3 +16,23 @@ body {
   color: var(--color-ugle-slate);
   font-family: var(--font-sans);
 }
+
+@keyframes scroll-progress-grow {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+.scroll-progress-bar {
+  transform: scaleX(0);
+}
+
+@supports (animation-timeline: scroll()) {
+  .scroll-progress-bar {
+    animation: scroll-progress-grow linear both;
+    animation-timeline: scroll(root);
+  }
+}

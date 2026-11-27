@@ -5,8 +5,10 @@ const nextConfig: NextConfig = {
   /* config options here */
   pageExtensions: ["js", "jsx", "md", "mdx", "ts", "tsx"],
   images: {
+    formats: ["image/avif", "image/webp"],
     remotePatterns: [
       { protocol: "https", hostname: "*.public.blob.vercel-storage.com" },
+      { protocol: "https", hostname: "ph-avatars.imgix.net" },
       // Local Payload media proxy (development only)
       ...(process.env.NODE_ENV !== "production"
         ? [
