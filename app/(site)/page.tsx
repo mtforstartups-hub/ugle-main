@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import Hero from "@/app/components/homepage/Hero";
+import FeatureShowcase from "@/app/components/homepage/FeatureShowcase";
 import {
   ProofBar,
-  FeatureColumns,
   NleExportStrip,
   BenchmarkSocialProof,
   HomepageBottomCta,
@@ -18,7 +18,7 @@ export default function Home() {
     <>
       <Hero />
       <ProofBar />
-      <FeatureColumns />
+      <FeatureShowcase />
       <NleExportStrip />
       <BenchmarkSocialProof />
       <HomepageBottomCta />

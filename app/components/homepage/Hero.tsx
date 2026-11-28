@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { Play } from "lucide-react";
 import { motion, type Variants } from "motion/react";
 
 export default function Hero() {
@@ -22,68 +23,86 @@ export default function Hero() {
   };
 
   return (
-    <section className="max-w-7xl mx-auto px-6 py-16 md:py-24 relative z-10 text-center">
-      <motion.div
-        variants={containerVariants}
-        initial="hidden"
-        animate="visible"
-        className="flex flex-col items-center gap-8"
-      >
-        <div className="space-y-6 flex flex-col items-center">
+    <section className="w-full bg-linear-to-b from-white to-[#F8FAF9] relative z-10">
+      <div className="max-w-7xl mx-auto px-6 py-16 md:py-24 text-center">
+        <motion.div
+          variants={containerVariants}
+          initial="hidden"
+          animate="visible"
+          className="flex flex-col items-center gap-8"
+        >
+          <div className="space-y-6 flex flex-col items-center">
+            <motion.div
+              variants={itemVariants}
+              className="inline-flex items-center px-4 py-1.5 rounded-full bg-white border border-ugle-light/70 text-xs sm:text-sm font-mono text-ugle-gray shadow-xs"
+            >
+              v1.0.1 Native Desktop App &bull; macOS 13.4+ &amp; Windows 10
+              64-bit+ &bull; Zero Cloud Uploads
+            </motion.div>
+
+            <motion.h1
+              variants={itemVariants}
+              className="text-4xl sm:text-5xl md:text-6xl lg:text-[4.5rem] font-extrabold tracking-tight leading-[1.08] text-ugle-slate max-w-5xl"
+            >
+              Search Terabytes of Raw Footage in 30ms — 100% Offline.
+            </motion.h1>
+
+            <motion.p
+              variants={itemVariants}
+              className="text-base sm:text-lg md:text-xl text-ugle-gray leading-relaxed max-w-3xl font-medium"
+            >
+              UGLE.AI turns your local media drives into an AES-256 encrypted,
+              searchable video and audio library. Index at ~22 hrs/hr on an M4
+              Pro Mac with 99.4% relevant recall, cut Multi-File Clip Lists, and
+              export straight to DaVinci Resolve, Premiere Pro, and Final Cut
+              Pro — with zero cloud uploads and 0% metering.
+            </motion.p>
+          </div>
+
           <motion.div
             variants={itemVariants}
-            className="inline-flex items-center px-4 py-1.5 rounded-full bg-white border border-ugle-light/70 text-xs sm:text-sm font-mono text-ugle-gray shadow-xs"
+            className="flex flex-col sm:flex-row gap-4 items-center w-full justify-center"
           >
-            v1.0.1 Native Desktop App &bull; macOS 13.4+ &amp; Windows 10
-            64-bit+ &bull; Zero Cloud Uploads
+            <Link
+              href="/download"
+              className="bg-ugle-green hover:bg-[#86d950] transition-colors text-white font-bold py-4 px-8 rounded-xl shadow-lg hover:shadow-xl text-base md:text-lg text-center flex items-center justify-center w-full sm:w-auto"
+            >
+              Download Free 15-Day Trial (~192 MB)
+            </Link>
+            <Link
+              href="/pricing"
+              className="bg-white hover:bg-gray-50 border-2 border-ugle-light/60 transition-colors text-ugle-slate font-bold py-4 px-8 rounded-xl text-base md:text-lg text-center flex items-center justify-center w-full sm:w-auto hover:border-black/10"
+            >
+              See Flat Annual Pricing ($225/yr)
+            </Link>
           </motion.div>
-
-          <motion.h1
-            variants={itemVariants}
-            className="text-4xl sm:text-5xl md:text-6xl lg:text-[4.5rem] font-extrabold tracking-tight leading-[1.08] text-ugle-slate max-w-5xl"
-          >
-            Search Terabytes of Raw Footage in 30ms — 100% Offline.
-          </motion.h1>
 
           <motion.p
             variants={itemVariants}
-            className="text-base sm:text-lg md:text-xl text-ugle-gray leading-relaxed max-w-3xl font-medium"
+            className="text-xs sm:text-sm text-ugle-gray/80 max-w-2xl leading-relaxed"
           >
-            UGLE.AI turns your local media drives into an AES-256 encrypted,
-            searchable video and audio library. Index at ~22 hrs/hr on an M4 Pro
-            Mac with 99.4% relevant recall, cut Multi-File Clip Lists, and
-            export straight to DaVinci Resolve, Premiere Pro, and Final Cut Pro
-            — with zero cloud uploads and 0% metering.
+            Ungated 15-day free trial. No credit card. No account required. No
+            file or hour limits. Keep your read-only searchable index after Day
+            15.
           </motion.p>
-        </div>
 
-        <motion.div
-          variants={itemVariants}
-          className="flex flex-col sm:flex-row gap-4 items-center w-full justify-center"
-        >
-          <Link
-            href="/download"
-            className="bg-ugle-green hover:bg-[#86d950] transition-colors text-white font-bold py-4 px-8 rounded-xl shadow-lg hover:shadow-xl text-base md:text-lg text-center flex items-center justify-center w-full sm:w-auto"
-          >
-            Download Free 15-Day Trial (~192 MB)
-          </Link>
-          <Link
-            href="/pricing"
-            className="bg-white hover:bg-gray-50 border-2 border-ugle-light/60 transition-colors text-ugle-slate font-bold py-4 px-8 rounded-xl text-base md:text-lg text-center flex items-center justify-center w-full sm:w-auto hover:border-black/10"
-          >
-            See Flat Annual Pricing ($225/yr)
-          </Link>
+          {/* Demo video placeholder — replace inner content with <video> when asset is ready */}
+          <motion.div variants={itemVariants} className="w-full max-w-5xl mt-4">
+            <div className="relative aspect-video w-full rounded-2xl border border-ugle-light/70 bg-[#1C1C1C] shadow-xl overflow-hidden flex flex-col items-center justify-center p-6 text-center">
+              <div className="w-16 h-16 rounded-full bg-ugle-green/15 border border-ugle-green/40 flex items-center justify-center mb-4">
+                <Play className="w-7 h-7 text-[#75C043] fill-current ml-0.5" />
+              </div>
+              <p className="text-sm sm:text-base font-semibold text-white mb-1">
+                30ms Offline Search Demo (45s Loop)
+              </p>
+              <p className="text-xs font-mono text-white/50">
+                Demo video placeholder — replace with &lt;video&gt; once asset
+                is added
+              </p>
+            </div>
+          </motion.div>
         </motion.div>
-
-        <motion.p
-          variants={itemVariants}
-          className="text-xs sm:text-sm text-ugle-gray/80 max-w-2xl leading-relaxed"
-        >
-          Ungated 15-day free trial. No credit card. No account required. No
-          file or hour limits. Keep your read-only searchable index after Day
-          15.
-        </motion.p>
-      </motion.div>
+      </div>
     </section>
   );
 }
