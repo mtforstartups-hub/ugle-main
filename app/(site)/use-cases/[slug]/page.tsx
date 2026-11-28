@@ -70,8 +70,8 @@ const USE_CASE_DATA: Record<
               "Drop the folder into Ugle. Indexing starts in the background.",
               "Continue other work. Notification: indexing complete.",
               "Search \u2018planning permission objection\u2019. 4 results across 3 files.",
-              "Preview both usable takes in Ugle. Select the cleaner one.",
-              "Export as MP3. Send to producer. Deadline met.",
+              "Add the cleanest takes to a Multi-File Clip List and fix any proper nouns with Replace All.",
+              "Export Producer Approval CSV for sign-off, or MP3 / Resolve EDL / Premiere XML / FCPXML. Deadline met.",
             ]}
           />
         </div>
@@ -187,8 +187,8 @@ const USE_CASE_DATA: Record<
           leftItems={[
             "Search \u2018rent control\u2019. 23 results across 18 episodes.",
             "Filter to results over 45 seconds of continuous speech.",
-            "Preview 8 candidates. Select 4.",
-            "Export as MP3 with timestamps for the editor.",
+            "Preview 8 candidates. Select 4 into a Multi-File Clip List (and clean up recurring names with Replace All).",
+            "Export Producer Approval CSV, MP3, or native Resolve EDL / Premiere XML / FCPXML for the editor.",
           ]}
           rightTitle="Workflow: Guest Research"
           rightItems={[
@@ -301,6 +301,16 @@ const USE_CASE_DATA: Record<
                   Ugle does not log search queries or file activity.
                 </td>
               </tr>
+              <tr className="hover:bg-gray-50/50 transition-colors border-l-4 border-transparent">
+                <td className="py-4 px-6 font-medium text-ugle-slate">
+                  Multi-File Clip Lists &amp; Replace All
+                </td>
+                <td className="py-4 px-6 text-ugle-gray">
+                  Assemble quotes across multiple recordings into one Multi-File
+                  Clip List, standardize source names with Replace All, and
+                  export Producer Approval CSV or NLE timelines.
+                </td>
+              </tr>
               <tr className="hover:bg-gray-50/50 transition-colors border-l-4 border-[#75C043] bg-white">
                 <td className="py-4 px-6 font-bold text-ugle-slate">
                   Portable
@@ -344,7 +354,7 @@ const USE_CASE_DATA: Record<
     ),
     ctatitle: "Protect your sources.",
     ctasubtitle: "100% on-device indexing. Complete privacy.",
-    ctaText: "Request Trial",
+    ctaText: "Start 15-Day Free Trial",
   },
 };
 

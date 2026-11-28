@@ -1,8 +1,12 @@
 import type { Metadata } from "next";
 import Hero from "@/app/components/homepage/Hero";
-import HowItWorks from "@/app/components/homepage/HowItWorks";
-import Problem from "@/app/components/homepage/Problem";
-import Workflow from "@/app/components/homepage/Workflow";
+import FeatureShowcase from "@/app/components/homepage/FeatureShowcase";
+import {
+  ProofBar,
+  NleExportStrip,
+  BenchmarkSocialProof,
+  HomepageBottomCta,
+} from "@/app/components/homepage/HomepageSections";
 import { canonicalFor } from "@/app/lib/seo";
 
 export const metadata: Metadata = {
@@ -13,9 +17,11 @@ export default function Home() {
   return (
     <>
       <Hero />
-      <Problem />
-      <HowItWorks />
-      <Workflow />
+      <ProofBar />
+      <FeatureShowcase />
+      <NleExportStrip />
+      <BenchmarkSocialProof />
+      <HomepageBottomCta />
     </>
   );
 }

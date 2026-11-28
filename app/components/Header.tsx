@@ -19,7 +19,8 @@ const menuItems = [
     ],
   },
   { id: 3, title: "Pricing", slug: "/pricing", subItems: [] },
-  { id: 4, title: "Answers", slug: "/answers", subItems: [] },
+  { id: 4, title: "Security", slug: "/security", subItems: [] },
+  { id: 5, title: "Answers", slug: "/answers", subItems: [] },
 ];
 
 export default function Header() {
@@ -92,9 +93,9 @@ export default function Header() {
           <div className="hidden md:flex items-center gap-6 ml-8">
             <Link
               href="/download"
-              className="flex items-center justify-center bg-[#1C1C1C] hover:bg-[#75C043] text-white hover:text-[#1C1C1C] font-semibold px-5 py-2.5 rounded-lg shadow-sm transition-all text-sm"
+              className="flex items-center justify-center bg-[#1C1C1C] hover:bg-[#75C043] text-white hover:text-[#1C1C1C] font-semibold px-5 py-2.5 rounded-lg shadow-sm transition-all text-sm whitespace-nowrap"
             >
-              Request Trial
+              Start 15-Day Free Trial
             </Link>
           </div>
 
@@ -248,7 +249,7 @@ export default function Header() {
             onClick={() => setMobileOpen(false)}
             className="flex items-center justify-center w-full py-3 rounded-xl bg-[#1C1C1C] hover:bg-[#75C043] text-white hover:text-[#1C1C1C] font-semibold text-sm shadow-sm transition-all"
           >
-            Request Trial
+            Start 15-Day Free Trial
           </Link>
         </div>
       </div>
